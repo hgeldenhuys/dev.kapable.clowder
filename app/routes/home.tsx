@@ -28,7 +28,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <form method="post" className="space-y-4">
+        <form method="post" action="?index" className="space-y-4">
           <textarea
             name="description"
             placeholder="Describe your app idea… (e.g. 'A marketplace for freelance accountants where clients post jobs and accountants bid on them')"
