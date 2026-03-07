@@ -128,6 +128,14 @@ export function listSessions(limit = 10): SessionRow[] {
   return db.prepare("SELECT * FROM clowder_sessions ORDER BY created_at DESC LIMIT ?").all(limit) as SessionRow[];
 }
 
+export function updateSessionApp(id: string, appId: string, appUrl: string): void {
+  const db = getDb();
+  const now = new Date().toISOString();
+  db.prepare(
+    "UPDATE clowder_sessions SET app_id = ?, app_url = ?, updated_at = ? WHERE id = ?"
+  ).run(appId, appUrl, now, id);
+}
+
 export function setForceStarted(id: string): void {
   const db = getDb();
   const now = new Date().toISOString();

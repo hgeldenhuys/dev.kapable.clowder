@@ -22,11 +22,78 @@ import {
   getApiBaseUrl,
   buildHeaders,
 } from "./api.server";
+import { updateSessionApp } from "./db.server";
 
 interface BuildArtifact {
   type: "spec" | "backlog" | "architecture" | "data_model";
   title: string;
   content: string;
+}
+
+// ---------------------------------------------------------------------------
+// Data model parsing (BL-CLW-003)
+// ---------------------------------------------------------------------------
+
+interface TableDef {
+  name: string;
+  columns: Array<{ name: string; type: string; required?: boolean }>;
+}
+
+const VALID_TYPES = new Set(["text", "integer", "boolean", "timestamp", "json", "uuid", "vector"]);
+
+function parseDataModel(spec: string): TableDef[] {
+  const match = spec.match(/```json:data_model\n([\s\S]+?)\n```/);
+  if (!match) return [];
+  try {
+    const tables: TableDef[] = JSON.parse(match[1]);
+    return tables
+      .map((t) => ({
+        name: t.name.toLowerCase().replace(/[^a-z0-9_]/g, "_"),
+        columns: t.columns.filter((c) => VALID_TYPES.has(c.type)),
+      }))
+      .filter((t) => t.columns.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Platform provisioning (BL-CLW-001)
+// ---------------------------------------------------------------------------
+
+async function provisionProject(
+  sessionName: string
+): Promise<{ projectId: string; apiKey: string }> {
+  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+  const res = await fetch(`${getApiBaseUrl()}/v1/projects`, {
+    method: "POST",
+    headers: buildHeaders(),
+    body: JSON.stringify({ name: sessionName, slug }),
+  });
+  if (!res.ok) throw new Error(`Failed to create project: ${res.status}`);
+  const data = await res.json();
+  const liveKey = data.api_keys?.find((k: any) => k.key_type === "live");
+  return { projectId: data.project.id, apiKey: liveKey?.key ?? "" };
+}
+
+async function provisionTables(
+  apiKey: string,
+  tables: TableDef[]
+): Promise<string[]> {
+  const created: string[] = [];
+  for (const table of tables) {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/v1/_meta/tables/${table.name}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-api-key": apiKey },
+        body: JSON.stringify({ storage_mode: "typed", columns: table.columns }),
+      });
+      if (res.ok) created.push(table.name);
+    } catch {
+      // Non-fatal — continue with other tables
+    }
+  }
+  return created;
 }
 
 /**
@@ -57,6 +124,17 @@ Generate a comprehensive spec in markdown. Include:
 5. Data model (entities and relationships)
 6. Technical architecture
 7. Implementation backlog (10-15 prioritized stories)
+
+IMPORTANT: At the end of your markdown, include a JSON code block with the data model:
+\`\`\`json:data_model
+[
+  { "name": "table_name", "columns": [
+    { "name": "col", "type": "text", "required": true }
+  ]}
+]
+\`\`\`
+Supported column types: text, integer, boolean, timestamp, json, uuid, vector
+Every table should include an "id" column of type "uuid" and a "created_at" column of type "timestamp".
 
 Output only the markdown document, no preamble.`;
 
@@ -209,17 +287,87 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     }).catch(() => {});
   }
 
-  // System message: building started
+  // ---------------------------------------------------------------------------
+  // Platform provisioning: create project + tables from spec
+  // ---------------------------------------------------------------------------
+
+  const specContent = artifacts.find((a) => a.type === "spec")?.content ?? "";
+  const tables = parseDataModel(specContent);
+
+  let provisionResult: { projectId: string; apiKey: string; tables: string[] } | null = null;
+
+  if (tables.length > 0) {
+    await sendClowderMessage(sessionId, {
+      content: `Creating your app on the Kapable platform...`,
+      role: "system",
+      metadata: { phase: "building" },
+    });
+
+    try {
+      const { projectId, apiKey } = await provisionProject(session.name);
+
+      await sendClowderMessage(sessionId, {
+        content: `Project created! Now setting up ${tables.length} database table${tables.length > 1 ? "s" : ""}...`,
+        role: "system",
+        metadata: { phase: "building", project_id: projectId },
+      });
+
+      const createdTables = await provisionTables(apiKey, tables);
+
+      const slug = session.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+      const appUrl = `https://${slug}.kapable.run`;
+
+      // Persist project info in local DB
+      updateSessionApp(sessionId, projectId, appUrl);
+
+      provisionResult = { projectId, apiKey, tables: createdTables };
+
+      await sendClowderMessage(sessionId, {
+        content: `Tables created: ${createdTables.map((t) => `\`${t}\``).join(", ")}`,
+        role: "system",
+        metadata: { phase: "building", tables: createdTables },
+      });
+    } catch (e) {
+      console.error("Platform provisioning failed:", e);
+      await sendClowderMessage(sessionId, {
+        content: `Platform provisioning encountered an error. Your planning documents are still saved — a developer can provision manually.`,
+        role: "system",
+        metadata: { phase: "building", error: String(e) },
+      });
+    }
+  }
+
+  // Final summary message
+  const summaryLines = [
+    `Planning complete! Here's what was created:`,
+    ``,
+    ...artifacts.map((a) => `- ${a.title}`),
+  ];
+
+  if (provisionResult) {
+    summaryLines.push(
+      ``,
+      `**Platform provisioned:**`,
+      `- Project ID: \`${provisionResult.projectId}\``,
+      `- Tables: ${provisionResult.tables.map((t) => `\`${t}\``).join(", ")}`,
+    );
+  } else if (tables.length === 0 && specContent.length > 100) {
+    summaryLines.push(
+      ``,
+      `No structured data model was found in the spec. A developer can provision tables manually.`,
+    );
+  }
+
+  summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
+
   await sendClowderMessage(sessionId, {
-    content: `Planning complete! I've generated your app specification and backlog.
-
-**What was created:**
-${artifacts.map((a) => `- ${a.title}`).join("\n")}
-
-In v2, the expert committee would now spawn dedicated build sessions and implement your app autonomously. For now, your planning documents are ready to review and hand to a developer.
-
-Your app plan has been saved to your Org Vault.`,
+    content: summaryLines.join("\n"),
     role: "system",
-    metadata: { phase: "building", artifacts_count: artifacts.length },
+    metadata: {
+      phase: "building",
+      artifacts_count: artifacts.length,
+      provisioned: !!provisionResult,
+      tables_created: provisionResult?.tables.length ?? 0,
+    },
   });
 }
