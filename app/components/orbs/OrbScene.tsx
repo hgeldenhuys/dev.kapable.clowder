@@ -195,16 +195,23 @@ export function OrbScene({ orbs, activeOrbId, onOrbClick }: OrbSceneProps) {
         className="w-full h-full cursor-pointer"
         style={{ display: "block" }}
       />
-      {/* HTML labels overlay — positioned at bottom, evenly spaced */}
-      <div className="absolute bottom-1 left-0 right-0 flex justify-center pointer-events-none" style={{ gap: `${Math.min(3, 12 / Math.max(orbs.length, 1)) * 40}px` }}>
+      {/* HTML labels overlay — evenly distributed across the orb spread area */}
+      <div
+        className="absolute bottom-1 left-1/2 flex justify-between pointer-events-none"
+        style={{
+          transform: "translateX(-50%)",
+          width: `${Math.min(orbs.length * 120, 500)}px`,
+        }}
+      >
         {orbs.map((orb) => {
           const isActive = orb.id === activeOrbId;
           return (
             <span
               key={orb.id}
-              className={`text-[10px] font-medium transition-opacity ${
+              className={`text-[10px] font-medium text-center transition-opacity ${
                 isActive ? "text-white opacity-90" : "text-muted-foreground opacity-60"
               }`}
+              style={{ width: `${100 / orbs.length}%` }}
             >
               {orb.name}
             </span>
