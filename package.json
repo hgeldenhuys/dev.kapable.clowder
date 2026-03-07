@@ -5,7 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "bun run server.ts",
+    "start": "bash -c 'set -a; source .env 2>/dev/null; set +a; exec bun run server.ts'",
     "typecheck": "react-router typegen && tsc",
     "postinstall": "rm -rf node_modules/.vite"
   },
