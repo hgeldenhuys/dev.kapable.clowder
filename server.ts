@@ -17,6 +17,21 @@ const server = Bun.serve({
   idleTimeout: 120,
 
   async fetch(req) {
+    const url = new URL(req.url);
+
+    // Health check
+    if (url.pathname === "/health") {
+      return new Response("ok", { status: 200 });
+    }
+
+    // Static assets from build/client
+    const staticPath = `${BUILD_DIR}/client${url.pathname}`;
+    const file = Bun.file(staticPath);
+    if (await file.exists()) {
+      return new Response(file);
+    }
+
+    // React Router SSR
     return handler(req);
   },
 });
