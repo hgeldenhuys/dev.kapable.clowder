@@ -27,7 +27,7 @@ export function useClowderSession({
   const [experts, setExperts] = useState<ClowderExpert[]>(initialExperts);
   const [messages, setMessages] = useState<ClowderMessage[]>(initialMessages);
   const [activeExpertId, setActiveExpertId] = useState<string | undefined>(
-    initialExperts.find((e) => e.status === "on_stage")?.id
+    initialExperts.find((e) => e.status === "on_stage")?.id ?? initialExperts[0]?.id
   );
   const [isSending, setIsSending] = useState(false);
   const [isWaitingForExpert, setIsWaitingForExpert] = useState(false);

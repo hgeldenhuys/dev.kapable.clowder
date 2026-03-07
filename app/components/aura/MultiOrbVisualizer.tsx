@@ -48,10 +48,10 @@ function getOrbShaderParams(orb: OrbData, index: number, isActive: boolean, isWa
       brightness: 1.5, blur: 0.2, colorShift: 0.05, bloom: 0.6, color,
     };
   }
-  // Background orb — gentle idle
+  // Background orb — gentle idle but still visible
   return {
-    speed: 8, amplitude: 0.8, frequency: 0.3, scale: 0.2,
-    brightness: 0.8, blur: 0.2, colorShift: 0.02, bloom: 0.3, color,
+    speed: 10, amplitude: 1.0, frequency: 0.4, scale: 0.25,
+    brightness: 1.2, blur: 0.2, colorShift: 0.05, bloom: 0.5, color,
   };
 }
 
