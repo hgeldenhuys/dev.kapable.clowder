@@ -11,4 +11,17 @@ export default defineConfig({
   server: {
     port: 3011,
   },
+  ssr: {
+    // Don't bundle bun — it's available at runtime when running under Bun
+    external: ["bun"],
+    noExternal: [],
+  },
+  build: {
+    rollupOptions: {
+      onwarn(warning, defaultHandler) {
+        if (warning.message?.includes("Error when using sourcemap for reporting an error")) return;
+        defaultHandler(warning);
+      },
+    },
+  },
 });
