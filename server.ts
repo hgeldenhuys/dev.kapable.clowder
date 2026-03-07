@@ -4,8 +4,7 @@
  * Serves the pre-built React Router 7 app (SSR) on a single port.
  */
 
-import { createRequestHandler } from "react-router";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 // Explicitly load .env (systemd services may not trigger Bun's auto-load)
 try {
@@ -25,8 +24,19 @@ try {
 const BUILD_DIR = "./build";
 const PORT = Number(process.env.PORT) || 3025;
 
-const build = await import(`${BUILD_DIR}/server/index.js`);
-const handler = createRequestHandler(build as any);
+let handler: ((req: Request) => Promise<Response>) | null = null;
+let startupError: string | null = null;
+
+// Try loading the SSR handler — log errors but still start the server
+try {
+  const { createRequestHandler } = await import("react-router");
+  const build = await import(`${BUILD_DIR}/server/index.js`);
+  handler = createRequestHandler(build as any);
+} catch (err: any) {
+  startupError = `SSR init failed: ${err?.message || err}\n${err?.stack || ""}`;
+  console.error(startupError);
+  try { writeFileSync("/tmp/clowder-startup-error.log", startupError); } catch {}
+}
 
 const server = Bun.serve({
   port: PORT,
@@ -35,9 +45,27 @@ const server = Bun.serve({
   async fetch(req) {
     const url = new URL(req.url);
 
-    // Health check
+    // Health check — always respond even if SSR failed
     if (url.pathname === "/health") {
-      return new Response("ok", { status: 200 });
+      return new Response(startupError ? `degraded: ${startupError}` : "ok", {
+        status: 200,
+      });
+    }
+
+    // Debug endpoint
+    if (url.pathname === "/_debug") {
+      return new Response(JSON.stringify({
+        port: PORT,
+        env_port: process.env.PORT,
+        cwd: process.cwd(),
+        startup_error: startupError,
+        build_exists: await Bun.file(`${BUILD_DIR}/server/index.js`).exists(),
+        env_file_exists: await Bun.file(".env").exists(),
+      }, null, 2), { headers: { "Content-Type": "application/json" } });
+    }
+
+    if (!handler) {
+      return new Response(`Server starting up or SSR failed: ${startupError}`, { status: 503 });
     }
 
     // Static assets from build/client
@@ -52,4 +80,4 @@ const server = Bun.serve({
   },
 });
 
-console.log(`Clowder server running at http://localhost:${server.port}`);
+console.log(`Clowder server running at http://localhost:${server.port} (PORT env: ${process.env.PORT || "unset"})`);
