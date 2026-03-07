@@ -47,11 +47,12 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Top: Orb scene */}
       <div
-        className="flex-none"
+        className="flex-none relative overflow-hidden"
         style={{
           height: "220px",
           background: "oklch(0.06 0.01 270)",
           borderBottom: "1px solid oklch(0.22 0.01 270)",
+          zIndex: 0,
         }}
       >
         <div className="h-full flex flex-col">
@@ -77,7 +78,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Bottom: Chat */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative" style={{ zIndex: 1 }}>
         <SpotlightChat
           messages={messages}
           experts={experts}
