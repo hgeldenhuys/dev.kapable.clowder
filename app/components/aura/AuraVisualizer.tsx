@@ -209,15 +209,20 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
   pp *= 1.0 / ITERATIONS;
 
-  // Dark mode
+  // Dark mode — luminance-only tonemapping to preserve color
   bloom = bloom / (bloom + 2e4);
   vec3 color = (-pp + bloom * 3.0 * uBloom) * 1.2;
   color += (randFibo(fragCoord).x - 0.5) / 255.0;
-  color = Tonemap(color);
 
-  // Boost saturation — tonemapping washes out color at high bloom
+  // Tonemap brightness only, preserve hue direction
+  float brightness = length(color);
+  vec3 direction = brightness > 0.0 ? color / brightness : color;
+  float mapped = (brightness * 4.0) / (1.0 + brightness * 4.0);
+  color = direction * mapped;
+
+  // Boost saturation — bloom tends toward white
   float gray = dot(color, vec3(0.299, 0.587, 0.114));
-  color = mix(vec3(gray), color, 2.5);
+  color = mix(vec3(gray), color, 3.0);
   color = max(color, 0.0);
 
   float alpha = luma(color) * uMix;
