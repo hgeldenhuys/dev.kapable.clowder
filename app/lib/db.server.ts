@@ -117,19 +117,21 @@ export function getSession(id: string): SessionRow | null {
 
 export function updateSessionPhase(id: string, phase: string): void {
   const db = getDb();
-  db.prepare("UPDATE clowder_sessions SET phase = ?, updated_at = datetime('now') WHERE id = ?").run(phase, id);
+  const now = new Date().toISOString();
+  db.prepare("UPDATE clowder_sessions SET phase = ?, updated_at = ? WHERE id = ?").run(phase, now, id);
 }
 
-export function listSessions(): SessionRow[] {
+export function listSessions(limit = 10): SessionRow[] {
   const db = getDb();
-  return db.prepare("SELECT * FROM clowder_sessions ORDER BY updated_at DESC").all() as SessionRow[];
+  return db.prepare("SELECT * FROM clowder_sessions ORDER BY created_at DESC LIMIT ?").all(limit) as SessionRow[];
 }
 
 export function setForceStarted(id: string): void {
   const db = getDb();
+  const now = new Date().toISOString();
   db.prepare(
-    "UPDATE clowder_sessions SET force_started_at = datetime('now'), phase = 'planning', updated_at = datetime('now') WHERE id = ?"
-  ).run(id);
+    "UPDATE clowder_sessions SET force_started_at = ?, phase = 'planning', updated_at = ? WHERE id = ?"
+  ).run(now, now, id);
 }
 
 // ---------------------------------------------------------------------------
@@ -217,7 +219,8 @@ export function updateExpert(
   }
 
   if (parts.length > 0) {
-    parts.push("updated_at = datetime('now')");
+    parts.push("updated_at = ?");
+    values.push(new Date().toISOString());
     values.push(id);
     db.prepare(`UPDATE clowder_experts SET ${parts.join(", ")} WHERE id = ?`).run(...values);
   }
