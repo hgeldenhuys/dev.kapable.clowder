@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { ShaderCanvas, type ShaderUniform } from "./ShaderCanvas";
 import type { OrbData } from "../orbs/types";
-import { getOrbHexColor } from "../orbs/types";
 
 /**
  * Aura visualizer for the Clowder expert committee.
@@ -17,16 +16,6 @@ interface AuraVisualizerProps {
   activeOrbId?: string;
   onOrbClick?: (orbId: string) => void;
   isWaitingForExpert?: boolean;
-}
-
-function hexToRgb(hex: string): number[] {
-  const m = hex.match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
-  if (m) return [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255];
-  return [0.12, 0.84, 0.98]; // fallback cyan
-}
-
-function numToHex(n: number): string {
-  return "#" + n.toString(16).padStart(6, "0");
 }
 
 /**
@@ -62,12 +51,8 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     return { speed, amplitude, frequency, scale, brightness, blur, colorShift, bloom, color };
   }
 
-  // Get color from expert state
-  const hexColor = numToHex(getOrbHexColor(activeOrb.confidence, activeOrb.status));
-  color = hexToRgb(hexColor);
-
   if (isWaiting) {
-    // Expert is thinking — pulsing, faster
+    // Expert is thinking — pulsing cyan
     speed = 30;
     amplitude = 0.5;
     frequency = 1.0;
@@ -75,8 +60,9 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     brightness = 2.0;
     bloom = 0.8;
     colorShift = 0.1;
+    color = [0.12, 0.84, 0.98]; // cyan
   } else if (activeOrb.status === "on_stage") {
-    // Active expert, responding — energetic
+    // Active expert, responding — energetic cyan-blue
     speed = 20;
     amplitude = 1.0;
     frequency = 0.7;
@@ -84,8 +70,9 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     brightness = 1.5;
     bloom = 0.6;
     colorShift = 0.05;
+    color = [0.12, 0.84, 0.98]; // cyan
   } else if (activeOrb.status === "building") {
-    // Building — high energy
+    // Building — high energy blue
     speed = 70;
     amplitude = 0.75;
     frequency = 1.25;
@@ -93,8 +80,9 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     brightness = 2.0;
     bloom = 1.0;
     colorShift = 0.1;
+    color = [0.23, 0.51, 0.96]; // blue
   } else if (activeOrb.confidence >= 0.5) {
-    // Progressing — steady glow
+    // Progressing — steady green
     speed = 15;
     amplitude = 0.8;
     frequency = 0.5;
@@ -102,8 +90,9 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     brightness = 1.5;
     bloom = 0.5;
     colorShift = 0.05;
+    color = [0.13, 0.77, 0.37]; // green
   } else {
-    // Unclear — dim, slow
+    // Unclear — dim orange
     speed = 10;
     amplitude = 1.2;
     frequency = 0.4;
@@ -111,6 +100,7 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     brightness = 1.2;
     bloom = 0.4;
     colorShift = 0.05;
+    color = [0.98, 0.45, 0.09]; // orange
   }
 
   return { speed, amplitude, frequency, scale, brightness, blur, colorShift, bloom, color };
