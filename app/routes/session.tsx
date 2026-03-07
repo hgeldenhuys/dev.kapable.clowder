@@ -67,7 +67,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
             <span className="text-xs text-muted-foreground">·</span>
             <span className="text-xs text-muted-foreground capitalize">{session.phase}</span>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <OrbScene
               orbs={orbs}
               activeOrbId={activeExpertId}
