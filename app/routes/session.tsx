@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { Route } from "./+types/session";
 import { getClowderSession, listClowderMessages } from "~/lib/api.server";
 import { OrbScene } from "~/components/orbs/OrbScene";
@@ -23,6 +24,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
     messages,
     activeExpert,
     activeExpertId,
+    isWaitingForExpert,
     sendMessage,
     forceStart,
     setActiveExpert,
@@ -54,6 +56,10 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       >
         <div className="h-full flex flex-col">
           <div className="flex items-center gap-3 px-4 pt-3 pb-1">
+            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
+              ← Back
+            </Link>
+            <span className="text-xs text-muted-foreground">·</span>
             <h1 className="text-sm font-semibold text-foreground truncate">
               {session.name}
             </h1>
@@ -78,6 +84,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
           sessionId={session.id}
           activeExpert={activeExpert}
           phase={session.phase}
+          isWaitingForExpert={isWaitingForExpert}
           onSend={sendMessage}
           onForceStart={forceStart}
         />

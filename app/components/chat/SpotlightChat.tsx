@@ -11,6 +11,7 @@ interface SpotlightChatProps {
   sessionId: string;
   activeExpert?: ClowderExpert;
   phase: string;
+  isWaitingForExpert?: boolean;
   onSend: (content: string) => void;
   onForceStart: () => void;
 }
@@ -27,18 +28,19 @@ export function SpotlightChat({
   sessionId,
   activeExpert,
   phase,
+  isWaitingForExpert,
   onSend,
   onForceStart,
 }: SpotlightChatProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const isBuilding = phase === "building" || phase === "delivered";
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive or typing indicator shows
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [messages.length]);
+  }, [messages.length, isWaitingForExpert]);
 
   return (
     <div className="flex flex-col h-full">
@@ -89,6 +91,18 @@ export function SpotlightChat({
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} experts={experts} />
         ))}
+        {isWaitingForExpert && (
+          <div className="flex items-center gap-2 px-3 py-2">
+            <div className="flex gap-1">
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {activeExpert ? `${activeExpert.name} is thinking…` : "Experts are thinking…"}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Input area */}
