@@ -36,25 +36,26 @@ function numToHex(n: number): string {
 function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: boolean) {
   const activeOrb = orbs.find((o) => o.id === activeOrbId);
 
-  // Default: idle state
-  let speed = 1.0;
-  let amplitude = 0.5;
+  // Default: idle state (LiveKit scale: speed 10-70, amplitude 0.5-2, bloom always > 0)
+  let speed = 10;
+  let amplitude = 1.2;
   let frequency = 0.4;
   let scale = 0.2;
-  let brightness = 1.0;
+  let brightness = 1.5;
   let blur = 0.2;
   let colorShift = 0.5;
-  let bloom = 0.0;
+  let bloom = 0.4;
   let color = [0.12, 0.84, 0.98]; // cyan
 
   if (!activeOrb) {
-    // Assembling — no active expert, gentle ambient
-    speed = 0.5;
-    amplitude = 0.3;
-    frequency = 0.3;
-    scale = 0.15;
-    brightness = 0.8;
-    color = [0.3, 0.3, 0.5]; // muted purple
+    // Assembling — no active expert, gentle ambient pulse
+    speed = 8;
+    amplitude = 1.0;
+    frequency = 0.4;
+    scale = 0.2;
+    brightness = 1.2;
+    bloom = 0.3;
+    color = [0.3, 0.3, 0.6]; // muted purple
     return { speed, amplitude, frequency, scale, brightness, blur, colorShift, bloom, color };
   }
 
@@ -64,46 +65,47 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
 
   if (isWaiting) {
     // Expert is thinking — pulsing, faster
-    speed = 3.0;
-    amplitude = 0.6;
-    frequency = 0.8;
-    scale = 0.25;
-    brightness = 1.8;
-    bloom = 0.3;
+    speed = 30;
+    amplitude = 0.5;
+    frequency = 1.0;
+    scale = 0.3;
+    brightness = 2.0;
+    bloom = 0.6;
     colorShift = 0.8;
   } else if (activeOrb.status === "on_stage") {
     // Active expert, responding — energetic
-    speed = 2.0;
-    amplitude = 0.7;
-    frequency = 0.6;
+    speed = 20;
+    amplitude = 1.0;
+    frequency = 0.7;
     scale = 0.3;
     brightness = 1.5;
-    bloom = 0.2;
+    bloom = 0.4;
     colorShift = 0.6;
   } else if (activeOrb.status === "building") {
     // Building — high energy, spinning feel
-    speed = 4.0;
-    amplitude = 0.8;
-    frequency = 1.0;
-    scale = 0.35;
+    speed = 70;
+    amplitude = 0.75;
+    frequency = 1.25;
+    scale = 0.3;
     brightness = 2.0;
-    bloom = 0.5;
+    bloom = 0.8;
     colorShift = 1.0;
   } else if (activeOrb.confidence >= 0.5) {
     // Progressing — steady glow
-    speed = 1.5;
-    amplitude = 0.5;
+    speed = 15;
+    amplitude = 0.8;
     frequency = 0.5;
     scale = 0.25;
-    brightness = 1.3;
-    bloom = 0.1;
+    brightness = 1.5;
+    bloom = 0.3;
   } else {
     // Unclear — dim, slow
-    speed = 0.8;
-    amplitude = 0.4;
+    speed = 10;
+    amplitude = 1.2;
     frequency = 0.4;
     scale = 0.2;
     brightness = 1.0;
+    bloom = 0.2;
     colorShift = 0.3;
   }
 
