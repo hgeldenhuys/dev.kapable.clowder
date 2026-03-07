@@ -5,7 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "bun run server-minimal.ts",
+    "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "postinstall": "rm -rf node_modules/.vite"
   },
