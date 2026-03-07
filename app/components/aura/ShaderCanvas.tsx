@@ -231,7 +231,8 @@ export function ShaderCanvas({
     return () => {
       cancelAnimationFrame(animId);
       ro.disconnect();
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // Don't call loseContext() — React re-runs effects on hydration,
+      // and a lost context can't be recovered on the same canvas.
     };
   }, [fs, dpr]); // Only re-init on shader source or DPR change
 
