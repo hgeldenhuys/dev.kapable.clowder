@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { useState, useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import { Toaster } from "sonner";
@@ -37,12 +38,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <Toaster position="top-right" richColors />
+        <ClientOnlyToaster />
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
+}
+
+function ClientOnlyToaster() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <Toaster position="top-right" richColors />;
 }
 
 export default function App() {

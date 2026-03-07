@@ -95,7 +95,11 @@ export function createSession(body: {
 }): SessionRow {
   const db = getDb();
   const id = randomUUID();
-  const name = body.name || body.description.slice(0, 60);
+  let name = body.name || body.description;
+  if (name.length > 60) {
+    const cut = name.lastIndexOf(" ", 60);
+    name = cut > 20 ? name.slice(0, cut) : name.slice(0, 60);
+  }
   const now = new Date().toISOString();
 
   db.prepare(

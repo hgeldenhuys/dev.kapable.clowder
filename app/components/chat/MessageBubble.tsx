@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
 
 interface MessageBubbleProps {
@@ -5,8 +6,22 @@ interface MessageBubbleProps {
   experts: ClowderExpert[];
 }
 
+function useClientTime(isoString: string): string {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    setTime(
+      new Date(isoString).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+  }, [isoString]);
+  return time;
+}
+
 export function MessageBubble({ message, experts }: MessageBubbleProps) {
   const isUser = message.role === "user";
+  const timeStr = useClientTime(message.created_at);
   const expert = message.expert_id
     ? experts.find((e) => e.id === message.expert_id)
     : null;
@@ -35,12 +50,11 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
         <p className="text-sm leading-relaxed whitespace-pre-wrap">
           {message.content}
         </p>
-        <p className="text-xs opacity-50 text-right">
-          {new Date(message.created_at).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </p>
+        {timeStr && (
+          <p className="text-xs opacity-50 text-right">
+            {timeStr}
+          </p>
+        )}
       </div>
     </div>
   );
