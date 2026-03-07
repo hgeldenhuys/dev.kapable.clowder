@@ -1,36 +1,45 @@
 import type { Route } from "./+types/api.clowder-stream";
-import { getApiBaseUrl, getAdminKey } from "~/lib/api.server";
+import { subscribe } from "~/lib/sse.server";
 
 /**
- * BFF SSE proxy — forwards the platform SSE stream to the browser.
+ * BFF SSE endpoint — streams real-time Clowder events to the browser.
  *
- * The browser cannot hit the platform API directly (CORS + auth).
- * This route proxies the SSE stream, adding auth headers server-side.
- *
- * Uses TransformStream to properly forward the SSE bytes without buffering.
+ * Uses the local SSE emitter (no Rust API proxy).
+ * Sends heartbeats every 15s to keep the connection alive.
  */
 export async function loader({ params }: Route.LoaderArgs) {
   const { sessionId } = params;
 
-  const upstream = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/sse`,
-    {
-      headers: {
-        "X-Admin-Key": getAdminKey(),
-        Accept: "text/event-stream",
-        "Cache-Control": "no-cache",
-      },
-    }
-  );
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
 
-  if (!upstream.ok || !upstream.body) {
-    return new Response("Failed to connect to upstream SSE", { status: 502 });
+  function write(eventType: string, data: string) {
+    try {
+      writer.write(encoder.encode(`event: ${eventType}\ndata: ${data}\n\n`));
+    } catch {
+      // Stream closed
+    }
   }
 
-  // Pipe upstream body through a TransformStream (never pipe directly).
-  const { readable, writable } = new TransformStream();
-  upstream.body.pipeTo(writable).catch(() => {
-    // Upstream closed — browser will retry
+  // Subscribe to session events
+  const unsubscribe = subscribe(sessionId, write);
+
+  // Heartbeat every 15s
+  const heartbeat = setInterval(() => {
+    write("heartbeat", JSON.stringify({ type: "heartbeat", session_id: sessionId }));
+  }, 15000);
+
+  // Send initial heartbeat
+  write("heartbeat", JSON.stringify({ type: "heartbeat", session_id: sessionId }));
+
+  // Clean up when the client disconnects
+  readable.pipeTo(new WritableStream()).catch(() => {
+    // Client disconnected
+  }).finally(() => {
+    unsubscribe();
+    clearInterval(heartbeat);
+    writer.close().catch(() => {});
   });
 
   return new Response(readable, {

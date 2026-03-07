@@ -13,7 +13,7 @@ export default defineConfig({
   },
   ssr: {
     // Don't bundle bun — it's available at runtime when running under Bun
-    external: ["bun"],
+    external: ["bun", "bun:sqlite"],
     noExternal: [],
   },
   build: {

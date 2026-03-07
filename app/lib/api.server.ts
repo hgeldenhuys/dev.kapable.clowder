@@ -1,9 +1,26 @@
 /**
- * BFF API helpers for Clowder.
+ * BFF API layer for Clowder.
  *
- * All calls go through here — adds auth header, handles errors.
+ * All operations use local SQLite (db.server.ts) — no Rust API dependency.
+ * SSE events are emitted via sse.server.ts for real-time updates.
  */
 
+import {
+  createSession,
+  getSession,
+  listExperts,
+  createExpert,
+  updateExpert,
+  listMessages,
+  createMessage,
+  setForceStarted,
+  sessionToApi,
+  expertToApi,
+  messageToApi,
+} from "./db.server";
+import { emitMessage, emitExpertUpdated, emitPhaseChanged, emitForceStarted } from "./sse.server";
+
+// Legacy helpers (used by builder.server.ts for vault calls)
 export function getApiBaseUrl(): string {
   return process.env.KAPABLE_API_URL ?? "http://localhost:3003";
 }
@@ -19,158 +36,13 @@ export function buildHeaders(): Record<string, string> {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Session CRUD
-// ---------------------------------------------------------------------------
-
-export async function createClowderSession(body: {
-  name?: string;
-  description: string;
-  input_type?: string;
-}): Promise<ClowderSession> {
-  const res = await fetch(`${getApiBaseUrl()}/v1/clowder/sessions`, {
-    method: "POST",
-    headers: buildHeaders(),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to create session: ${text}`);
-  }
-  const json = await res.json();
-  return json.data as ClowderSession;
-}
-
-export async function getClowderSession(sessionId: string): Promise<{
-  session: ClowderSession;
-  experts: ClowderExpert[];
-}> {
-  const res = await fetch(`${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}`, {
-    headers: buildHeaders(),
-  });
-  if (!res.ok) {
-    throw new Error(`Session not found: ${sessionId}`);
-  }
-  const json = await res.json();
-  return json.data as { session: ClowderSession; experts: ClowderExpert[] };
-}
-
-export async function listClowderMessages(sessionId: string): Promise<ClowderMessage[]> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/messages`,
-    { headers: buildHeaders() }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to list messages`);
-  }
-  const json = await res.json();
-  return json.data as ClowderMessage[];
-}
-
-export async function sendClowderMessage(
-  sessionId: string,
-  body: {
-    content: string;
-    expert_id?: string;
-    role?: string;
-    metadata?: Record<string, unknown>;
-  }
-): Promise<ClowderMessage> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/messages`,
-    {
-      method: "POST",
-      headers: buildHeaders(),
-      body: JSON.stringify(body),
-    }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to send message`);
-  }
-  const json = await res.json();
-  return json.data as ClowderMessage;
-}
-
-export async function listClowderExperts(sessionId: string): Promise<ClowderExpert[]> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/experts`,
-    { headers: buildHeaders() }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to list experts`);
-  }
-  const json = await res.json();
-  return json.data as ClowderExpert[];
-}
-
-export async function createClowderExpert(
-  sessionId: string,
-  body: {
-    name: string;
-    role: string;
-    domain: string;
-    voice_id?: string;
-    system_prompt?: string;
-    sort_order?: number;
-  }
-): Promise<ClowderExpert> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/experts`,
-    {
-      method: "POST",
-      headers: buildHeaders(),
-      body: JSON.stringify(body),
-    }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to create expert`);
-  }
-  const json = await res.json();
-  return json.data as ClowderExpert;
-}
-
-export async function updateClowderExpert(
-  sessionId: string,
-  expertId: string,
-  body: {
-    confidence?: number;
-    status?: string;
-    blockers?: string[];
-    system_prompt?: string;
-  }
-): Promise<ClowderExpert> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/experts/${expertId}`,
-    {
-      method: "PATCH",
-      headers: buildHeaders(),
-      body: JSON.stringify(body),
-    }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to update expert`);
-  }
-  const json = await res.json();
-  return json.data as ClowderExpert;
-}
-
-export async function forceStartBuild(sessionId: string): Promise<ClowderSession> {
-  const res = await fetch(
-    `${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/force-start`,
-    {
-      method: "POST",
-      headers: buildHeaders(),
-    }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to force start`);
-  }
-  const json = await res.json();
-  return json.data as ClowderSession;
-}
+// Re-export types for consumers
+export type { SessionRow as ClowderSessionRow } from "./db.server";
+export type { ExpertRow as ClowderExpertRow } from "./db.server";
+export type { MessageRow as ClowderMessageRow } from "./db.server";
 
 // ---------------------------------------------------------------------------
-// Shared types
+// Shared types (kept for compatibility with existing components)
 // ---------------------------------------------------------------------------
 
 export interface ClowderSession {
@@ -214,4 +86,128 @@ export interface ClowderMessage {
   phase: string;
   metadata: Record<string, unknown>;
   created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Session CRUD
+// ---------------------------------------------------------------------------
+
+export async function createClowderSession(body: {
+  name?: string;
+  description: string;
+  input_type?: string;
+}): Promise<ClowderSession> {
+  const row = createSession(body);
+  return sessionToApi(row) as ClowderSession;
+}
+
+export async function getClowderSession(sessionId: string): Promise<{
+  session: ClowderSession;
+  experts: ClowderExpert[];
+}> {
+  const row = getSession(sessionId);
+  if (!row) throw new Error(`Session not found: ${sessionId}`);
+  const expertRows = listExperts(sessionId);
+  return {
+    session: sessionToApi(row) as ClowderSession,
+    experts: expertRows.map(expertToApi) as ClowderExpert[],
+  };
+}
+
+export async function listClowderMessages(sessionId: string): Promise<ClowderMessage[]> {
+  const rows = listMessages(sessionId);
+  return rows.map(messageToApi) as ClowderMessage[];
+}
+
+export async function sendClowderMessage(
+  sessionId: string,
+  body: {
+    content: string;
+    expert_id?: string;
+    role?: string;
+    metadata?: Record<string, unknown>;
+  }
+): Promise<ClowderMessage> {
+  const row = createMessage(sessionId, body);
+  const msg = messageToApi(row) as ClowderMessage;
+
+  // Emit SSE event
+  emitMessage(sessionId, {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    expert_id: msg.expert_id,
+    phase: msg.phase,
+    created_at: msg.created_at,
+  });
+
+  return msg;
+}
+
+export async function listClowderExperts(sessionId: string): Promise<ClowderExpert[]> {
+  const rows = listExperts(sessionId);
+  return rows.map(expertToApi) as ClowderExpert[];
+}
+
+export async function createClowderExpert(
+  sessionId: string,
+  body: {
+    name: string;
+    role: string;
+    domain: string;
+    voice_id?: string;
+    system_prompt?: string;
+    sort_order?: number;
+  }
+): Promise<ClowderExpert> {
+  const row = createExpert(sessionId, body);
+  const expert = expertToApi(row) as ClowderExpert;
+
+  // Emit SSE event
+  emitExpertUpdated(sessionId, {
+    id: expert.id,
+    name: expert.name,
+    confidence: expert.confidence,
+    status: expert.status,
+    blockers: expert.blockers,
+  });
+
+  return expert;
+}
+
+export async function updateClowderExpert(
+  sessionId: string,
+  expertId: string,
+  body: {
+    confidence?: number;
+    status?: string;
+    blockers?: string[];
+    system_prompt?: string;
+  }
+): Promise<ClowderExpert> {
+  const row = updateExpert(expertId, body);
+  const expert = expertToApi(row) as ClowderExpert;
+
+  // Emit SSE event
+  emitExpertUpdated(sessionId, {
+    id: expert.id,
+    name: expert.name,
+    confidence: expert.confidence,
+    status: expert.status,
+    blockers: expert.blockers,
+  });
+
+  return expert;
+}
+
+export async function forceStartBuild(sessionId: string): Promise<ClowderSession> {
+  setForceStarted(sessionId);
+  const row = getSession(sessionId);
+  if (!row) throw new Error(`Session not found: ${sessionId}`);
+
+  // Emit SSE events
+  emitForceStarted(sessionId);
+  emitPhaseChanged(sessionId, "planning");
+
+  return sessionToApi(row) as ClowderSession;
 }
