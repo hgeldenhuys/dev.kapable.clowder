@@ -99,6 +99,8 @@ export function createSession(body: {
   if (name.length > 60) {
     const cut = name.lastIndexOf(" ", 60);
     name = cut > 20 ? name.slice(0, cut) : name.slice(0, 60);
+    // Trim trailing punctuation for cleaner display
+    name = name.replace(/[,;:\-–—]+$/, "").trimEnd();
   }
   const now = new Date().toISOString();
 

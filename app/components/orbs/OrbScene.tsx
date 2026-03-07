@@ -189,10 +189,28 @@ export function OrbScene({ orbs, activeOrbId, onOrbClick }: OrbSceneProps) {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full cursor-pointer"
-      style={{ display: "block" }}
-    />
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full cursor-pointer"
+        style={{ display: "block" }}
+      />
+      {/* HTML labels overlay — positioned at bottom, evenly spaced */}
+      <div className="absolute bottom-1 left-0 right-0 flex justify-center pointer-events-none" style={{ gap: `${Math.min(3, 12 / Math.max(orbs.length, 1)) * 40}px` }}>
+        {orbs.map((orb) => {
+          const isActive = orb.id === activeOrbId;
+          return (
+            <span
+              key={orb.id}
+              className={`text-[10px] font-medium transition-opacity ${
+                isActive ? "text-white opacity-90" : "text-muted-foreground opacity-60"
+              }`}
+            >
+              {orb.name}
+            </span>
+          );
+        })}
+      </div>
+    </div>
   );
 }
