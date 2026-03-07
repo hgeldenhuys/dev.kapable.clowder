@@ -66,6 +66,19 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
             </h1>
             <span className="text-xs text-muted-foreground">·</span>
             <span className="text-xs text-muted-foreground capitalize">{session.phase}</span>
+            {session.app_url && (
+              <>
+                <span className="text-xs text-muted-foreground">·</span>
+                <a
+                  href={session.app_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Visit your app →
+                </a>
+              </>
+            )}
           </div>
           <div className="flex-1 min-h-0">
             <MultiOrbVisualizer

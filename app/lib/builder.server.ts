@@ -96,6 +96,186 @@ async function provisionTables(
   return created;
 }
 
+// ---------------------------------------------------------------------------
+// Scaffold + Deploy (BL-CLW-002)
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a minimal RR7 + Bun scaffold via Claude headless,
+ * push to GitHub, register as Connect App, and trigger deploy.
+ */
+async function scaffoldAndDeploy(
+  sessionId: string,
+  sessionName: string,
+  specContent: string,
+  tables: TableDef[],
+  projectApiKey: string,
+  projectId: string,
+  sendProgress: (msg: string, meta?: Record<string, unknown>) => Promise<void>,
+): Promise<{ appId: string; appUrl: string; repoUrl: string } | null> {
+  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+  const scaffoldDir = `/tmp/clowder-scaffold-${sessionId}`;
+
+  // Step 1: Generate scaffold with Claude headless
+  await sendProgress("Generating your app code...");
+
+  const tableDescriptions = tables
+    .map((t) => `- ${t.name}: ${t.columns.map((c) => `${c.name}(${c.type})`).join(", ")}`)
+    .join("\n");
+
+  const scaffoldPrompt = `You are generating a complete, deployable React Router 7 + Bun web application.
+
+## App Spec
+${specContent.slice(0, 4000)}
+
+## Database Tables (already provisioned on Kapable)
+${tableDescriptions}
+
+## API Access
+- Base URL: https://api.kapable.dev
+- API Key: ${projectApiKey}
+- Data API: GET/POST/PUT/DELETE /v1/data/{table_name}
+- Auth: Include header "x-api-key: ${projectApiKey}" on all requests
+
+## Requirements
+1. Use React Router v7 with file-based routing
+2. Use Bun as the runtime
+3. Use shadcn/ui components with dark mode (Tailwind CSS)
+4. Create CRUD pages for each table (list view + detail/edit view)
+5. Include a simple login/signup page using Kapable session tokens
+6. Include a homepage/dashboard that links to each table's list view
+7. Keep it minimal and functional — no over-engineering
+
+## Output Format
+Output ONLY file contents in this exact format, one file per block:
+--- FILE: path/to/file.ext ---
+(file contents)
+--- END FILE ---
+
+Required files:
+- package.json (with dependencies: react, react-dom, react-router, @types/react, tailwindcss, etc.)
+- app/root.tsx
+- app/routes/_index.tsx (dashboard)
+- app/routes/login.tsx
+- app/lib/api.ts (Kapable Data API client)
+- app/tailwind.css
+- tailwind.config.ts
+- tsconfig.json
+- vite.config.ts
+- react-router.config.ts
+
+Plus route files for each table's CRUD pages.`;
+
+  try {
+    const output = execSync(`claude --dangerously-skip-permissions`, {
+      input: scaffoldPrompt,
+      encoding: "utf8",
+      timeout: 180000,
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    if (output.length < 200) {
+      await sendProgress("Scaffold generation produced insufficient output. Skipping deploy.");
+      return null;
+    }
+
+    // Parse the file blocks
+    const fileBlocks = output.matchAll(/--- FILE: (.+?) ---\n([\s\S]*?)--- END FILE ---/g);
+    const files: Array<{ path: string; content: string }> = [];
+    for (const match of fileBlocks) {
+      files.push({ path: match[1].trim(), content: match[2] });
+    }
+
+    if (files.length < 3) {
+      await sendProgress("Scaffold generation did not produce enough files. Skipping deploy.");
+      return null;
+    }
+
+    // Step 2: Write files to disk
+    await sendProgress(`Writing ${files.length} files to scaffold...`);
+
+    execSync(`rm -rf ${scaffoldDir} && mkdir -p ${scaffoldDir}`, { encoding: "utf8" });
+    for (const file of files) {
+      const fullPath = `${scaffoldDir}/${file.path}`;
+      const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
+      execSync(`mkdir -p "${dir}"`, { encoding: "utf8" });
+      const { writeFileSync } = await import("node:fs");
+      writeFileSync(fullPath, file.content, "utf8");
+    }
+
+    // Step 3: Initialize git and push to GitHub
+    await sendProgress("Pushing to GitHub...");
+
+    const repoName = `clowder-${slug}`;
+    try {
+      execSync(
+        `cd ${scaffoldDir} && git init && git add -A && git commit -m "Initial scaffold from Clowder" && gh repo create hgeldenhuys/${repoName} --public --source=. --push`,
+        { encoding: "utf8", timeout: 60000, stdio: ["pipe", "pipe", "pipe"] }
+      );
+    } catch (e) {
+      // Repo might already exist — try just pushing
+      try {
+        execSync(
+          `cd ${scaffoldDir} && git remote add origin https://github.com/hgeldenhuys/${repoName}.git 2>/dev/null; git push -u origin main`,
+          { encoding: "utf8", timeout: 30000, stdio: ["pipe", "pipe", "pipe"] }
+        );
+      } catch {
+        await sendProgress("Failed to push to GitHub. The scaffold is saved locally.");
+        return null;
+      }
+    }
+
+    const repoUrl = `https://github.com/hgeldenhuys/${repoName}`;
+
+    // Step 4: Register as Connect App
+    await sendProgress("Registering app on Kapable...");
+
+    const registerRes = await fetch(`${getApiBaseUrl()}/v1/apps`, {
+      method: "POST",
+      headers: buildHeaders(),
+      body: JSON.stringify({
+        name: sessionName,
+        slug,
+        git_repo: repoUrl,
+        project_id: projectId,
+        framework: "react-router",
+        runtime: "bun",
+      }),
+    });
+
+    if (!registerRes.ok) {
+      await sendProgress(`App registration failed (${registerRes.status}). Scaffold is on GitHub: ${repoUrl}`);
+      return null;
+    }
+
+    const appData = await registerRes.json();
+    const appId = appData.app?.id ?? appData.id;
+
+    // Step 5: Trigger deploy
+    await sendProgress("Deploying your app...");
+
+    const deployRes = await fetch(
+      `${getApiBaseUrl()}/v1/apps/${appId}/environments/production/deploy`,
+      {
+        method: "POST",
+        headers: buildHeaders(),
+        body: JSON.stringify({ branch: "main" }),
+      }
+    );
+
+    if (!deployRes.ok) {
+      await sendProgress(`Deploy trigger failed (${deployRes.status}). You can deploy manually from: ${repoUrl}`);
+    }
+
+    const appUrl = `https://${slug}.kapable.run`;
+    return { appId, appUrl, repoUrl };
+  } catch (e) {
+    console.error("Scaffold and deploy failed:", e);
+    await sendProgress(`App scaffolding encountered an error: ${String(e).slice(0, 200)}`);
+    return null;
+  }
+}
+
 /**
  * Generate planning artifacts using Claude headless.
  * Falls back to stub content if Claude is not available.
@@ -337,6 +517,37 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Scaffold + Deploy: generate frontend, push to GitHub, deploy
+  // ---------------------------------------------------------------------------
+
+  let deployResult: { appId: string; appUrl: string; repoUrl: string } | null = null;
+
+  if (provisionResult && provisionResult.tables.length > 0) {
+    const sendProgress = async (msg: string, meta?: Record<string, unknown>) => {
+      await sendClowderMessage(sessionId, {
+        content: msg,
+        role: "system",
+        metadata: { phase: "building", ...meta },
+      });
+    };
+
+    deployResult = await scaffoldAndDeploy(
+      sessionId,
+      session.name,
+      specContent,
+      tables,
+      provisionResult.apiKey,
+      provisionResult.projectId,
+      sendProgress,
+    );
+
+    if (deployResult) {
+      // Update local DB with final app URL
+      updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
+    }
+  }
+
   // Final summary message
   const summaryLines = [
     `Planning complete! Here's what was created:`,
@@ -358,16 +569,27 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     );
   }
 
+  if (deployResult) {
+    summaryLines.push(
+      ``,
+      `**Your app is live!**`,
+      `- URL: ${deployResult.appUrl}`,
+      `- GitHub: ${deployResult.repoUrl}`,
+    );
+  }
+
   summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
 
   await sendClowderMessage(sessionId, {
     content: summaryLines.join("\n"),
     role: "system",
     metadata: {
-      phase: "building",
+      phase: deployResult ? "delivered" : "building",
       artifacts_count: artifacts.length,
       provisioned: !!provisionResult,
       tables_created: provisionResult?.tables.length ?? 0,
+      deployed: !!deployResult,
+      app_url: deployResult?.appUrl,
     },
   });
 }
