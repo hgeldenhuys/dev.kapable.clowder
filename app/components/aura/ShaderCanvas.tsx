@@ -90,8 +90,9 @@ export function ShaderCanvas({
     const gl = canvas.getContext("webgl", {
       premultipliedAlpha: false,
       alpha: true,
+      preserveDrawingBuffer: true,
     }) as WebGLRenderingContext | null;
-    if (!gl) return;
+    if (!gl) { console.error("ShaderCanvas: WebGL context creation failed"); return; }
 
     gl.getExtension("OES_standard_derivatives");
     gl.clearColor(0, 0, 0, 0);
@@ -152,14 +153,17 @@ export function ShaderCanvas({
     }
 
     const prog = gl.createProgram()!;
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, BASIC_VS));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fragSrc));
+    const vs = compile(gl.VERTEX_SHADER, BASIC_VS);
+    const frag = compile(gl.FRAGMENT_SHADER, fragSrc);
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, frag);
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-      console.error("Shader link:", gl.getProgramInfoLog(prog));
+      console.error("ShaderCanvas link error:", gl.getProgramInfoLog(prog));
       return;
     }
     gl.useProgram(prog);
+    console.log("ShaderCanvas: shader compiled & linked, uniforms:", customNames.join(", "));
 
     const posAttr = gl.getAttribLocation(prog, "aVertexPosition");
     gl.enableVertexAttribArray(posAttr);
@@ -185,12 +189,17 @@ export function ShaderCanvas({
     let animId: number;
     let timer = 0;
     let lastTime = 0;
+    let frameCount = 0;
 
     function draw(timestamp: number) {
       if (!gl) return;
       const delta = lastTime ? (timestamp - lastTime) / 1000 : 0;
       lastTime = timestamp;
       timer += delta;
+      frameCount++;
+      if (frameCount === 1 || frameCount === 60) {
+        console.log(`ShaderCanvas: frame ${frameCount}, timer=${timer.toFixed(2)}, buffer=${gl.drawingBufferWidth}x${gl.drawingBufferHeight}`);
+      }
 
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
