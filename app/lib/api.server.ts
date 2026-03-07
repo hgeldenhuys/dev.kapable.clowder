@@ -163,10 +163,12 @@ export async function createClowderExpert(
   const row = createExpert(sessionId, body);
   const expert = expertToApi(row) as ClowderExpert;
 
-  // Emit SSE event
+  // Emit SSE event (include domain/role so client can add new experts)
   emitExpertUpdated(sessionId, {
     id: expert.id,
     name: expert.name,
+    domain: expert.domain,
+    role: expert.role,
     confidence: expert.confidence,
     status: expert.status,
     blockers: expert.blockers,
@@ -188,10 +190,12 @@ export async function updateClowderExpert(
   const row = updateExpert(expertId, body);
   const expert = expertToApi(row) as ClowderExpert;
 
-  // Emit SSE event
+  // Emit SSE event (include domain/role so client can add new experts)
   emitExpertUpdated(sessionId, {
     id: expert.id,
     name: expert.name,
+    domain: expert.domain,
+    role: expert.role,
     confidence: expert.confidence,
     status: expert.status,
     blockers: expert.blockers,

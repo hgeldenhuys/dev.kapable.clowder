@@ -40,7 +40,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
             <span className="text-xs font-semibold text-primary">
               {expert?.name ?? "System"}
             </span>
-            {expert && (
+            {expert && expert.domain.toLowerCase() !== expert.name.toLowerCase() && (
               <span className="text-xs text-muted-foreground capitalize">
                 · {expert.domain}
               </span>

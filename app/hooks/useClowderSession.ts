@@ -54,8 +54,19 @@ export function useClowderSession({
           created_at: msg.created_at,
         };
         setMessages((prev) => {
-          // Avoid duplicates
+          // Avoid duplicates (by real ID)
           if (prev.some((m) => m.id === msg.id)) return prev;
+          // Replace optimistic message with real one (same role + content)
+          if (msg.role === "user") {
+            const optimisticIdx = prev.findIndex(
+              (m) => m.id.startsWith("optimistic-") && m.content === msg.content
+            );
+            if (optimisticIdx !== -1) {
+              const updated = [...prev];
+              updated[optimisticIdx] = newMessage;
+              return updated;
+            }
+          }
           return [...prev, newMessage];
         });
         break;
@@ -63,18 +74,37 @@ export function useClowderSession({
 
       case "expert_updated": {
         const { expert } = event;
-        setExperts((prev) =>
-          prev.map((e) =>
-            e.id === expert.id
-              ? {
-                  ...e,
-                  confidence: expert.confidence,
-                  status: expert.status as ClowderExpert["status"],
-                  blockers: expert.blockers as string[],
-                }
-              : e
-          )
-        );
+        setExperts((prev) => {
+          const existingIdx = prev.findIndex((e) => e.id === expert.id);
+          if (existingIdx !== -1) {
+            // Update existing expert
+            const updated = [...prev];
+            updated[existingIdx] = {
+              ...updated[existingIdx],
+              confidence: expert.confidence,
+              status: expert.status as ClowderExpert["status"],
+              blockers: expert.blockers as string[],
+            };
+            return updated;
+          }
+          // New expert — add to list
+          return [...prev, {
+            id: expert.id,
+            session_id: session.id,
+            org_id: session.org_id,
+            name: expert.name,
+            role: (expert as any).role ?? "core",
+            domain: (expert as any).domain ?? expert.name.toLowerCase(),
+            voice_id: undefined,
+            confidence: expert.confidence,
+            status: expert.status as ClowderExpert["status"],
+            blockers: expert.blockers as string[],
+            system_prompt: undefined,
+            sort_order: prev.length,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }];
+        });
         // If expert came on stage, update active expert
         if (expert.status === "on_stage") {
           setActiveExpertId(expert.id);

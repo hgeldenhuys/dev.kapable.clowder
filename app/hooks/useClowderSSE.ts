@@ -17,6 +17,8 @@ export type ClowderSSEEvent =
   | { type: "expert_updated"; session_id: string; expert: {
       id: string;
       name: string;
+      domain?: string;
+      role?: string;
       confidence: number;
       status: string;
       blockers: unknown[];
