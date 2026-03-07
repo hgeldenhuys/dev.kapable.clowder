@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import type { ClowderSession, ClowderExpert, ClowderMessage } from "~/lib/api.server";
 import { useClowderSSE } from "./useClowderSSE";
 
@@ -155,12 +156,12 @@ export function useClowderSession({
       if (!res.ok) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
         setIsWaitingForExpert(false);
-        console.error("Failed to send message");
+        toast.error("Failed to send message. Please try again.");
       }
     } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       setIsWaitingForExpert(false);
-      console.error("Send error:", e);
+      toast.error("Connection error. Please check your network and try again.");
     } finally {
       setIsSending(false);
     }

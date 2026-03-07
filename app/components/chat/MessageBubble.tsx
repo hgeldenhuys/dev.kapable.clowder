@@ -1,5 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
+
+/** Minimal markdown: **bold**, *italic*, `code`, and - bullet lists */
+function renderSimpleMarkdown(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`(.+?)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>');
+}
 
 interface MessageBubbleProps {
   message: ClowderMessage;
@@ -25,6 +37,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
   const expert = message.expert_id
     ? experts.find((e) => e.id === message.expert_id)
     : null;
+  const html = useMemo(() => renderSimpleMarkdown(message.content), [message.content]);
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -47,9 +60,10 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
             )}
           </div>
         )}
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {message.content}
-        </p>
+        <div
+          className="text-sm leading-relaxed whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
         {timeStr && (
           <p className="text-xs opacity-50 text-right">
             {timeStr}
