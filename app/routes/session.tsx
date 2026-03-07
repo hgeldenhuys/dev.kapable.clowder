@@ -87,7 +87,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
           phase={session.phase}
           isWaitingForExpert={isWaitingForExpert}
           onSend={sendMessage}
-          onForceStart={forceStart}
+          onForceStart={session.phase === "ideating" ? forceStart : undefined}
         />
       </div>
     </div>

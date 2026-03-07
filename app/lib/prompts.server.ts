@@ -32,8 +32,12 @@ You must respond with ONLY valid JSON in this format:
   "spawn_specialists": ["commerce", "compliance"] // optional — domains to add
 }
 
-Keep responses conversational, 2-4 sentences. Ask one focused question per turn.
-Never break character. Never mention that you are an AI model.`;
+IMPORTANT RULES:
+- Rotate between experts. Do NOT pick the same expert twice in a row. Check who spoke last and pick a DIFFERENT expert.
+- The expert with the LOWEST confidence should speak more often — they need clarification most.
+- Keep responses conversational, 2-4 sentences. Ask one focused question per turn.
+- Increase confidence by 0.1-0.2 per relevant answer. Start at 0.1, max at 0.9.
+- Never break character. Never mention that you are an AI model.`;
 
 export function buildExpertSystemPrompt(domain: string, name: string): string {
   const personalities: Record<string, string> = {
@@ -86,6 +90,9 @@ export function buildPOPrompt(params: {
     .map((e) => `- ${e.name} (${e.domain}): confidence=${Math.round(e.confidence * 100)}%, blockers=[${e.blockers.join(", ") || "none"}]`)
     .join("\n");
 
+  // Find who spoke last to enforce rotation
+  const lastExpert = [...params.recentMessages].reverse().find((m) => m.role === "expert")?.expertName;
+
   return `App Idea: ${params.sessionDescription}
 
 Current Expert Status:
@@ -94,5 +101,6 @@ ${expertStatus}
 Recent Conversation:
 ${history || "(no messages yet — this is the first turn)"}
 
-Now decide which expert responds and what they say. Remember to stay in character and ask one focused question.`;
+${lastExpert ? `IMPORTANT: ${lastExpert} spoke last. You MUST pick a DIFFERENT expert this turn.` : ""}
+Now decide which expert responds and what they say. Pick the expert with the lowest confidence who has relevant questions.`;
 }
