@@ -57,8 +57,8 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     scale = 0.2;
     brightness = 1.5;
     bloom = 0.5;
-    colorShift = 0.05;
-    color = [0.3, 0.3, 0.6]; // muted purple
+    colorShift = 0.15;
+    color = [0.12, 0.5, 0.98]; // blue-cyan
     return { speed, amplitude, frequency, scale, brightness, blur, colorShift, bloom, color };
   }
 
