@@ -1,2 +1,6 @@
 framework: react-router
 start_cmd: "/usr/local/bin/bun run server.ts"
+env:
+  KAPABLE_API_URL: "https://api.kapable.dev"
+  SESSION_SECRET: "clowder-prod-secret-k4p4bl3-2026"
+  KAPABLE_ADMIN_KEY: "sk_admin_61af775f967c434dbace3877ade456b8"
