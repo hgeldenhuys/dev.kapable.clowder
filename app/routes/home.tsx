@@ -1,6 +1,7 @@
 import { Link, redirect } from "react-router";
 import type { Route } from "./+types/home";
-import { createClowderSession, listClowderSessions } from "~/lib/api.server";
+import { createClowderSession, listClowderSessions, sendClowderMessage } from "~/lib/api.server";
+import { orchestrate } from "~/lib/orchestrator.server";
 
 export async function loader() {
   const sessions = await listClowderSessions();
@@ -16,6 +17,13 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const session = await createClowderSession({ description });
+
+  // Auto-send the description as the first user message so experts respond immediately
+  await sendClowderMessage(session.id, { content: description, role: "user" });
+  orchestrate(session.id).catch((e) => {
+    console.error("Orchestrator error on session create:", e);
+  });
+
   return redirect(`/session/${session.id}`);
 }
 
