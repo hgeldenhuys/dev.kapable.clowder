@@ -29,6 +29,7 @@ export function useClowderSession({
     initialExperts.find((e) => e.status === "on_stage")?.id
   );
   const [isSending, setIsSending] = useState(false);
+  const [isWaitingForExpert, setIsWaitingForExpert] = useState(false);
 
   const handleSSEEvent = useCallback((event: import("./useClowderSSE").ClowderSSEEvent) => {
     switch (event.type) {
@@ -69,6 +70,10 @@ export function useClowderSession({
           }
           return [...prev, newMessage];
         });
+        // Clear typing indicator when expert responds
+        if (msg.role === "expert") {
+          setIsWaitingForExpert(false);
+        }
         break;
       }
 
@@ -136,6 +141,7 @@ export function useClowderSession({
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticMsg]);
+    setIsWaitingForExpert(true);
 
     try {
       const formData = new FormData();
@@ -147,12 +153,13 @@ export function useClowderSession({
       });
 
       if (!res.ok) {
-        // Remove optimistic message on failure
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+        setIsWaitingForExpert(false);
         console.error("Failed to send message");
       }
     } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      setIsWaitingForExpert(false);
       console.error("Send error:", e);
     } finally {
       setIsSending(false);
@@ -180,6 +187,7 @@ export function useClowderSession({
     activeExpert,
     activeExpertId,
     isSending,
+    isWaitingForExpert,
     sendMessage,
     forceStart,
     setActiveExpert,

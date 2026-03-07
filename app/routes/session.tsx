@@ -77,8 +77,8 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         </div>
       </div>
 
-      {/* Bottom: Chat */}
-      <div className="flex-1 overflow-hidden relative" style={{ zIndex: 1 }}>
+      {/* Bottom: Chat — transform forces GPU layer so WebGL canvas doesn't bleed through */}
+      <div className="flex-1 overflow-hidden relative" style={{ zIndex: 1, transform: "translateZ(0)" }}>
         <SpotlightChat
           messages={messages}
           experts={experts}

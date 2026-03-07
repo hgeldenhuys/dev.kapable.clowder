@@ -278,7 +278,13 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     blockers: poResponse.blockers,
   });
 
-  // Set this expert on stage
+  // Clear previous on_stage expert, then set the new one
+  for (const e of experts) {
+    if (e.status === "on_stage" && e.id !== respondingExpert.id) {
+      const resetStatus = e.confidence >= 0.5 ? "progressing" : "unclear";
+      await updateClowderExpert(sessionId, e.id, { status: resetStatus });
+    }
+  }
   await updateClowderExpert(sessionId, respondingExpert.id, { status: "on_stage" });
 
   // Save the expert's response as a message

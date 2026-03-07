@@ -13,7 +13,7 @@ interface SpotlightChatProps {
   phase: string;
   isWaitingForExpert?: boolean;
   onSend: (content: string) => void;
-  onForceStart: () => void;
+  onForceStart?: () => void;
 }
 
 /**
