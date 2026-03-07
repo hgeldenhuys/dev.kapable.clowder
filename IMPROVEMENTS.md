@@ -1,8 +1,9 @@
 # Clowder Process Improvements
 
-Discovered during end-to-end testing (2026-03-07). Two apps built:
+Discovered during end-to-end testing (2026-03-07). Three apps built:
 1. Neighborhood Tool Library (ideation -> planning)
 2. Couples Habit Tracker (ideation -> planning)
+3. Pet Sitting Marketplace (ideation -> planning)
 
 ## Shipped This Session
 
@@ -10,6 +11,9 @@ Discovered during end-to-end testing (2026-03-07). Two apps built:
 - [x] Luminance-only tonemapping (preserves color direction, prevents wash-out)
 - [x] Markdown rendering in chat messages (bold, italic, code, bullet lists)
 - [x] Error toasts on failed message sends (was silently dropping messages)
+- [x] Multi-orb aurora visualizer (one ShaderCanvas per expert, click-to-foreground)
+- [x] Default to first expert active when none is on_stage
+- [x] Distinct orb colors per expert (cyan, violet, amber)
 
 ## UX Bugs
 
@@ -75,3 +79,11 @@ actual Kapable platform provisioning (create tables, scaffold Connect App).
 The ShaderCanvas creates WebGL context without `preserveDrawingBuffer: true`,
 making programmatic pixel sampling impossible (all reads return zeros). Not
 blocking for users but makes automated visual testing difficult.
+
+### Browser-typed messages may silently vanish
+When typing via browser automation (or potentially fast human typing), pressing
+Enter can clear the input without the optimistic message appearing in the chat.
+No error toast shown — different from the API failure case. Likely a race
+condition between React state update from input change and form submit. The
+curl API path works reliably. Investigate whether `sendMessage` reads stale
+`content` from the input ref vs state.
