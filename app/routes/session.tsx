@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/session";
 import { getClowderSession, listClowderMessages } from "~/lib/api.server";
-import { OrbScene } from "~/components/orbs/OrbScene";
+import { AuraVisualizer } from "~/components/aura/AuraVisualizer";
 import { SpotlightChat } from "~/components/chat/SpotlightChat";
 import { useClowderSession } from "~/hooks/useClowderSession";
 import type { OrbData } from "~/components/orbs/types";
@@ -68,10 +68,11 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
             <span className="text-xs text-muted-foreground capitalize">{session.phase}</span>
           </div>
           <div className="flex-1 min-h-0">
-            <OrbScene
+            <AuraVisualizer
               orbs={orbs}
               activeOrbId={activeExpertId}
               onOrbClick={setActiveExpert}
+              isWaitingForExpert={isWaitingForExpert}
             />
           </div>
         </div>
