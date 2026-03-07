@@ -40,6 +40,7 @@ try {
 
 const server = Bun.serve({
   port: PORT,
+  hostname: "0.0.0.0",
   idleTimeout: 120,
 
   async fetch(req) {
