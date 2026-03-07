@@ -17,7 +17,6 @@
  * a persistent Claude session (KAIT) for true statefulness.
  */
 
-import { execSync } from "child_process";
 import {
   PO_SYSTEM_PROMPT,
   buildPOPrompt,
@@ -28,6 +27,7 @@ import {
   updateClowderExpert,
   createClowderExpert,
   listClowderExperts,
+  listClowderMessages,
   getClowderSession,
   type ClowderMessage,
   type ClowderExpert,
@@ -107,44 +107,56 @@ async function spawnSpecialists(
 }
 
 /**
- * Call Claude headless as the PO agent.
- * Returns a parsed POResponse or null if Claude is not available.
+ * Call the PO agent via OpenRouter API.
+ * Uses Gemini Flash for fast, cheap responses.
+ * Falls back to null if API key not configured or call fails.
  */
 async function callPOAgent(prompt: string): Promise<POResponse | null> {
-  const fullPrompt = `${PO_SYSTEM_PROMPT}\n\n---\n\n${prompt}`;
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.warn("OPENROUTER_API_KEY not set — using fallback responses");
+    return null;
+  }
 
   try {
-    const text = execSync(
-      `claude --dangerously-skip-permissions --output-format json`,
-      {
-        input: fullPrompt,
-        encoding: "utf8",
-        timeout: 60000,
-        stdio: ["pipe", "pipe", "pipe"],
-      }
-    ).trim();
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://clowder.kapable.run",
+        "X-Title": "Clowder AI App Builder",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.0-flash-001",
+        messages: [
+          { role: "system", content: PO_SYSTEM_PROMPT },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 500,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
 
-    // Try to parse the JSON response
-    if (!text) return null;
-
-    // Claude --output-format json wraps in {"type":"result","result":"..."}
-    let jsonText = text;
-    try {
-      const wrapper = JSON.parse(text) as { type?: string; result?: string };
-      if (wrapper.result) {
-        jsonText = wrapper.result;
-      }
-    } catch {
-      // Already raw JSON
+    if (!res.ok) {
+      console.error("OpenRouter API error:", res.status, await res.text());
+      return null;
     }
 
-    // Extract JSON object from the response (may have preamble)
-    const match = jsonText.match(/\{[\s\S]*\}/);
+    const data = await res.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) return null;
+
+    // Extract JSON object from the response (may have preamble/markdown)
+    const match = text.match(/\{[\s\S]*\}/);
     if (!match) return null;
 
     return JSON.parse(match[0]) as POResponse;
   } catch (e) {
-    console.error("Claude subprocess error:", e);
+    console.error("OpenRouter API error:", e);
     return null;
   }
 }
@@ -206,12 +218,19 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     experts = await spawnCoreExperts(sessionId);
   }
 
+  // Load recent messages for conversation context
+  const allMessages = await listClowderMessages(sessionId);
+  const recentMessages = allMessages.slice(-10).map((m) => {
+    const expertName = m.expert_id
+      ? experts.find((e) => e.id === m.expert_id)?.name
+      : undefined;
+    return { role: m.role, content: m.content, expertName };
+  });
+
   // Build the PO prompt with session context
-  // For simplicity, we just load the experts' current state
-  // (messages are loaded by the PO prompt builder)
   const prompt = buildPOPrompt({
     sessionDescription: session.description ?? "Unknown app",
-    recentMessages: [], // TODO: load recent messages for full context
+    recentMessages,
     experts: experts.map((e) => ({
       name: e.name,
       domain: e.domain,
