@@ -214,6 +214,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec3 color = (-pp + bloom * 3.0 * uBloom) * 1.2;
   color += (randFibo(fragCoord).x - 0.5) / 255.0;
   color = Tonemap(color);
+
+  // Boost saturation — tonemapping washes out color at high bloom
+  float gray = dot(color, vec3(0.299, 0.587, 0.114));
+  color = mix(vec3(gray), color, 2.5);
+  color = max(color, 0.0);
+
   float alpha = luma(color) * uMix;
   fragColor = vec4(color * uMix, alpha);
 }`;
