@@ -62,6 +62,9 @@ const server = Bun.serve({
         startup_error: startupError,
         build_exists: await Bun.file(`${BUILD_DIR}/server/index.js`).exists(),
         env_file_exists: await Bun.file(".env").exists(),
+        has_openrouter_key: !!process.env.OPENROUTER_API_KEY,
+        has_admin_key: !!process.env.KAPABLE_ADMIN_KEY,
+        env_keys: Object.keys(process.env).filter(k => !k.startsWith("_") && !k.startsWith("npm")),
       }, null, 2), { headers: { "Content-Type": "application/json" } });
     }
 
