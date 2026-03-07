@@ -68,6 +68,19 @@ function setUniform(
   }
 }
 
+interface GLState {
+  gl: WebGLRenderingContext;
+  prog: WebGLProgram;
+  buf: WebGLBuffer;
+  posAttr: number;
+  customNames: string[];
+  builtins: Record<string, { glsl: string; needed: boolean }>;
+  animId: number;
+  timer: number;
+  lastTime: number;
+  ro: ResizeObserver;
+}
+
 export function ShaderCanvas({
   fs,
   uniforms: propUniforms,
@@ -77,6 +90,7 @@ export function ShaderCanvas({
 }: ShaderCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const uniformsRef = useRef(propUniforms);
+  const glStateRef = useRef<GLState | null>(null);
 
   // Keep uniforms ref in sync so animation loop picks up latest values
   useEffect(() => {
@@ -84,24 +98,23 @@ export function ShaderCanvas({
   }, [propUniforms]);
 
   useEffect(() => {
+    // Guard: only initialize once per canvas element
+    if (glStateRef.current) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const gl = canvas.getContext("webgl", {
       premultipliedAlpha: false,
       alpha: true,
-      preserveDrawingBuffer: true,
     }) as WebGLRenderingContext | null;
-    if (!gl) { console.error("ShaderCanvas: WebGL context creation failed"); return; }
+    if (!gl) return;
 
     gl.getExtension("OES_standard_derivatives");
     gl.clearColor(0, 0, 0, 0);
-    gl.clearDepth(1.0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
 
     // Buffers
-    const buf = gl.createBuffer();
+    const buf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(
       gl.ARRAY_BUFFER,
@@ -116,7 +129,7 @@ export function ShaderCanvas({
     };
 
     // Detect which built-ins and custom uniforms the shader uses
-    let fragSrc = `precision highp float;\n#define DPR ${dpr.toFixed(1)}\n`;
+    let fragSrc = `precision highp float;\n`;
     const customNames: string[] = [];
 
     for (const [name, info] of Object.entries(builtins)) {
@@ -153,17 +166,14 @@ export function ShaderCanvas({
     }
 
     const prog = gl.createProgram()!;
-    const vs = compile(gl.VERTEX_SHADER, BASIC_VS);
-    const frag = compile(gl.FRAGMENT_SHADER, fragSrc);
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, frag);
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, BASIC_VS));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fragSrc));
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
       console.error("ShaderCanvas link error:", gl.getProgramInfoLog(prog));
       return;
     }
     gl.useProgram(prog);
-    console.log("ShaderCanvas: shader compiled & linked, uniforms:", customNames.join(", "));
 
     const posAttr = gl.getAttribLocation(prog, "aVertexPosition");
     gl.enableVertexAttribArray(posAttr);
@@ -177,6 +187,7 @@ export function ShaderCanvas({
       canvas.width = w;
       canvas.height = h;
       if (builtins.iResolution.needed) {
+        gl.useProgram(prog);
         const loc = gl.getUniformLocation(prog, "iResolution");
         gl.uniform2fv(loc, [w, h]);
       }
@@ -185,30 +196,34 @@ export function ShaderCanvas({
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // Animation
-    let animId: number;
-    let timer = 0;
-    let lastTime = 0;
-    let frameCount = 0;
+    // Store state
+    const state: GLState = {
+      gl, prog, buf, posAttr, customNames, builtins,
+      animId: 0, timer: 0, lastTime: 0, ro,
+    };
+    glStateRef.current = state;
 
+    // Animation loop
     function draw(timestamp: number) {
-      if (!gl) return;
-      const delta = lastTime ? (timestamp - lastTime) / 1000 : 0;
-      lastTime = timestamp;
-      timer += delta;
-      frameCount++;
-      if (frameCount === 1 || frameCount === 60) {
-        console.log(`ShaderCanvas: frame ${frameCount}, timer=${timer.toFixed(2)}, buffer=${gl.drawingBufferWidth}x${gl.drawingBufferHeight}`);
-      }
+      const s = glStateRef.current;
+      if (!s) return;
+      const { gl, prog, buf, posAttr, customNames, builtins } = s;
+
+      const delta = s.lastTime ? (timestamp - s.lastTime) / 1000 : 0;
+      s.lastTime = timestamp;
+      s.timer += delta;
+
+      // Ensure this program is active (guards against stale GL state)
+      gl.useProgram(prog);
 
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.clear(gl.COLOR_BUFFER_BIT);
       gl.bindBuffer(gl.ARRAY_BUFFER, buf);
       gl.vertexAttribPointer(posAttr, 3, gl.FLOAT, false, 0, 0);
 
       // Built-in uniforms
       if (builtins.iTime.needed) {
-        gl.uniform1f(gl.getUniformLocation(prog, "iTime"), timer);
+        gl.uniform1f(gl.getUniformLocation(prog, "iTime"), s.timer);
       }
 
       // Custom uniforms — read from ref for latest values
@@ -223,18 +238,19 @@ export function ShaderCanvas({
       }
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      animId = requestAnimationFrame(draw);
+      s.animId = requestAnimationFrame(draw);
     }
 
-    animId = requestAnimationFrame(draw);
+    state.animId = requestAnimationFrame(draw);
 
     return () => {
-      cancelAnimationFrame(animId);
-      ro.disconnect();
-      // Don't call loseContext() — React re-runs effects on hydration,
-      // and a lost context can't be recovered on the same canvas.
+      if (glStateRef.current) {
+        cancelAnimationFrame(glStateRef.current.animId);
+        glStateRef.current.ro.disconnect();
+        glStateRef.current = null;
+      }
     };
-  }, [fs, dpr]); // Only re-init on shader source or DPR change
+  }, [fs, dpr]);
 
   return (
     <canvas

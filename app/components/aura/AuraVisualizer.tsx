@@ -36,16 +36,17 @@ function numToHex(n: number): string {
 function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: boolean) {
   const activeOrb = orbs.find((o) => o.id === activeOrbId);
 
-  // Params calibrated to LiveKit's proven defaults.
-  // Key: speed 10-70, amplitude 0.5-1.2, bloom 0-0.3, brightness 1.0-1.5
+  // Standalone pixel test showed bloom is the key brightness driver:
+  //   bloom=0.0 → ~2/255, bloom=0.2 → ~43/255, bloom=1.0 → ~150/255
+  // uMix (brightness) is a linear multiplier on top.
   let speed = 10;
   let amplitude = 1.2;
   let frequency = 0.4;
   let scale = 0.2;
-  let brightness = 1.0;
+  let brightness = 1.5;
   let blur = 0.2;
   let colorShift = 0.05;
-  let bloom = 0.0;
+  let bloom = 0.6;
   let color = [0.12, 0.84, 0.98]; // cyan
 
   if (!activeOrb) {
@@ -54,8 +55,8 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     amplitude = 1.2;
     frequency = 0.4;
     scale = 0.2;
-    brightness = 1.0;
-    bloom = 0.0;
+    brightness = 1.5;
+    bloom = 0.5;
     colorShift = 0.05;
     color = [0.3, 0.3, 0.6]; // muted purple
     return { speed, amplitude, frequency, scale, brightness, blur, colorShift, bloom, color };
@@ -66,31 +67,31 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
   color = hexToRgb(hexColor);
 
   if (isWaiting) {
-    // Expert is thinking — pulsing, faster (LiveKit "thinking" state)
+    // Expert is thinking — pulsing, faster
     speed = 30;
     amplitude = 0.5;
     frequency = 1.0;
     scale = 0.3;
-    brightness = 1.5;
-    bloom = 0.1;
+    brightness = 2.0;
+    bloom = 0.8;
     colorShift = 0.1;
   } else if (activeOrb.status === "on_stage") {
-    // Active expert, responding (LiveKit "listening" state)
+    // Active expert, responding — energetic
     speed = 20;
     amplitude = 1.0;
     frequency = 0.7;
     scale = 0.3;
     brightness = 1.5;
-    bloom = 0.0;
+    bloom = 0.6;
     colorShift = 0.05;
   } else if (activeOrb.status === "building") {
-    // Building — high energy (LiveKit "speaking" state)
+    // Building — high energy
     speed = 70;
     amplitude = 0.75;
     frequency = 1.25;
     scale = 0.3;
-    brightness = 1.5;
-    bloom = 0.1;
+    brightness = 2.0;
+    bloom = 1.0;
     colorShift = 0.1;
   } else if (activeOrb.confidence >= 0.5) {
     // Progressing — steady glow
@@ -98,17 +99,17 @@ function getShaderParams(orbs: OrbData[], activeOrbId?: string, isWaiting?: bool
     amplitude = 0.8;
     frequency = 0.5;
     scale = 0.25;
-    brightness = 1.2;
-    bloom = 0.0;
+    brightness = 1.5;
+    bloom = 0.5;
     colorShift = 0.05;
   } else {
-    // Unclear — dim, slow (LiveKit "idle" state)
+    // Unclear — dim, slow
     speed = 10;
     amplitude = 1.2;
     frequency = 0.4;
     scale = 0.2;
-    brightness = 1.0;
-    bloom = 0.0;
+    brightness = 1.2;
+    bloom = 0.4;
     colorShift = 0.05;
   }
 
