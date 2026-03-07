@@ -8,12 +8,14 @@
 import {
   createSession,
   getSession,
+  listSessions,
   listExperts,
   createExpert,
   updateExpert,
   listMessages,
   createMessage,
   setForceStarted,
+  updateSessionPhase as dbUpdateSessionPhase,
   sessionToApi,
   expertToApi,
   messageToApi,
@@ -99,6 +101,16 @@ export async function createClowderSession(body: {
 }): Promise<ClowderSession> {
   const row = createSession(body);
   return sessionToApi(row) as ClowderSession;
+}
+
+export async function listClowderSessions(): Promise<ClowderSession[]> {
+  const rows = listSessions();
+  return rows.map(sessionToApi) as ClowderSession[];
+}
+
+export async function updateSessionPhase(sessionId: string, phase: ClowderSession["phase"]): Promise<void> {
+  dbUpdateSessionPhase(sessionId, phase);
+  emitPhaseChanged(sessionId, phase);
 }
 
 export async function getClowderSession(sessionId: string): Promise<{

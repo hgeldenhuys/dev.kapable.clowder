@@ -120,6 +120,11 @@ export function updateSessionPhase(id: string, phase: string): void {
   db.prepare("UPDATE clowder_sessions SET phase = ?, updated_at = datetime('now') WHERE id = ?").run(phase, id);
 }
 
+export function listSessions(): SessionRow[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM clowder_sessions ORDER BY updated_at DESC").all() as SessionRow[];
+}
+
 export function setForceStarted(id: string): void {
   const db = getDb();
   db.prepare(

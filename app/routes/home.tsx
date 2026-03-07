@@ -1,6 +1,11 @@
-import { redirect } from "react-router";
+import { Link, redirect } from "react-router";
 import type { Route } from "./+types/home";
-import { createClowderSession } from "~/lib/api.server";
+import { createClowderSession, listClowderSessions } from "~/lib/api.server";
+
+export async function loader() {
+  const sessions = await listClowderSessions();
+  return { sessions };
+}
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -14,7 +19,17 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(`/session/${session.id}`);
 }
 
-export default function HomePage() {
+const phaseColors: Record<string, string> = {
+  assembling: "text-yellow-400",
+  ideating: "text-blue-400",
+  planning: "text-purple-400",
+  building: "text-green-400",
+  delivered: "text-emerald-400",
+};
+
+export default function HomePage({ loaderData }: Route.ComponentProps) {
+  const { sessions } = loaderData;
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="max-w-2xl w-full text-center space-y-8">
@@ -47,6 +62,35 @@ export default function HomePage() {
           A clowder is a group of cats — and a team of expert AI agents that will
           build your app together.
         </p>
+
+        {sessions.length > 0 && (
+          <div className="mt-8 text-left space-y-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Recent Sessions
+            </h2>
+            <div className="space-y-2">
+              {sessions.map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/session/${s.id}`}
+                  className="block p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground truncate">
+                      {s.name}
+                    </span>
+                    <span className={`text-xs font-medium uppercase tracking-wide ${phaseColors[s.phase] ?? "text-muted-foreground"}`}>
+                      {s.phase}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

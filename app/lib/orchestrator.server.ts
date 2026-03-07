@@ -29,6 +29,7 @@ import {
   listClowderExperts,
   listClowderMessages,
   getClowderSession,
+  updateSessionPhase,
   type ClowderMessage,
   type ClowderExpert,
 } from "./api.server";
@@ -298,5 +299,39 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     });
   }
 
+  // Phase transitions
+  await transitionPhase(sessionId, session.phase, experts, poResponse);
+
   return { expertMessage, updatedExpert };
+}
+
+/**
+ * Evaluate and apply phase transitions based on expert state.
+ *
+ * assembling → ideating: when experts exist and first exchange happened
+ * ideating → planning: when all core experts ≥ 50% confidence
+ */
+async function transitionPhase(
+  sessionId: string,
+  currentPhase: string,
+  experts: ClowderExpert[],
+  latestResponse: POResponse,
+) {
+  if (currentPhase === "assembling") {
+    // Move to ideating once experts are responding
+    await updateSessionPhase(sessionId, "ideating");
+  } else if (currentPhase === "ideating") {
+    // Move to planning when all core experts are at least 50% confident
+    const coreExperts = experts.filter((e) => e.role === "core");
+    const allProgressing = coreExperts.length > 0 && coreExperts.every((e) => {
+      // Use latest response confidence for the responding expert
+      const conf = e.name.toLowerCase() === latestResponse.responding_expert.toLowerCase()
+        ? latestResponse.confidence
+        : e.confidence;
+      return conf >= 0.5;
+    });
+    if (allProgressing) {
+      await updateSessionPhase(sessionId, "planning");
+    }
+  }
 }
