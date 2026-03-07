@@ -7,7 +7,7 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "postinstall": "rm -rf node_modules/.vite"
+    "postinstall": "rm -rf node_modules/.vite && if [ -f /etc/systemd/system/kapable-app.service ]; then printf '#!/bin/bash\\nset -e\\nexport PATH=/usr/local/bin:/root/.bun/bin:$PATH\\ncd /app\\nexec bun start\\n' > /app/start-container.sh && chmod +x /app/start-container.sh && mkdir -p /etc/systemd/system/kapable-app.service.d && printf '[Service]\\nExecStart=\\nExecStart=/app/start-container.sh\\nWorkingDirectory=/app\\n' > /etc/systemd/system/kapable-app.service.d/start-cmd.conf && systemctl daemon-reload && echo 'Systemd drop-in written'; fi"
   },
   "dependencies": {
     "@kapable/sdk": "file:../dev.kapable.sdk",
