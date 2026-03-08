@@ -323,8 +323,9 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     });
   }
 
-  // Phase transitions
-  await transitionPhase(sessionId, session.phase, experts, poResponse);
+  // Phase transitions — reload experts from DB since we just updated confidences
+  const freshExperts = await listClowderExperts(sessionId);
+  await transitionPhase(sessionId, session.phase, freshExperts, poResponse);
 
   return { expertMessage, updatedExpert };
 }
@@ -346,14 +347,9 @@ async function transitionPhase(
     await updateSessionPhase(sessionId, "ideating");
   } else if (currentPhase === "ideating") {
     // Move to planning when all core experts are at least 50% confident
+    // experts should be freshly loaded from DB with up-to-date confidence values
     const coreExperts = experts.filter((e) => e.role === "core");
-    const allProgressing = coreExperts.length > 0 && coreExperts.every((e) => {
-      // Use latest response confidence for the responding expert
-      const conf = e.name.toLowerCase() === latestResponse.responding_expert.toLowerCase()
-        ? latestResponse.confidence
-        : e.confidence;
-      return conf >= 0.5;
-    });
+    const allProgressing = coreExperts.length > 0 && coreExperts.every((e) => e.confidence >= 0.5);
     if (allProgressing) {
       await updateSessionPhase(sessionId, "planning");
     }
