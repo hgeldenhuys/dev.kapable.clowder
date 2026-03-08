@@ -89,23 +89,37 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             </h2>
             <div className="space-y-2">
               {sessions.map((s) => (
-                <Link
+                <div
                   key={s.id}
-                  to={`/session/${s.id}`}
-                  className="block p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
+                  className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {s.name}
-                    </span>
-                    <span className={`text-xs font-medium uppercase tracking-wide ${phaseColors[s.phase] ?? "text-muted-foreground"}`}>
-                      {s.phase}
-                    </span>
+                  <Link to={`/session/${s.id}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {s.name}
+                      </span>
+                      <span className={`text-xs font-medium uppercase tracking-wide ${phaseColors[s.phase] ?? "text-muted-foreground"}`}>
+                        {s.phase}
+                      </span>
+                    </div>
+                  </Link>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    {s.app_url && (
+                      <a
+                        href={s.app_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Visit app →
+                      </a>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
