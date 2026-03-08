@@ -572,3 +572,41 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** 169/300 (56%), ~10 sessions headroom (purge available)
 - **Flow:** Single-request, ~15s, fully autonomous, self-cleaning
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 15 — 2026-03-08
+
+### Goal: Build another app, add auto-purge
+
+### Iteration 42: Lost & Found Network — 8.8s build (sub-10s!)
+- Session `22da281a` → **10 tables**: users, posts, post_photos, matches, conversations, resolution_confirmations, category_subscriptions, neighborhoods, community_stats, moderation_queue
+- Project provisioned: `13eff774-c9c8-46ff-be65-f29a089affac`
+- **Total time: 8.8 seconds** (spec gen: 7.4s)
+- **First sub-10-second build!** 6.4x faster than the original 56s baseline
+- Approaching theoretical floor (~7s = 1.3s orchestrator + 5s LLM + 0.5s provisioning)
+
+### Iteration 43: Auto-purge after builds
+- Added `purgeStale()` call at end of `runBuildPhase()` (fire-and-forget)
+- Stale sessions now cleaned automatically after every successful build
+- No manual `/api/purge` needed (endpoint still available for ad-hoc use)
+- Commit: `549ee2f`
+
+### Speed Evolution
+| Round | Time | Model | Prompt | Notes |
+|-------|------|-------|--------|-------|
+| 1-8 | ~56s | Sonnet | Full spec | Baseline |
+| 9 | ~70s | Sonnet | Full spec | Fall-through fix |
+| 10 | ~23s | Flash | Full spec | Model switch |
+| 11-12 | ~19-21s | Flash | Full spec | Stabilized |
+| 13 | ~15s | Flash | Slim | Prompt slimming |
+| 14 | ~15s | Flash | Slim | Consistent |
+| 15 | **~9s** | Flash | Slim | **Sub-10s, 6.4x baseline** |
+
+### Cumulative Stats (Rounds 1-15)
+- **Total apps built:** 22 (+lost & found network)
+- **Total tables provisioned:** ~194
+- **Fastest build:** 8.8 seconds (6.4x improvement over baseline)
+- **Pool:** Self-cleaning (auto-purge after each build)
+- **Flow:** Single-request, sub-10s possible, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
