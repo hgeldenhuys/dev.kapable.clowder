@@ -60,7 +60,7 @@ async function apiList(table: string, limit = 300): Promise<Record<string, unkno
   if (!res.ok) return [];
   const data = await res.json() as { data?: Record<string, unknown>[] };
   // jsonb mode stores all tables in a single pool — filter by _type discriminator
-  return (data.data ?? []).filter((r) => r._type === table || !r._type);
+  return (data.data ?? []).filter((r) => r._type === table);
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +132,9 @@ export async function updateSessionPhase(id: string, phase: string): Promise<voi
 export async function listSessions(limit = 10): Promise<SessionRow[]> {
   // Shared jsonb pool requires over-fetching then filtering by _type
   const rows = await apiList("clowder_sessions");
-  return rows.map(toSessionRow).slice(0, limit);
+  return rows.map(toSessionRow)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, limit);
 }
 
 export async function updateSessionApp(id: string, appId: string, appUrl: string): Promise<void> {
