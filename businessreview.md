@@ -26,6 +26,35 @@
 **Key Outcome:** Clowder build phase now provisions a real Kapable project with tables AND scaffolds/deploys a Connect App frontend. The full ideation → planning → build → deploy loop is code-complete.
 **Next:** Debug table provisioning (PUT /v1/_meta/tables returns errors), then wire scaffold+deploy.
 
+## E2E Testing Round 2 — 2026-03-08
+
+### Iteration 5: Fixed table provisioning (3 bugs)
+- **col_type not type** — Platform API expects `col_type` field, not `type`
+- **nullable required** — `nullable` is a required field on ColumnDef
+- **jsonb mode** — `typed` mode has a server-side DDL error (notify trigger?), `jsonb` works
+- **Filter system columns** — Don't send `id`/`created_at`/`updated_at` (platform auto-adds them)
+- **Error logging** — Added console.error instead of silent catch
+- Commit: `3ac80a9`
+
+### Iteration 6: SUCCESS — Full table provisioning on production!
+- Session: `f84ea4d3-e9bf-47a9-8e4f-1df16989a232`
+- Project created: `e3d178ee-b1ea-45a2-a9ad-c6648a61cd4e`
+- **11 tables created**: users, recipes, ingredients, recipe_ingredients, photos, ratings, comments, saves, follows, tags, recipe_tags
+- Scaffold generated successfully (LLM produced app code)
+- GitHub push failed — production container lacks `gh` CLI/credentials
+- Deploy skipped (depends on GitHub push)
+
+### Iteration 7: Fixed API session creation
+- `api.clowder-sessions` endpoint was missing `orchestrate()` + initial message send
+- Mirrored the `home.tsx` action logic
+
+### Remaining Issues
+1. **GitHub push from production** — Container needs `gh` CLI or git credentials for scaffold deploy
+2. **Typed storage mode** — `PUT _meta/tables` with `typed` returns DATABASE_ERROR (investigate when SSH available)
+3. **React form_input** — Browser automation `form_input` doesn't trigger React onChange (used curl workaround)
+
+---
+
 ## E2E Testing — 2026-03-08
 
 ### Iteration 1: Discovered `claude` CLI not available on production container
