@@ -536,3 +536,39 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** 190/300 (63%), ~9 sessions left
 - **Flow:** Single-request, ~15s, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 14 — 2026-03-08
+
+### Goal: Build another app, add pool maintenance
+
+### Iteration 40: Childcare Co-op — 15.4s, 15 tables (new table record!)
+- Session `7054a9e6` → **15 tables**: users, families, children, certifications, coop_groups, group_memberships, sitting_slots, care_requests, matched_sessions, credit_ledger, session_logs, ratings, emergency_broadcasts, announcements, messages
+- Project provisioned: `7b6d1a3d-650b-4ad0-9dff-586d1d1a570c`
+- **15.4s total** — consistent with slim prompt
+- **15 tables = new record** for most tables in a single build
+
+### Iteration 41: Pool purge endpoint
+- **Problem:** Pool at 67% with 5 stale sessions (assembling/ideating/planning) consuming 33 rows
+- **Fix:** Added `POST /api/purge` endpoint that deletes stale sessions + orphaned experts and messages
+- Added `apiDelete()` function to db.server.ts
+- `purgeStale()` identifies sessions in non-terminal phases and cascading-deletes all related data
+- **Result:** Purged 5 sessions, 33 rows. Pool went from 202 → 169 (67% → 56%)
+- Commit: `bdbecac`
+
+### Pool Before/After Purge
+| Metric | Before | After |
+|--------|--------|-------|
+| Total rows | 202 | 169 |
+| Utilization | 67% | 56% |
+| Sessions headroom | ~8 | ~10 |
+
+### Cumulative Stats (Rounds 1-14)
+- **Total apps built:** 21 (+childcare co-op)
+- **Total tables provisioned:** ~184
+- **Most tables in one build:** 15 (childcare co-op)
+- **Fastest build:** 14.6 seconds
+- **Pool:** 169/300 (56%), ~10 sessions headroom (purge available)
+- **Flow:** Single-request, ~15s, fully autonomous, self-cleaning
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
