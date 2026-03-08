@@ -338,8 +338,18 @@ export async function listMessages(sessionId: string): Promise<MessageRow[]> {
 
 export async function purgeStale(): Promise<{ sessions: number; rows: number }> {
   const allRows = await apiList("clowder_sessions");
-  const stalePhases = new Set(["assembling", "ideating", "planning"]);
-  const staleSessions = allRows.filter((r) => stalePhases.has(String(r.phase ?? "")));
+
+  // Always purge stuck sessions (incomplete phases)
+  const stuckPhases = new Set(["assembling", "ideating", "planning"]);
+  const stuckSessions = allRows.filter((r) => stuckPhases.has(String(r.phase ?? "")));
+
+  // Keep only the 5 most recent delivered/building sessions, purge the rest
+  const completedSessions = allRows
+    .filter((r) => r.phase === "delivered" || r.phase === "building")
+    .sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+  const excessCompleted = completedSessions.slice(5);
+
+  const staleSessions = [...stuckSessions, ...excessCompleted];
   const staleIds = new Set(staleSessions.map((r) => String(r.id)));
 
   if (staleIds.size === 0) return { sessions: 0, rows: 0 };

@@ -728,7 +728,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
   summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
 
   // Update session phase based on outcome
-  const finalPhase = deployResult ? "delivered" : provisionResult ? "building" : "planning";
+  // "delivered" when provisioned (even without scaffold deploy — project + tables are the core value)
+  const finalPhase = provisionResult ? "delivered" : "planning";
   await updateSessionPhase(sessionId, finalPhase);
 
   await sendClowderMessage(sessionId, {
