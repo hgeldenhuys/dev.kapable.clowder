@@ -33,7 +33,7 @@ interface BuildArtifact {
  * Call an LLM via OpenRouter API.
  * Uses OPENROUTER_API_KEY from env, falls back to empty string.
  */
-async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?: number }): Promise<string> {
+async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?: number; model?: string }): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY ?? "";
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
 
@@ -48,7 +48,7 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4",
+        model: options?.model ?? "google/gemini-2.0-flash-001",
         max_tokens: options?.maxTokens ?? 8192,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -339,7 +339,7 @@ Required files:
 Plus route files for each table's CRUD pages.`;
 
   try {
-    const output = await callLLM(scaffoldPrompt, { maxTokens: 16384, timeout: 180000 });
+    const output = await callLLM(scaffoldPrompt, { maxTokens: 16384, timeout: 180000, model: "anthropic/claude-sonnet-4" });
 
     if (output.length < 200) {
       await sendProgress("Scaffold generation produced insufficient output. Skipping deploy.");
