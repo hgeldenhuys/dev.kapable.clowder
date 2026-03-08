@@ -9,11 +9,19 @@ import { Database } from "bun:sqlite";
 import { randomUUID } from "node:crypto";
 
 // Store DB in /app/data for container persistence (survives deploys).
-// Falls back to ./clowder.db if /app/data doesn't exist (local dev).
-import { existsSync } from "node:fs";
+// Creates the directory if running in a container context (/app exists).
+// Falls back to ./clowder.db for local dev.
+import { existsSync, mkdirSync } from "node:fs";
 const PERSIST_DIR = "/app/data";
-const DB_PATH = process.env.CLOWDER_DB_PATH
-  ?? (existsSync(PERSIST_DIR) ? `${PERSIST_DIR}/clowder.db` : "./clowder.db");
+function resolvDbPath(): string {
+  if (process.env.CLOWDER_DB_PATH) return process.env.CLOWDER_DB_PATH;
+  // In containers, /app is the app root. Create /app/data if /app exists.
+  if (existsSync("/app") && !existsSync(PERSIST_DIR)) {
+    try { mkdirSync(PERSIST_DIR, { recursive: true }); } catch { /* fallback below */ }
+  }
+  return existsSync(PERSIST_DIR) ? `${PERSIST_DIR}/clowder.db` : "./clowder.db";
+}
+const DB_PATH = resolvDbPath();
 
 let _db: Database | null = null;
 

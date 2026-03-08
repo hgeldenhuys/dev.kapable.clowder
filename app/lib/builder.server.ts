@@ -18,6 +18,7 @@ import {
   listClowderMessages,
   sendClowderMessage,
   updateClowderExpert,
+  updateSessionPhase,
   getApiBaseUrl,
 } from "./api.server";
 import { updateSessionApp } from "./db.server";
@@ -729,11 +730,15 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
   summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
 
+  // Update session phase based on outcome
+  const finalPhase = deployResult ? "delivered" : provisionResult ? "building" : "planning";
+  await updateSessionPhase(sessionId, finalPhase);
+
   await sendClowderMessage(sessionId, {
     content: summaryLines.join("\n"),
     role: "system",
     metadata: {
-      phase: deployResult ? "delivered" : "building",
+      phase: finalPhase,
       artifacts_count: artifacts.length,
       provisioned: !!provisionResult,
       tables_created: provisionResult?.tables.length ?? 0,
