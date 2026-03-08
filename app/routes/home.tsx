@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, redirect } from "react-router";
 import type { Route } from "./+types/home";
 import { createClowderSession, listClowderSessions, sendClowderMessage } from "~/lib/api.server";
@@ -37,6 +38,7 @@ const phaseColors: Record<string, string> = {
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
   const { sessions } = loaderData;
+  const [wordCount, setWordCount] = useState(0);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -52,12 +54,21 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
 
         <form method="post" action="?index" className="space-y-4">
-          <textarea
-            name="description"
-            placeholder="Describe your app idea… (e.g. 'A marketplace for freelance accountants where clients post jobs and accountants bid on them')"
-            className="w-full min-h-[140px] p-4 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary text-base"
-            required
-          />
+          <div className="relative">
+            <textarea
+              name="description"
+              placeholder="Describe your app idea in detail — who are the users, what do they do, what data is needed? (200+ words triggers instant auto-build)"
+              className="w-full min-h-[140px] p-4 pb-8 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary text-base"
+              required
+              onChange={(e) => {
+                const words = e.target.value.trim().split(/\s+/).filter(Boolean).length;
+                setWordCount(words);
+              }}
+            />
+            <span className={`absolute bottom-2 right-3 text-xs ${wordCount >= 200 ? "text-green-400" : "text-muted-foreground"}`}>
+              {wordCount} word{wordCount !== 1 ? "s" : ""}{wordCount >= 200 ? " — instant build!" : ""}
+            </span>
+          </div>
           <button
             type="submit"
             className="w-full py-4 px-8 rounded-xl bg-primary text-primary-foreground font-semibold text-lg hover:opacity-90 transition-opacity"
