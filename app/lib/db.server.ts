@@ -53,7 +53,7 @@ async function apiPatch(table: string, id: string, data: Record<string, unknown>
   return res.json() as Promise<Record<string, unknown>>;
 }
 
-async function apiList(table: string, limit = 100): Promise<Record<string, unknown>[]> {
+async function apiList(table: string, limit = 300): Promise<Record<string, unknown>[]> {
   const res = await fetch(`${API_BASE}/v1/data?table=${table}&limit=${limit}`, {
     headers: headers(),
   });
@@ -131,7 +131,7 @@ export async function updateSessionPhase(id: string, phase: string): Promise<voi
 
 export async function listSessions(limit = 10): Promise<SessionRow[]> {
   // Shared jsonb pool requires over-fetching then filtering by _type
-  const rows = await apiList("clowder_sessions", 100);
+  const rows = await apiList("clowder_sessions");
   return rows.map(toSessionRow).slice(0, limit);
 }
 
@@ -223,7 +223,7 @@ export async function getExpert(id: string): Promise<ExpertRow | null> {
 export async function listExperts(sessionId: string): Promise<ExpertRow[]> {
   // Data API jsonb mode doesn't support column filtering — fetch all and filter client-side.
   // Clowder has at most ~50 experts across all sessions, so this is fine.
-  const rows = await apiList("clowder_experts", 100);
+  const rows = await apiList("clowder_experts");
   return rows
     .filter((r) => r.session_id === sessionId)
     .map(toExpertRow)
@@ -315,7 +315,7 @@ export async function getMessage(id: string): Promise<MessageRow | null> {
 
 export async function listMessages(sessionId: string): Promise<MessageRow[]> {
   // Client-side filtering — message count per session is typically <50
-  const rows = await apiList("clowder_messages", 100);
+  const rows = await apiList("clowder_messages");
   return rows
     .filter((r) => r.session_id === sessionId)
     .map(toMessageRow)
