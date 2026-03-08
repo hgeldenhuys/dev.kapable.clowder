@@ -20,7 +20,6 @@ import {
   sendClowderMessage,
   updateClowderExpert,
   getApiBaseUrl,
-  buildHeaders,
 } from "./api.server";
 import { updateSessionApp } from "./db.server";
 
@@ -99,13 +98,20 @@ function parseDataModel(spec: string): TableDef[] {
 // Platform provisioning (BL-CLW-001)
 // ---------------------------------------------------------------------------
 
+function platformHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    "x-api-key": process.env.KAPABLE_ADMIN_KEY ?? "",
+  };
+}
+
 async function provisionProject(
   sessionName: string
 ): Promise<{ projectId: string; apiKey: string }> {
   const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
   const res = await fetch(`${getApiBaseUrl()}/v1/projects`, {
     method: "POST",
-    headers: buildHeaders(),
+    headers: platformHeaders(),
     body: JSON.stringify({ name: sessionName, slug }),
   });
   if (!res.ok) throw new Error(`Failed to create project: ${res.status}`);
@@ -265,7 +271,7 @@ Plus route files for each table's CRUD pages.`;
 
     const registerRes = await fetch(`${getApiBaseUrl()}/v1/apps`, {
       method: "POST",
-      headers: buildHeaders(),
+      headers: platformHeaders(),
       body: JSON.stringify({
         name: sessionName,
         slug,
@@ -291,7 +297,7 @@ Plus route files for each table's CRUD pages.`;
       `${getApiBaseUrl()}/v1/apps/${appId}/environments/production/deploy`,
       {
         method: "POST",
-        headers: buildHeaders(),
+        headers: platformHeaders(),
         body: JSON.stringify({ branch: "main" }),
       }
     );
@@ -427,7 +433,7 @@ async function saveArtifactsToVault(
     try {
       await fetch(`${getApiBaseUrl()}/v1/vault/files/${encodeURIComponent(path)}`, {
         method: "PUT",
-        headers: buildHeaders(),
+        headers: platformHeaders(),
         body: JSON.stringify({
           content: artifact.content,
           message: `Clowder: Add ${artifact.title}`,
@@ -472,7 +478,7 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     try {
       await fetch(`${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/artifacts`, {
         method: "POST",
-        headers: buildHeaders(),
+        headers: platformHeaders(),
         body: JSON.stringify({
           artifact_type: artifact.type === "spec" ? "spec" : artifact.type,
           title: artifact.title,
