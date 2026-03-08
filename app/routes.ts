@@ -12,4 +12,5 @@ export default [
   route("api/clowder-sessions", "routes/api.clowder-sessions.ts"),
   route("health", "routes/api.health.ts"),
   route("api/purge", "routes/api.purge.ts"),
+  route("api/stats", "routes/api.stats.ts"),
 ] satisfies RouteConfig;

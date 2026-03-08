@@ -440,38 +440,30 @@ async function generatePlanningArtifacts(
   sessionDescription: string,
   messages: Array<{ role: string; content: string }>
 ): Promise<BuildArtifact[]> {
-  const conversationSummary = messages
-    .slice(-20)
-    .map((m) => `${m.role}: ${m.content}`)
-    .join("\n");
+  // Only include conversation context if experts added meaningful content beyond echoing the description
+  const expertMessages = messages.filter((m) => m.role === "expert");
+  const hasExpertContext = expertMessages.length > 1;
+  const contextBlock = hasExpertContext
+    ? `\nExpert discussion:\n${expertMessages.slice(-5).map((m) => m.content).join("\n")}\n`
+    : "";
 
-  const prompt = `Extract a database schema from this app description.
+  const prompt = `Extract a database schema from this app description. Output ONLY the JSON block, nothing else.
 
 App: ${sessionDescription}
-
-Context:
-${conversationSummary}
-
-Output a brief app summary (3-5 sentences), then a JSON data model block.
-
+${contextBlock}
 \`\`\`json:data_model
-[
-  { "name": "table_name", "columns": [
-    { "name": "col", "type": "text", "required": true }
-  ]}
-]
+[{"name":"table_name","columns":[{"name":"col","type":"text","required":true}]}]
 \`\`\`
 
 Rules:
-- Supported column types: text, integer, boolean, timestamp, json, uuid, vector
+- Types: text, integer, boolean, timestamp, json, uuid, vector
 - Every table MUST include "id" (uuid, required) and "created_at" (timestamp, required)
-- Use foreign key columns (e.g. "user_id" of type "uuid") for relationships
-- Include all entities mentioned in the description
-- Keep table/column names lowercase with underscores
-- Output ONLY the summary paragraph and the json:data_model block, nothing else`;
+- Use foreign key columns (e.g. "user_id" uuid) for relationships
+- Include all entities from the description
+- lowercase_with_underscores for names`;
 
   try {
-    const spec = await callLLM(prompt, { maxTokens: 4096, timeout: 60000 });
+    const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 60000 });
 
     if (spec.length > 100) {
       return [
