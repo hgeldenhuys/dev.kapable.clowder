@@ -651,10 +651,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
       const createdTables = await provisionTables(apiKey, tables);
 
-      const appUrl = `https://${slug}.kapable.run`;
-
-      // Persist project info via Data API
-      await updateSessionApp(sessionId, projectId, appUrl);
+      // Store project ID now; app_url set later only if scaffold deploys
+      await updateSessionApp(sessionId, projectId, "");
 
       provisionResult = { projectId, apiKey, tables: createdTables };
 
