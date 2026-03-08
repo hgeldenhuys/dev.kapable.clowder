@@ -497,3 +497,42 @@ SSH unavailable for mounting persistent volumes.
 - **UX:** Word counter guides users toward instant build
 - **Flow:** Single-request, ~19s, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 13 — 2026-03-08
+
+### Goal: Halve spec generation time with slimmer prompt
+
+### Iteration 37: Tool Lending Library — 29s (pre-optimization baseline)
+- Session `98991bc5` → **13 tables**: users, library_zones, tools, borrow_requests, deposit_holds, transactions, condition_reports, damage_claims, tool_reputation, usage_statistics, wishlists, notifications, tool_photos
+- 29s total — spec generation was 27s due to longer description (~260 words)
+- Confirmed build time scales with description length
+
+### Iteration 38: Slim spec prompt — data model extraction only
+- **Problem:** Spec prompt asked for 7 planning sections (overview, users, features, flows, data model, architecture, backlog) at 8K max tokens. Only the `json:data_model` block is used by the build pipeline.
+- **Fix:** Replaced with focused data model extraction prompt. Brief summary + JSON block only. Reduced max tokens from 8192 to 4096.
+- Commit: `21985ad`
+
+### Iteration 39: Meal Prep Platform — 14.6s build!
+- Session `a79b9001` → **11 tables**: users, kitchen_profiles, meals, orders, order_items, payments, reviews, cook_reputation, meal_plans, favorites, notifications
+- **Total time: 14.6 seconds** (new record!)
+- Breakdown: 1.5s orchestrator + 13s spec generation + <1s provisioning
+- Spec generation dropped from ~17-27s to **13s** (~50% faster)
+
+### Speed Evolution
+| Round | Time | Model | Prompt | Notes |
+|-------|------|-------|--------|-------|
+| 1-8 | ~56s | Sonnet | Full spec | Baseline |
+| 9 | ~70s | Sonnet | Full spec | Fall-through fix |
+| 10 | ~23s | Flash | Full spec | Model switch |
+| 11-12 | ~19-21s | Flash | Full spec | Stabilized |
+| 13 | **~15s** | Flash | Slim | **3.7x faster than baseline** |
+
+### Cumulative Stats (Rounds 1-13)
+- **Total apps built:** 20 (+tool lending, +meal prep)
+- **Total tables provisioned:** ~169
+- **Fastest build:** 14.6 seconds (3.8x improvement over baseline)
+- **Pool:** 190/300 (63%), ~9 sessions left
+- **Flow:** Single-request, ~15s, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
