@@ -130,8 +130,9 @@ export async function updateSessionPhase(id: string, phase: string): Promise<voi
 }
 
 export async function listSessions(limit = 10): Promise<SessionRow[]> {
-  const rows = await apiList("clowder_sessions", limit);
-  return rows.map(toSessionRow);
+  // Request large limit from shared pool, then take first `limit` after _type filtering
+  const rows = await apiList("clowder_sessions", 500);
+  return rows.map(toSessionRow).slice(0, limit);
 }
 
 export async function updateSessionApp(id: string, appId: string, appUrl: string): Promise<void> {
@@ -222,7 +223,7 @@ export async function getExpert(id: string): Promise<ExpertRow | null> {
 export async function listExperts(sessionId: string): Promise<ExpertRow[]> {
   // Data API jsonb mode doesn't support column filtering — fetch all and filter client-side.
   // Clowder has at most ~50 experts across all sessions, so this is fine.
-  const rows = await apiList("clowder_experts", 200);
+  const rows = await apiList("clowder_experts", 500);
   return rows
     .filter((r) => r.session_id === sessionId)
     .map(toExpertRow)
