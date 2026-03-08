@@ -117,9 +117,47 @@
 ### Remaining Issues
 1. **GITHUB_TOKEN on production** — SSH down, can't set env vars. Scaffold deploy skipped.
 2. **Typed storage mode** — DDL trigger error with `typed` mode. Using `jsonb` workaround.
-3. **JSON Content-Type** — Messages endpoint sometimes fails with `application/json`, works with `application/x-www-form-urlencoded`.
+3. **SQLite wiped on deploy** — Container is recreated each deploy. `/app/data` mkdir fix doesn't help because the entire container filesystem is replaced. Needs: mounted volume (SSH) or migrate to platform PostgreSQL.
 
 ### Key Metrics
 - **Messages to planning:** 12+ → **2** (6x improvement)
 - **Build phase:** Fully autonomous (no manual intervention)
 - **Tables provisioned:** 15 tables across 2 apps in this session
+
+---
+
+## E2E Testing Round 4 — 2026-03-08
+
+### Goal: Build another app, verify fixes, identify new issues
+
+### Iteration 12: Volunteer Coordination Platform
+- Session `64094df1` → 9 tables: users, organizations, opportunities, shifts, signups, attendance_logs, badges, user_badges, messages
+- **2 messages** → full autonomous build. Flow confirmed stable.
+
+### Iteration 13: Fixed session phase not updating after build
+- **Problem:** Session stayed at "planning" even after tables provisioned. Builder set phase in message metadata but never called `updateSessionPhase()`.
+- **Fix:** Added `updateSessionPhase(sessionId, finalPhase)` at end of `runBuildPhase()`. Phase now correctly shows "building" (provisioned) or "delivered" (deployed).
+- Commit: `029e898`
+
+### Iteration 14: Neighborhood Watch Reporting App
+- Session `3f7f8a17` → 6 tables: users, neighborhoods, reports, report_photos, comments, resolutions
+- Phase correctly shows `building` after completion (fix verified).
+
+### Iteration 15: SQLite persistence — deeper investigation
+- `/app/data` mkdir fix doesn't help: Connect App deploy recreates the container, wiping all filesystem state.
+- **Root cause:** Incus container is destroyed and recreated on each deploy, not updated in-place.
+- **Solutions (ranked):**
+  1. Migrate session storage to platform PostgreSQL via Data API (no infra change needed)
+  2. Mount a persistent volume from host (needs SSH for Incus config)
+  3. Accept data loss on deploys (viable for MVP — sessions are ephemeral)
+
+### Apps Created This Round
+1. **Volunteer Coordination** — 9 tables
+2. **Neighborhood Watch** — 6 tables
+
+### Cumulative Stats (Rounds 1-4)
+- **Total apps built:** 6 (recipe sharing, event board, tool library, coworking, volunteer, neighborhood watch)
+- **Total tables provisioned:** ~45 across all apps
+- **Ideation speed:** 2 messages (down from 12+)
+- **Flow:** Fully autonomous (describe → 2 exchanges → provisioned)
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
