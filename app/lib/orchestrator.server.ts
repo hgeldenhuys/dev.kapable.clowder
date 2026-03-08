@@ -130,7 +130,7 @@ async function callPOAgent(prompt: string): Promise<POResponse | null> {
         "X-Title": "Clowder AI App Builder",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-001",
+        model: "minimax/minimax-m2.5",
         messages: [
           { role: "system", content: PO_SYSTEM_PROMPT },
           { role: "user", content: prompt },

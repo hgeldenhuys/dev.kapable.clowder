@@ -13,4 +13,5 @@ export default [
   route("health", "routes/api.health.ts"),
   route("api/purge", "routes/api.purge.ts"),
   route("api/stats", "routes/api.stats.ts"),
+  route("api/predict-experts", "routes/api.predict-experts.ts"),
 ] satisfies RouteConfig;

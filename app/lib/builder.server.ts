@@ -48,7 +48,7 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: options?.model ?? "google/gemini-2.0-flash-001",
+        model: options?.model ?? "minimax/minimax-m2.5",
         max_tokens: options?.maxTokens ?? 8192,
         messages: [{ role: "user", content: prompt }],
       }),
