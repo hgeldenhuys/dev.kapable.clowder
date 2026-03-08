@@ -107,8 +107,9 @@ function platformHeaders(): Record<string, string> {
 
 async function provisionProject(
   sessionName: string
-): Promise<{ projectId: string; apiKey: string }> {
-  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+): Promise<{ projectId: string; apiKey: string; slug: string }> {
+  const suffix = Math.random().toString(36).slice(2, 6);
+  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 25) + "-" + suffix;
   const res = await fetch(`${getApiBaseUrl()}/v1/projects`, {
     method: "POST",
     headers: platformHeaders(),
@@ -117,7 +118,7 @@ async function provisionProject(
   if (!res.ok) throw new Error(`Failed to create project: ${res.status}`);
   const data = await res.json();
   const liveKey = data.api_keys?.find((k: any) => k.key_type === "live");
-  return { projectId: data.project.id, apiKey: liveKey?.key ?? "" };
+  return { projectId: data.project.id, apiKey: liveKey?.key ?? "", slug };
 }
 
 async function provisionTables(
@@ -281,7 +282,8 @@ async function scaffoldAndDeploy(
   projectId: string,
   sendProgress: (msg: string, meta?: Record<string, unknown>) => Promise<void>,
 ): Promise<{ appId: string; appUrl: string; repoUrl: string } | null> {
-  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+  const suffix = Math.random().toString(36).slice(2, 6);
+  const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 25) + "-" + suffix;
 
   const githubToken = process.env.GITHUB_TOKEN ?? "";
   if (!githubToken) {
@@ -634,7 +636,7 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     });
 
     try {
-      const { projectId, apiKey } = await provisionProject(session.name);
+      const { projectId, apiKey, slug } = await provisionProject(session.name);
 
       await sendClowderMessage(sessionId, {
         content: `Project created! Now setting up ${tables.length} database table${tables.length > 1 ? "s" : ""}...`,
@@ -644,7 +646,6 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
       const createdTables = await provisionTables(apiKey, tables);
 
-      const slug = session.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
       const appUrl = `https://${slug}.kapable.run`;
 
       // Persist project info via Data API
