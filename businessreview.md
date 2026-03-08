@@ -372,3 +372,47 @@ SSH unavailable for mounting persistent volumes.
 - **Most complex app:** 13 tables (fitness challenge, community garden — tied)
 - **Flow:** Single-request auto-build achieved
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 10 — 2026-03-08
+
+### Goal: Optimize build speed, fix slug collisions
+
+### Iteration 29: Emergency Preparedness Network — 12 tables, single-request
+- Session `6455582e` → **12 tables**: users, neighborhoods, households, user_skills, household_resources, special_needs, incidents, check_ins, assistance_requests, training_events, event_attendees, lessons_learned
+- Single-request build confirmed stable (3rd consecutive success)
+
+### Iteration 30: Language Exchange — 409 slug collision
+- Session `2684fdd8` — provisioning failed with **409 Conflict**
+- **Root cause:** Session names truncated to 30 chars produced identical slugs across sessions with similar long names
+- **Fix:** Added 4-char random suffix to slugs (25 chars + "-" + 4 = 30 max). Also return slug from `provisionProject()` to avoid recomputing.
+- Commit: `73d85ba`
+
+### Iteration 31: Gemini Flash for spec generation — 2.4x speed boost
+- **Change:** Switched `callLLM()` default model from `anthropic/claude-sonnet-4` (~55s) to `google/gemini-2.0-flash-001` (~21s)
+- Scaffold code generation still uses Sonnet (needs stronger reasoning for code)
+- Commit: `bfcdd16`
+- **Observation:** Gemini Flash returns much higher confidence scores (1.0 vs 0.1-0.2) for the orchestrator responses. Not a problem — the floor algorithm handles it either way.
+
+### Iteration 32: Language Exchange (retry) — 23s build!
+- Session `c027a461` → **11 tables**: users, languages, user_languages, sessions, feedback, streaks, badges, user_badges, posts, comments, notifications
+- Project provisioned: `369a00f7-af5c-438c-bcf2-47307eaa94b5`
+- **Total time: 23 seconds** (down from 56s with Sonnet — 2.4x faster)
+- Breakdown: 1.3s orchestrator + 21s spec generation + <1s provisioning
+
+### Speed Evolution
+| Round | Time | Model | Notes |
+|-------|------|-------|-------|
+| 1-8 | ~56s | Sonnet | Baseline |
+| 9 | ~70s | Sonnet | Fall-through fix (was stalling) |
+| 10 | **~23s** | Flash | **2.4x faster** |
+
+### Cumulative Stats (Rounds 1-10)
+- **Total apps built:** 16 (+emergency prep, +language exchange x2)
+- **Total tables provisioned:** ~124
+- **Fastest build:** 23 seconds (language exchange)
+- **Build speed:** 56s → 23s (2.4x improvement)
+- **Slug collisions:** Fixed with random suffix
+- **Flow:** Single-request, 23s, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
