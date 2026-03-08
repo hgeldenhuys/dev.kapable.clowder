@@ -30,6 +30,44 @@ interface BuildArtifact {
   content: string;
 }
 
+/**
+ * Call an LLM via OpenRouter API.
+ * Uses OPENROUTER_API_KEY from env, falls back to empty string.
+ */
+async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?: number }): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY ?? "";
+  if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 120000);
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "anthropic/claude-sonnet-4",
+        max_tokens: options?.maxTokens ?? 8192,
+        messages: [{ role: "user", content: prompt }],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`OpenRouter API error ${res.status}: ${body.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "";
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Data model parsing (BL-CLW-003)
 // ---------------------------------------------------------------------------
@@ -167,12 +205,7 @@ Required files:
 Plus route files for each table's CRUD pages.`;
 
   try {
-    const output = execSync(`claude --dangerously-skip-permissions`, {
-      input: scaffoldPrompt,
-      encoding: "utf8",
-      timeout: 180000,
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    const output = await callLLM(scaffoldPrompt, { maxTokens: 16384, timeout: 180000 });
 
     if (output.length < 200) {
       await sendProgress("Scaffold generation produced insufficient output. Skipping deploy.");
@@ -319,12 +352,7 @@ Every table should include an "id" column of type "uuid" and a "created_at" colu
 Output only the markdown document, no preamble.`;
 
   try {
-    const spec = execSync(`claude --dangerously-skip-permissions`, {
-      input: prompt,
-      encoding: "utf8",
-      timeout: 120000,
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    const spec = await callLLM(prompt, { maxTokens: 8192, timeout: 120000 });
 
     if (spec.length > 100) {
       return [
@@ -335,7 +363,8 @@ Output only the markdown document, no preamble.`;
         },
       ];
     }
-  } catch {
+  } catch (e) {
+    console.error("LLM spec generation failed:", e);
     // Fall through to stub
   }
 
