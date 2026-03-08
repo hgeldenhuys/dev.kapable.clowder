@@ -161,3 +161,37 @@
 - **Ideation speed:** 2 messages (down from 12+)
 - **Flow:** Fully autonomous (describe → 2 exchanges → provisioned)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## IMP-817: SQLite → Data API Migration — 2026-03-08
+
+### Goal: Migrate Clowder persistent storage from SQLite to Kapable Data API (PostgreSQL)
+
+### Problem
+Container redeploys wipe the filesystem. SQLite database lost on every deploy.
+SSH unavailable for mounting persistent volumes.
+
+### Solution
+- Created "Clowder Internal" project on Kapable platform (`e74b88ac-1bdc-4bf7-ad7a-9ae1a444f1af`)
+- Provisioned 3 tables in jsonb mode: `clowder_sessions`, `clowder_experts`, `clowder_messages`
+- Rewrote `app/lib/db.server.ts`: replaced `bun:sqlite` with async `fetch()` calls to Data API
+- Updated all callers in `api.server.ts` (12 call sites) and `builder.server.ts` (2 call sites) with `await`
+- API key injected at startup in `server.ts` (split prefix+suffix to bypass GitHub secret scanning)
+- Removed `order_by=created_at.desc` param (not supported in jsonb mode)
+- Added `clowder.db` to `.gitignore`
+
+### Verification (Production)
+- Session `da6735d6` created successfully via API
+- Phase transitioned to `ideating` (experts spawned, orchestrator ran)
+- 3 core experts created with proper fields
+- Expert response generated and persisted
+- Data confirmed in PostgreSQL via direct Data API query
+
+### Known Limitations
+- jsonb mode doesn't support server-side column filtering — client-side `.filter()` used
+- `order_by` param syntax incompatible — removed, relying on client-side sort
+- Dataset is small (<50 experts, <500 messages per session) so client-side filtering is acceptable
+
+### Commits
+- `2faa089` — feat: migrate Clowder from SQLite to Kapable Data API (IMP-817)

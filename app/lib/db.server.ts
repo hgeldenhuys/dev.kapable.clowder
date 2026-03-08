@@ -54,7 +54,7 @@ async function apiPatch(table: string, id: string, data: Record<string, unknown>
 }
 
 async function apiList(table: string, limit = 100): Promise<Record<string, unknown>[]> {
-  const res = await fetch(`${API_BASE}/v1/data?table=${table}&limit=${limit}&order_by=created_at.desc`, {
+  const res = await fetch(`${API_BASE}/v1/data?table=${table}&limit=${limit}`, {
     headers: headers(),
   });
   if (!res.ok) return [];
