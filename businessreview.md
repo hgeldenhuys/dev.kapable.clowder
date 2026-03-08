@@ -79,3 +79,47 @@
 2. **Use OpenRouter API, not CLI** — production containers don't have `claude` CLI
 3. **Use correct header** — platform API expects `x-api-key`, not `X-Admin-Key`
 4. **Commit env defaults** — `.env.production` for keys that must exist in containers
+
+---
+
+## E2E Testing Round 3 — 2026-03-08
+
+### Goal: Build another app and improve the process
+
+### Iteration 8: Fixed confidence scoring + auto-build
+- **Problem:** LLM confidence scores too conservative (0.1-0.2 per turn). Planning transition (≥0.5 for all 3 experts) took 12-15 exchanges.
+- **Fix 1:** Added word-count confidence floor in orchestrator (`totalUserWords / 400`, max 0.5). Comprehensive user answers boost all experts automatically.
+- **Fix 2:** Updated PO prompt with explicit generous scoring guidance.
+- **Fix 3:** Non-responding experts also get confidence floor boost (rich input covers multiple domains).
+- **Result:** Ideating → Planning now happens in **2 messages** instead of 12+.
+- Commits: `1f2246a`, `3a9defb`
+
+### Iteration 9: Fixed stale expert data in phase transition
+- **Problem:** `transitionPhase()` checked in-memory expert array from before confidence updates. Transition never fired even when DB had ≥0.5.
+- **Fix:** Reload experts from SQLite before transition check.
+- Commit: `c9ca4db`
+
+### Iteration 10: Auto-trigger build phase
+- **Problem:** Planning transition didn't start the build. Users had to manually "force-start" or the session stalled at planning phase.
+- **Fix:** `transitionPhase()` now calls `runBuildPhase()` async when transitioning to planning.
+- **Result:** Full autonomous flow: describe → 2 exchanges → auto-build → project + tables provisioned.
+- Commit: `b8da4b5`
+
+### Iteration 11: SQLite persistence
+- **Problem:** `./clowder.db` path is relative — deploys could wipe the database.
+- **Fix:** Auto-detect `/app/data/` for containers, fallback to `./clowder.db` for local dev.
+- Commit: `1f2246a`
+
+### Apps Created This Round
+1. **Tool Library** (session `5d9197f1`): 8 tables — users, neighborhoods, tool_categories, tools, borrow_requests, reviews, messages, notifications
+2. **Coworking Space Booking** (session `788856e5`): 7 tables — users, spaces, amenities, space_amenities, bookings, reviews, space_photos
+
+### Remaining Issues
+1. **GITHUB_TOKEN on production** — SSH down, can't set env vars. Scaffold deploy skipped.
+2. **Typed storage mode** — DDL trigger error with `typed` mode. Using `jsonb` workaround.
+3. **JSON Content-Type** — Messages endpoint sometimes fails with `application/json`, works with `application/x-www-form-urlencoded`.
+
+### Key Metrics
+- **Messages to planning:** 12+ → **2** (6x improvement)
+- **Build phase:** Fully autonomous (no manual intervention)
+- **Tables provisioned:** 15 tables across 2 apps in this session
