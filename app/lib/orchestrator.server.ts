@@ -267,16 +267,34 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     return null;
   }
 
+  // Boost confidence based on how rich the user's input has been.
+  // LLMs tend to be too conservative; this ensures natural progression.
+  const userMessages = allMessages.filter((m) => m.role === "user");
+  const totalUserWords = userMessages.reduce((sum, m) => sum + m.content.split(/\s+/).length, 0);
+  const confidenceFloor = Math.min(0.5, totalUserWords / 400); // 200+ words → floor of 0.5
+  const adjustedConfidence = Math.max(poResponse.confidence, confidenceFloor);
+
   // Update expert confidence and status
   const newStatus: ClowderExpert["status"] =
-    poResponse.confidence >= 0.9 ? "ready" :
-    poResponse.confidence >= 0.5 ? "progressing" : "unclear";
+    adjustedConfidence >= 0.9 ? "ready" :
+    adjustedConfidence >= 0.5 ? "progressing" : "unclear";
 
   const updatedExpert = await updateClowderExpert(sessionId, respondingExpert.id, {
-    confidence: poResponse.confidence,
+    confidence: adjustedConfidence,
     status: newStatus,
     blockers: poResponse.blockers,
   });
+
+  // Boost non-responding experts too — rich user input covers multiple domains
+  for (const e of experts) {
+    if (e.id !== respondingExpert.id && e.confidence < confidenceFloor) {
+      const boostedStatus = confidenceFloor >= 0.5 ? "progressing" : "unclear";
+      await updateClowderExpert(sessionId, e.id, {
+        confidence: confidenceFloor,
+        status: boostedStatus,
+      });
+    }
+  }
 
   // Clear previous on_stage expert, then set the new one
   for (const e of experts) {
