@@ -79,7 +79,11 @@ interface TableDef {
 const VALID_TYPES = new Set(["text", "integer", "boolean", "timestamp", "json", "uuid", "vector"]);
 
 function parseDataModel(spec: string): TableDef[] {
-  const match = spec.match(/```json:data_model\n([\s\S]+?)\n```/);
+  // Try exact format first, then common LLM variations
+  const match =
+    spec.match(/```json:data_model\n([\s\S]+?)\n```/) ||
+    spec.match(/```json\n([\s\S]+?)\n```/) ||
+    spec.match(/```\n(\[[\s\S]+?\])\n```/);
   if (!match) return [];
   try {
     const tables: TableDef[] = JSON.parse(match[1]);
@@ -447,12 +451,16 @@ async function generatePlanningArtifacts(
     ? `\nExpert discussion:\n${expertMessages.slice(-5).map((m) => m.content).join("\n")}\n`
     : "";
 
-  const prompt = `Extract a database schema from this app description. Output ONLY the JSON block, nothing else.
+  const prompt = `Extract a database schema from this app description. Output ONLY a fenced JSON block labeled json:data_model, nothing else.
 
 App: ${sessionDescription}
 ${contextBlock}
 \`\`\`json:data_model
-[{"name":"table_name","columns":[{"name":"col","type":"text","required":true}]}]
+[
+  { "name": "table_name", "columns": [
+    { "name": "col", "type": "text", "required": true }
+  ]}
+]
 \`\`\`
 
 Rules:
@@ -460,7 +468,8 @@ Rules:
 - Every table MUST include "id" (uuid, required) and "created_at" (timestamp, required)
 - Use foreign key columns (e.g. "user_id" uuid) for relationships
 - Include all entities from the description
-- lowercase_with_underscores for names`;
+- lowercase_with_underscores for names
+- Output ONLY the \`\`\`json:data_model block, no other text`;
 
   try {
     const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 60000 });
