@@ -59,7 +59,8 @@ async function apiList(table: string, limit = 100): Promise<Record<string, unkno
   });
   if (!res.ok) return [];
   const data = await res.json() as { data?: Record<string, unknown>[] };
-  return data.data ?? [];
+  // jsonb mode stores all tables in a single pool — filter by _type discriminator
+  return (data.data ?? []).filter((r) => r._type === table || !r._type);
 }
 
 // ---------------------------------------------------------------------------
@@ -109,6 +110,7 @@ export async function createSession(body: {
   }
 
   const raw = await apiPost("clowder_sessions", {
+    _type: "clowder_sessions",
     org_id: "default",
     name,
     description: body.description,
@@ -196,6 +198,7 @@ export async function createExpert(
   }
 ): Promise<ExpertRow> {
   const raw = await apiPost("clowder_experts", {
+    _type: "clowder_experts",
     session_id: sessionId,
     org_id: "default",
     name: body.name,
@@ -292,6 +295,7 @@ export async function createMessage(
   const session = await getSession(sessionId);
 
   const raw = await apiPost("clowder_messages", {
+    _type: "clowder_messages",
     session_id: sessionId,
     org_id: "default",
     expert_id: body.expert_id ?? null,
