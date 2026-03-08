@@ -759,3 +759,32 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** Self-cleaning with 5-min age guard
 - **Critical bugs fixed:** 2 (purge race, Gemini wrapper)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 21 — 2026-03-08
+
+### Goal: Fix Gemini prompt confusion, enhanced stats
+
+### Improvements Made
+1. **Plain JSON fence** — Removed `json:data_model` label from prompt, use plain ` ```json ` instead. Eliminates Gemini's wrapper object behavior entirely.
+2. **Enhanced stats endpoint** — `/api/stats` now shows avg build time, avg tables, recent build times array, failed count
+
+### Iteration 52: Sports League Management — 15.7s, 15 tables
+- Session `d88dcaf8` → **15 tables**: players, teams, coaches, seasons, games, live_scores, player_statistics, standing_tables, tournament_brackets, team_communication, parent_portal, revenue_management, admin_dashboard, player_positions, player_sports_experience
+- **Build time: 15.7s** — delivered on second poll
+- Plain JSON fence worked first try, no formatting issues
+
+### Live Stats (from `/api/stats`)
+```json
+{"delivered": 6, "failed": 0, "avg_build_ms": 13586, "avg_tables": 16}
+```
+
+### Cumulative Stats (Rounds 1-21)
+- **Total apps built:** 29 (+sports league)
+- **Total tables provisioned:** ~294
+- **Avg build time:** 13.6s (from stats endpoint)
+- **Fastest build:** 8.5 seconds
+- **Avg tables per build:** 16
+- **Success rate:** 100% (since Gemini parser fix)
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
