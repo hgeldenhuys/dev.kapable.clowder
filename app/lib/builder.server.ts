@@ -12,7 +12,6 @@
  * V2 will wire KAIT sessions to each expert.
  */
 
-import { execSync } from "child_process";
 import {
   getClowderSession,
   listClowderExperts,
@@ -163,8 +162,114 @@ async function provisionTables(
 // ---------------------------------------------------------------------------
 
 /**
- * Generate a minimal RR7 + Bun scaffold via Claude headless,
- * push to GitHub, register as Connect App, and trigger deploy.
+ * GitHub REST API helpers — no CLI tools needed on production.
+ * Requires GITHUB_TOKEN env var.
+ */
+function githubHeaders(): Record<string, string> {
+  const token = process.env.GITHUB_TOKEN ?? "";
+  return {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${token}`,
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+}
+
+async function createGitHubRepo(repoName: string): Promise<boolean> {
+  const res = await fetch("https://api.github.com/user/repos", {
+    method: "POST",
+    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ name: repoName, auto_init: true, private: false }),
+  });
+  if (res.status === 422) return true; // Already exists — OK
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error(`GitHub repo create failed (${res.status}): ${body.slice(0, 200)}`);
+    return false;
+  }
+  return true;
+}
+
+async function pushFilesToGitHub(
+  owner: string,
+  repo: string,
+  files: Array<{ path: string; content: string }>,
+): Promise<boolean> {
+  // Get the default branch's latest commit SHA
+  const refRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`, {
+    headers: githubHeaders(),
+  });
+  if (!refRes.ok) {
+    console.error(`GitHub get ref failed (${refRes.status})`);
+    return false;
+  }
+  const refData = await refRes.json() as any;
+  const latestCommitSha = refData.object.sha;
+
+  // Create blobs for each file
+  const treeItems: Array<{ path: string; mode: string; type: string; sha: string }> = [];
+  for (const file of files) {
+    const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
+      method: "POST",
+      headers: { ...githubHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ content: file.content, encoding: "utf-8" }),
+    });
+    if (!blobRes.ok) {
+      console.error(`GitHub blob create failed for ${file.path}: ${blobRes.status}`);
+      continue;
+    }
+    const blobData = await blobRes.json() as any;
+    treeItems.push({ path: file.path, mode: "100644", type: "blob", sha: blobData.sha });
+  }
+
+  if (treeItems.length === 0) return false;
+
+  // Create a tree
+  const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
+    method: "POST",
+    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ base_tree: latestCommitSha, tree: treeItems }),
+  });
+  if (!treeRes.ok) {
+    console.error(`GitHub tree create failed: ${treeRes.status}`);
+    return false;
+  }
+  const treeData = await treeRes.json() as any;
+
+  // Create a commit
+  const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+    method: "POST",
+    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: "Initial scaffold from Clowder",
+      tree: treeData.sha,
+      parents: [latestCommitSha],
+    }),
+  });
+  if (!commitRes.ok) {
+    console.error(`GitHub commit create failed: ${commitRes.status}`);
+    return false;
+  }
+  const commitData = await commitRes.json() as any;
+
+  // Update the ref to point to the new commit
+  const updateRefRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`,
+    {
+      method: "PATCH",
+      headers: { ...githubHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ sha: commitData.sha }),
+    },
+  );
+  if (!updateRefRes.ok) {
+    console.error(`GitHub ref update failed: ${updateRefRes.status}`);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Generate a minimal RR7 + Bun scaffold via LLM,
+ * push to GitHub via REST API, register as Connect App, and trigger deploy.
  */
 async function scaffoldAndDeploy(
   sessionId: string,
@@ -176,9 +281,14 @@ async function scaffoldAndDeploy(
   sendProgress: (msg: string, meta?: Record<string, unknown>) => Promise<void>,
 ): Promise<{ appId: string; appUrl: string; repoUrl: string } | null> {
   const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
-  const scaffoldDir = `/tmp/clowder-scaffold-${sessionId}`;
 
-  // Step 1: Generate scaffold with Claude headless
+  const githubToken = process.env.GITHUB_TOKEN ?? "";
+  if (!githubToken) {
+    await sendProgress("GITHUB_TOKEN not configured — skipping scaffold deploy.");
+    return null;
+  }
+
+  // Step 1: Generate scaffold with LLM
   await sendProgress("Generating your app code...");
 
   const tableDescriptions = tables
@@ -202,11 +312,11 @@ ${tableDescriptions}
 ## Requirements
 1. Use React Router v7 with file-based routing
 2. Use Bun as the runtime
-3. Use shadcn/ui components with dark mode (Tailwind CSS)
+3. Use Tailwind CSS with dark mode
 4. Create CRUD pages for each table (list view + detail/edit view)
-5. Include a simple login/signup page using Kapable session tokens
-6. Include a homepage/dashboard that links to each table's list view
-7. Keep it minimal and functional — no over-engineering
+5. Include a homepage/dashboard that links to each table's list view
+6. Keep it minimal and functional — no over-engineering
+7. Use fetch() for all API calls with the x-api-key header
 
 ## Output Format
 Output ONLY file contents in this exact format, one file per block:
@@ -218,7 +328,6 @@ Required files:
 - package.json (with dependencies: react, react-dom, react-router, @types/react, tailwindcss, etc.)
 - app/root.tsx
 - app/routes/_index.tsx (dashboard)
-- app/routes/login.tsx
 - app/lib/api.ts (Kapable Data API client)
 - app/tailwind.css
 - tailwind.config.ts
@@ -248,43 +357,29 @@ Plus route files for each table's CRUD pages.`;
       return null;
     }
 
-    // Step 2: Write files to disk
-    await sendProgress(`Writing ${files.length} files to scaffold...`);
+    await sendProgress(`Generated ${files.length} files. Pushing to GitHub...`);
 
-    execSync(`rm -rf ${scaffoldDir} && mkdir -p ${scaffoldDir}`, { encoding: "utf8" });
-    for (const file of files) {
-      const fullPath = `${scaffoldDir}/${file.path}`;
-      const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
-      execSync(`mkdir -p "${dir}"`, { encoding: "utf8" });
-      const { writeFileSync } = await import("node:fs");
-      writeFileSync(fullPath, file.content, "utf8");
-    }
-
-    // Step 3: Initialize git and push to GitHub
-    await sendProgress("Pushing to GitHub...");
-
+    // Step 2: Create GitHub repo and push files via REST API
     const repoName = `clowder-${slug}`;
-    try {
-      execSync(
-        `cd ${scaffoldDir} && git init && git add -A && git commit -m "Initial scaffold from Clowder" && gh repo create hgeldenhuys/${repoName} --public --source=. --push`,
-        { encoding: "utf8", timeout: 60000, stdio: ["pipe", "pipe", "pipe"] }
-      );
-    } catch (e) {
-      // Repo might already exist — try just pushing
-      try {
-        execSync(
-          `cd ${scaffoldDir} && git remote add origin https://github.com/hgeldenhuys/${repoName}.git 2>/dev/null; git push -u origin main`,
-          { encoding: "utf8", timeout: 30000, stdio: ["pipe", "pipe", "pipe"] }
-        );
-      } catch {
-        await sendProgress("Failed to push to GitHub. The scaffold is saved locally.");
-        return null;
-      }
+    const owner = "hgeldenhuys";
+    const repoUrl = `https://github.com/${owner}/${repoName}`;
+
+    const repoCreated = await createGitHubRepo(repoName);
+    if (!repoCreated) {
+      await sendProgress("Failed to create GitHub repo. The scaffold was generated but not saved.");
+      return null;
     }
 
-    const repoUrl = `https://github.com/hgeldenhuys/${repoName}`;
+    // Small delay to let GitHub initialize the repo
+    await new Promise((r) => setTimeout(r, 2000));
 
-    // Step 4: Register as Connect App
+    const pushed = await pushFilesToGitHub(owner, repoName, files);
+    if (!pushed) {
+      await sendProgress(`Failed to push files to GitHub. Repo created at: ${repoUrl}`);
+      return null;
+    }
+
+    // Step 3: Register as Connect App
     await sendProgress("Registering app on Kapable...");
 
     const registerRes = await fetch(`${getApiBaseUrl()}/v1/apps`, {
@@ -301,14 +396,15 @@ Plus route files for each table's CRUD pages.`;
     });
 
     if (!registerRes.ok) {
-      await sendProgress(`App registration failed (${registerRes.status}). Scaffold is on GitHub: ${repoUrl}`);
+      const errBody = await registerRes.text().catch(() => "");
+      await sendProgress(`App registration failed (${registerRes.status}): ${errBody.slice(0, 100)}. Scaffold is on GitHub: ${repoUrl}`);
       return null;
     }
 
-    const appData = await registerRes.json();
+    const appData = await registerRes.json() as any;
     const appId = appData.app?.id ?? appData.id;
 
-    // Step 5: Trigger deploy
+    // Step 4: Trigger deploy
     await sendProgress("Deploying your app...");
 
     const deployRes = await fetch(
