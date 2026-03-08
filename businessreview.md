@@ -631,3 +631,35 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** Self-cleaning (auto-purge after each build)
 - **Flow:** Single-request, sub-15s consistent, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 17 — 2026-03-08
+
+### Goal: Fix phase transition + JSON API + pool cleanup
+
+### Improvements Made
+1. **Phase transition fix** — Sessions now transition to "delivered" after provisioning succeeds, even without scaffold deploy (previously stuck at "building")
+2. **JSON API** — `/api/clowder-sessions` now accepts `application/json` in addition to formData, returns JSON response for programmatic clients
+3. **Smarter purge** — Keeps 5 most recent completed sessions, purges all older ones regardless of phase. Pool dropped **193 → 60 rows** (69% reduction)
+
+### Iteration 45: Pet Sitting Network — 12.1s build
+- Session `2c31792f` → **8 tables**: users, pets, sitter_profiles, rates, bookings, booking_pets, daily_updates, reviews
+- Project provisioned: `045f56c8-ba19-4130-b96a-fda50a6e0af1`
+- **Total time: 12.1 seconds** (assembling → **delivered** in one request)
+- First session to reach "delivered" phase autonomously
+- Pool after purge: 60 rows (5 sessions kept)
+
+### Interim Bug: Round 17a — 165-word description
+- Attempted build with only 165 words (below 200 threshold)
+- Session `91a508cf` stuck at "ideating" with confidence 0.4125 (165/400)
+- Confirmed word-count floor algorithm works correctly
+- Discovery: sessions API only accepted formData, not JSON → fixed
+
+### Cumulative Stats (Rounds 1-17)
+- **Total apps built:** 24 (+pet sitting network)
+- **Total tables provisioned:** ~215
+- **Fastest build:** 8.8 seconds (6.4x improvement over baseline)
+- **Pool:** 60 rows, self-cleaning with retention cap of 5 sessions
+- **Flow:** Single-request JSON API, sub-15s, fully autonomous, "delivered" phase
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
