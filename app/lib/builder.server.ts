@@ -33,38 +33,55 @@ interface BuildArtifact {
  * Call an LLM via OpenRouter API.
  * Uses OPENROUTER_API_KEY from env, falls back to empty string.
  */
+const LLM_MODELS = ["minimax/minimax-m2.5", "google/gemini-3.1-flash-lite-preview"] as const;
+
 async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?: number; model?: string }): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY ?? "";
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 120000);
+  const models = options?.model ? [options.model] : [...LLM_MODELS];
 
-  try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: options?.model ?? "minimax/minimax-m2.5",
-        max_tokens: options?.maxTokens ?? 8192,
-        messages: [{ role: "user", content: prompt }],
-      }),
-      signal: controller.signal,
-    });
+  for (const model of models) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 60000);
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`OpenRouter API error ${res.status}: ${body.slice(0, 200)}`);
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://clowder.kapable.run",
+          "X-Title": "Clowder AI App Builder",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: options?.maxTokens ?? 8192,
+          messages: [{ role: "user", content: prompt }],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`LLM ${model} failed (${res.status}): ${body.slice(0, 200)}`);
+        continue; // Try next model
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content ?? "";
+      if (content.length > 50) return content;
+      console.error(`LLM ${model} returned short response (${content.length} chars)`);
+      continue; // Try next model
+    } catch (e) {
+      console.error(`LLM ${model} error:`, e);
+      continue; // Try next model
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "";
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  throw new Error(`All LLM models failed for spec generation`);
 }
 
 // ---------------------------------------------------------------------------
