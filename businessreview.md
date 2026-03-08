@@ -272,3 +272,30 @@ SSH unavailable for mounting persistent volumes.
 - **Ideation speed:** 2 messages (stable)
 - **Flow:** Fully autonomous + now persists across deploys (Data API)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 7 — 2026-03-08
+
+### Goal: Build another app, test single-message auto-build
+
+### Iteration 23: Music Lesson Marketplace — Single-message auto-build!
+- Session `a76c078b` → **8 tables**: users, teacher_profiles, instruments, teacher_instruments, availability_slots, bookings, reviews, messages
+- **1 message** → ideating → planning → building (fully autonomous)
+- Project provisioned: `d8f8c9f1-91d2-42f8-bb4f-80de4eb1bb77`
+- Phase correctly shows `building`
+- **Milestone:** First app built with a single comprehensive user message (200+ words hit the 0.5 confidence floor exactly)
+
+### Key Discovery: Single-Message Auto-Build
+- **Previous best:** 2 messages to reach planning threshold
+- **New best:** 1 message (200+ words = `totalUserWords / 400` ≥ 0.5 floor)
+- The confidence floor algorithm (`Math.min(0.5, totalUserWords / 400)`) means a sufficiently detailed first message can bypass all back-and-forth
+- **UX implication:** Power users who write comprehensive descriptions get instant builds
+
+### Cumulative Stats (Rounds 1-7)
+- **Total apps built:** 10 (+music lessons)
+- **Total tables provisioned:** ~65
+- **Ideation speed:** 1 message (new record, down from 2)
+- **Flow:** Fully autonomous + persists across deploys (Data API)
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+- **Data API backend:** Stable across 3 rounds (no new issues)
