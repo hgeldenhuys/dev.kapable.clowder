@@ -6,18 +6,41 @@ export async function loader() {
   const building = sessions.filter((s) => s.phase === "building");
   const failed = sessions.filter((s) => s.phase === "planning");
 
-  // Extract build times from final messages of delivered sessions (last 5)
+  // Extract build times and table data from final messages of delivered sessions (last 10)
   const buildTimes: number[] = [];
   const tableCounts: number[] = [];
-  for (const s of delivered.slice(0, 5)) {
+  const allTableNames: string[] = [];
+  const sessionDetails: Array<{
+    name: string;
+    tables: number;
+    build_ms: number;
+    created_at: string;
+  }> = [];
+
+  for (const s of delivered.slice(0, 10)) {
     const msgs = await listMessages(s.id);
     for (const m of msgs) {
       const meta = typeof m.metadata === "string" ? JSON.parse(m.metadata) : m.metadata;
       if (meta?.build_time_ms) {
         buildTimes.push(meta.build_time_ms);
         if (meta.tables_created) tableCounts.push(meta.tables_created);
+        if (Array.isArray(meta.table_names)) {
+          for (const t of meta.table_names) allTableNames.push(t);
+        }
+        sessionDetails.push({
+          name: String(s.name ?? ""),
+          tables: meta.tables_created ?? 0,
+          build_ms: meta.build_time_ms,
+          created_at: String(s.created_at ?? ""),
+        });
       }
     }
+  }
+
+  // Count table name frequency across builds
+  const tableFrequency: Record<string, number> = {};
+  for (const name of allTableNames) {
+    tableFrequency[name] = (tableFrequency[name] ?? 0) + 1;
   }
 
   const avgBuildMs = buildTimes.length > 0
@@ -36,7 +59,9 @@ export async function loader() {
       avg_build_ms: avgBuildMs,
       avg_tables: avgTables,
       recent_build_times: buildTimes,
+      table_frequency: tableFrequency,
     },
+    recent_builds: sessionDetails,
     latest: sessions[0]
       ? { name: sessions[0].name, phase: sessions[0].phase, created_at: sessions[0].created_at }
       : null,

@@ -747,6 +747,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       artifacts_count: artifacts.length,
       provisioned: !!provisionResult,
       tables_created: provisionResult?.tables.length ?? 0,
+      table_names: provisionResult?.tables ?? [],
+      project_id: provisionResult?.projectId ?? null,
       deployed: !!deployResult,
       app_url: deployResult?.appUrl,
       build_time_ms: Date.now() - buildStart,
