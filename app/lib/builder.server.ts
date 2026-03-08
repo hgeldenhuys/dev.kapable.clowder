@@ -567,6 +567,7 @@ async function saveArtifactsToVault(
  * V2: Will spawn KAIT sessions per expert for actual implementation.
  */
 export async function runBuildPhase(sessionId: string): Promise<void> {
+  const buildStart = Date.now();
   const { session } = await getClowderSession(sessionId);
   const [experts, messages] = await Promise.all([
     listClowderExperts(sessionId),
@@ -742,6 +743,7 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       tables_created: provisionResult?.tables.length ?? 0,
       deployed: !!deployResult,
       app_url: deployResult?.appUrl,
+      build_time_ms: Date.now() - buildStart,
     },
   });
 

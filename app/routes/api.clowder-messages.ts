@@ -1,6 +1,11 @@
 import type { Route } from "./+types/api.clowder-messages";
-import { sendClowderMessage } from "~/lib/api.server";
+import { listClowderMessages, sendClowderMessage } from "~/lib/api.server";
 import { orchestrate } from "~/lib/orchestrator.server";
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const messages = await listClowderMessages(params.sessionId);
+  return Response.json({ data: messages });
+}
 
 export async function action({ request, params }: Route.ActionArgs) {
   const { sessionId } = params;
