@@ -333,3 +333,42 @@ SSH unavailable for mounting persistent volumes.
 - **Ideation speed:** 1-2 messages (depends on initial description length)
 - **Flow:** Fully autonomous + persists across deploys
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 9 — 2026-03-08
+
+### Goal: Achieve true single-request auto-build (one POST → full app)
+
+### Iteration 26: Artisan Marketplace — Build stalled by deploy
+- Session `a399aa54` → **10 tables**: users, seller_profiles, categories, products, orders, order_items, reviews, favorites, messages, delivery_zones
+- Initial 230-word description hit confidence floor (0.5 all experts) but phase stuck at `ideating`
+- **Root cause:** `transitionPhase()` used `if/else` — assembling→ideating blocked the ideating→planning check in the same call
+- Build stalled further when deploy (for pool limit fix) restarted the container mid-build
+- Re-triggered via force-start after new deployment → build completed
+
+### Iteration 27: Phase transition fall-through fix
+- **Problem:** `transitionPhase()` went `if (assembling) {...} else if (ideating) {...}` — only one transition per call
+- **Fix:** Changed to `if (assembling) { ...; phase = "ideating"; } if (ideating) { ... }` — fall-through allows assembling→ideating→planning in one call
+- Commit: `deb27c9`
+
+### Iteration 28: Community Garden — TRUE SINGLE-REQUEST AUTO-BUILD!
+- Session `7babfe02` → **13 tables**: users, gardens, plots, plants, activities, harvests, resources, resource_loans, events, event_signups, posts, planting_guides, plot_waitlists
+- **One POST to `/api/clowder-sessions`** → assembling → ideating → planning → building (fully autonomous)
+- Project provisioned: `d39690a4-753b-4c7c-ac94-d5d151d75920`
+- **Milestone:** First true single-HTTP-request app creation. No follow-up messages needed.
+- Time from POST to provisioned: ~70 seconds
+
+### Key Discovery: Single-Request Auto-Build
+- **Previous:** Required 1-2 user messages after session creation to reach planning threshold
+- **Now:** A 200+ word session description triggers the entire flow in one request
+- **Technical fix:** State machine fall-through in `transitionPhase()` — allows multiple phase transitions in one orchestration call
+- **UX impact:** An API consumer can now create a fully provisioned app with a single HTTP POST
+
+### Cumulative Stats (Rounds 1-9)
+- **Total apps built:** 13 (+artisan marketplace, +community garden)
+- **Total tables provisioned:** ~101
+- **Fastest build:** 1 HTTP request (~70s to provisioned)
+- **Most complex app:** 13 tables (fitness challenge, community garden — tied)
+- **Flow:** Single-request auto-build achieved
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
