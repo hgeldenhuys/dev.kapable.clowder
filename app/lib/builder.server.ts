@@ -125,13 +125,9 @@ async function provisionTables(
   apiKey: string,
   tables: TableDef[]
 ): Promise<string[]> {
-  const created: string[] = [];
-  for (const table of tables) {
-    try {
-      // Map our TableDef format to the platform's ColumnDef format:
-      // - col_type (not type) — matches Rust ColumnDef struct
-      // - nullable is required (default true for user columns)
-      // - Filter out "id" and "created_at" — platform auto-adds these
+  // Fire all table creation requests concurrently — tables are independent (jsonb mode)
+  const results = await Promise.allSettled(
+    tables.map(async (table) => {
       const platformColumns = table.columns
         .filter((c) => c.name !== "id" && c.name !== "created_at" && c.name !== "updated_at")
         .map((c) => ({
@@ -145,15 +141,19 @@ async function provisionTables(
         headers: { "Content-Type": "application/json", "x-api-key": apiKey },
         body: JSON.stringify({ storage_mode: "jsonb", columns: platformColumns }),
       });
-      if (res.ok) {
-        created.push(table.name);
-      } else {
+      if (!res.ok) {
         const errBody = await res.text().catch(() => "");
         console.error(`Table ${table.name} creation failed (${res.status}): ${errBody.slice(0, 300)}`);
+        return null;
       }
-    } catch (e) {
-      console.error(`Table ${table.name} creation error:`, e);
-      // Non-fatal — continue with other tables
+      return table.name;
+    })
+  );
+
+  const created: string[] = [];
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value) {
+      created.push(r.value);
     }
   }
   return created;
