@@ -127,13 +127,31 @@ async function provisionTables(
   const created: string[] = [];
   for (const table of tables) {
     try {
+      // Map our TableDef format to the platform's ColumnDef format:
+      // - col_type (not type) — matches Rust ColumnDef struct
+      // - nullable is required (default true for user columns)
+      // - Filter out "id" and "created_at" — platform auto-adds these
+      const platformColumns = table.columns
+        .filter((c) => c.name !== "id" && c.name !== "created_at" && c.name !== "updated_at")
+        .map((c) => ({
+          name: c.name,
+          col_type: c.type,
+          nullable: !c.required,
+        }));
+
       const res = await fetch(`${getApiBaseUrl()}/v1/_meta/tables/${table.name}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "x-api-key": apiKey },
-        body: JSON.stringify({ storage_mode: "typed", columns: table.columns }),
+        body: JSON.stringify({ storage_mode: "jsonb", columns: platformColumns }),
       });
-      if (res.ok) created.push(table.name);
-    } catch {
+      if (res.ok) {
+        created.push(table.name);
+      } else {
+        const errBody = await res.text().catch(() => "");
+        console.error(`Table ${table.name} creation failed (${res.status}): ${errBody.slice(0, 300)}`);
+      }
+    } catch (e) {
+      console.error(`Table ${table.name} creation error:`, e);
       // Non-fatal — continue with other tables
     }
   }
