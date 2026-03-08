@@ -343,10 +343,16 @@ async function transitionPhase(
   experts: ClowderExpert[],
   latestResponse: POResponse,
 ) {
-  if (currentPhase === "assembling") {
+  let phase = currentPhase;
+
+  if (phase === "assembling") {
     // Move to ideating once experts are responding
     await updateSessionPhase(sessionId, "ideating");
-  } else if (currentPhase === "ideating") {
+    // Fall through — check if we can also jump to planning in the same call
+    // (happens when a 200+ word first message hits the confidence floor immediately)
+    phase = "ideating";
+  }
+  if (phase === "ideating") {
     // Move to planning when all core experts are at least 50% confident
     // experts should be freshly loaded from DB with up-to-date confidence values
     const coreExperts = experts.filter((e) => e.role === "core");
