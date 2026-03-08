@@ -663,3 +663,28 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** 60 rows, self-cleaning with retention cap of 5 sessions
 - **Flow:** Single-request JSON API, sub-15s, fully autonomous, "delivered" phase
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 18 — 2026-03-08
+
+### Goal: GET messages endpoint + build timing metadata + stress test with complex app
+
+### Improvements Made
+1. **GET messages endpoint** — `/api/clowder-session/:id/messages` now supports GET requests, enabling API monitoring
+2. **Build timing metadata** — `build_time_ms` embedded in final message metadata for self-reporting
+
+### Iteration 46: Book Club Platform — 15.9s build, 20 tables (record!)
+- Session `db6ebd61` → **20 tables**: users, genres, user_genres, books, bookshelf, currently_reading, book_clubs, club_memberships, discussion_boards, discussion_threads, messages, annotations, book_votes, reading_challenges, reading_lists, reading_list_items, book_trades, user_reputation, authors, author_events
+- **Build time: 15.9s** (self-reported via `build_time_ms: 15896`)
+- Most complex build to date — 20 tables covering social reading, book trading, author events
+- Phase: **delivered** ✓, Pool: 60 rows (stable)
+
+### Cumulative Stats (Rounds 1-18)
+- **Total apps built:** 25 (+book club platform)
+- **Total tables provisioned:** ~235
+- **Fastest build:** 8.8 seconds (6.4x improvement over baseline)
+- **Most complex build:** 20 tables (book club platform)
+- **Pool:** 60 rows, self-cleaning with retention cap of 5 sessions
+- **Flow:** Single-request JSON API, self-timed, fully autonomous, "delivered" phase
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
