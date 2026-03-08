@@ -43,7 +43,7 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
 
   for (const model of models) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 60000);
+    const timeoutId = setTimeout(() => controller.abort(), options?.timeout ?? 30000);
 
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -496,7 +496,7 @@ Rules:
 - Output ONLY the JSON array in a fenced code block, no other text`;
 
   try {
-    const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 60000 });
+    const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 30000 });
 
     if (spec.length > 100) {
       return [
