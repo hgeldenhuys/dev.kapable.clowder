@@ -22,6 +22,7 @@ import {
   buildPOPrompt,
   buildExpertSystemPrompt,
 } from "./prompts.server";
+import { runBuildPhase } from "./builder.server";
 import {
   sendClowderMessage,
   updateClowderExpert,
@@ -352,6 +353,10 @@ async function transitionPhase(
     const allProgressing = coreExperts.length > 0 && coreExperts.every((e) => e.confidence >= 0.5);
     if (allProgressing) {
       await updateSessionPhase(sessionId, "planning");
+      // Auto-trigger build phase when all experts are confident enough
+      runBuildPhase(sessionId).catch((e) => {
+        console.error("Auto-build phase error:", e);
+      });
     }
   }
 }
