@@ -810,3 +810,25 @@ SSH unavailable for mounting persistent volumes.
 - **Success rate:** 100% (last 6 builds)
 - **Pool:** Self-cleaning, stable
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 23 — 2026-03-08
+
+### Goal: Fix misleading app_url for provisioning-only builds
+
+### Improvement Made
+- **Honest app_url** — No longer sets `app_url` to `slug.kapable.run` when scaffold deploy is skipped. Empty `app_url` means home page "Visit app →" link is hidden. `app_id` still stored for project lookup.
+
+### Iteration 54: Community Garden Platform — 12.6s, 14 tables
+- Session `118c489f` → **14 tables**: plot_holders, garden_beds, irrigation_systems, community_workdays, workday_signups, master_gardeners, mentorship_sessions, seed_plant_library, seed_plant_checkout, harvest_tracking, food_bank_partners, composting_program, weather_data, admin_dashboard
+- **Build time: 12.6s** — delivered on first poll
+- **Verified:** `app_url` is empty, `app_id` is `b2931393` (correct)
+
+### Cumulative Stats (Rounds 1-23)
+- **Total apps built:** 31
+- **Total tables provisioned:** ~323
+- **Avg build time:** 13.6s (from live stats)
+- **Fastest build:** 8.5 seconds
+- **Success rate:** 100% (last 7 consecutive builds)
+- **Pool:** Self-cleaning, stable at ~60 rows
