@@ -21,7 +21,7 @@ import {
   updateSessionPhase,
   getApiBaseUrl,
 } from "./api.server";
-import { updateSessionApp } from "./db.server";
+import { updateSessionApp, purgeStale } from "./db.server";
 
 interface BuildArtifact {
   type: "spec" | "backlog" | "architecture" | "data_model";
@@ -743,4 +743,7 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       app_url: deployResult?.appUrl,
     },
   });
+
+  // Auto-purge stale sessions to keep pool healthy (fire-and-forget)
+  purgeStale().catch(() => {});
 }
