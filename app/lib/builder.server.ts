@@ -458,11 +458,11 @@ async function generatePlanningArtifacts(
     ? `\nExpert discussion:\n${expertMessages.slice(-5).map((m) => m.content).join("\n")}\n`
     : "";
 
-  const prompt = `Extract a database schema from this app description. Output ONLY a fenced JSON block labeled json:data_model, nothing else.
+  const prompt = `Extract a database schema from this app description. Output ONLY a fenced JSON array, nothing else.
 
 App: ${sessionDescription}
 ${contextBlock}
-\`\`\`json:data_model
+\`\`\`json
 [
   { "name": "table_name", "columns": [
     { "name": "col", "type": "text", "required": true }
@@ -476,7 +476,7 @@ Rules:
 - Use foreign key columns (e.g. "user_id" uuid) for relationships
 - Include all entities from the description
 - lowercase_with_underscores for names
-- Output ONLY the \`\`\`json:data_model block, no other text`;
+- Output ONLY the JSON array in a fenced code block, no other text`;
 
   try {
     const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 60000 });
