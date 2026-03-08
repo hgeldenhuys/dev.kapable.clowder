@@ -6,3 +6,4 @@ build/
 *.db-shm
 *.db-wal
 .agentboard/
+clowder.db

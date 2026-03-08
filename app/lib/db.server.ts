@@ -1,85 +1,65 @@
 /**
- * Clowder BFF-local SQLite database.
+ * Clowder data layer — Kapable Data API backend.
  *
- * Stores sessions, experts, and messages locally — no Rust API dependency.
- * Uses Bun's built-in SQLite (bun:sqlite) for zero-dependency persistence.
+ * Uses the platform's Data API (PostgreSQL) for persistent storage that
+ * survives container deploys. Replaces the previous SQLite implementation.
+ *
+ * Project: clowder-internal (e74b88ac-1bdc-4bf7-ad7a-9ae1a444f1af)
+ * Tables: clowder_sessions, clowder_experts, clowder_messages
  */
 
-import { Database } from "bun:sqlite";
-import { randomUUID } from "node:crypto";
+const API_BASE = process.env.KAPABLE_API_URL ?? "https://api.kapable.dev";
+const API_KEY = process.env.CLOWDER_INTERNAL_API_KEY ?? "";
 
-// Store DB in /app/data for container persistence (survives deploys).
-// Creates the directory if running in a container context (/app exists).
-// Falls back to ./clowder.db for local dev.
-import { existsSync, mkdirSync } from "node:fs";
-const PERSIST_DIR = "/app/data";
-function resolvDbPath(): string {
-  if (process.env.CLOWDER_DB_PATH) return process.env.CLOWDER_DB_PATH;
-  // In containers, /app is the app root. Create /app/data if /app exists.
-  if (existsSync("/app") && !existsSync(PERSIST_DIR)) {
-    try { mkdirSync(PERSIST_DIR, { recursive: true }); } catch { /* fallback below */ }
-  }
-  return existsSync(PERSIST_DIR) ? `${PERSIST_DIR}/clowder.db` : "./clowder.db";
-}
-const DB_PATH = resolvDbPath();
-
-let _db: Database | null = null;
-
-function getDb(): Database {
-  if (!_db) {
-    _db = new Database(DB_PATH, { create: true });
-    _db.exec("PRAGMA journal_mode = WAL");
-    _db.exec("PRAGMA foreign_keys = ON");
-    migrate(_db);
-  }
-  return _db;
+function headers(): Record<string, string> {
+  return {
+    "x-api-key": API_KEY,
+    "Content-Type": "application/json",
+  };
 }
 
-function migrate(db: Database) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS clowder_sessions (
-      id TEXT PRIMARY KEY,
-      org_id TEXT NOT NULL DEFAULT 'default',
-      name TEXT NOT NULL DEFAULT '',
-      description TEXT,
-      phase TEXT NOT NULL DEFAULT 'assembling',
-      input_type TEXT NOT NULL DEFAULT 'text',
-      app_id TEXT,
-      app_url TEXT,
-      force_started_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
+async function apiPost(table: string, data: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/v1/data?table=${table}`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Data API POST ${table} failed (${res.status}): ${err.slice(0, 200)}`);
+  }
+  return res.json() as Promise<Record<string, unknown>>;
+}
 
-    CREATE TABLE IF NOT EXISTS clowder_experts (
-      id TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL REFERENCES clowder_sessions(id),
-      org_id TEXT NOT NULL DEFAULT 'default',
-      name TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'core',
-      domain TEXT NOT NULL,
-      voice_id TEXT,
-      confidence REAL NOT NULL DEFAULT 0.0,
-      status TEXT NOT NULL DEFAULT 'unclear',
-      blockers TEXT NOT NULL DEFAULT '[]',
-      system_prompt TEXT,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
+async function apiGet(table: string, id: string): Promise<Record<string, unknown> | null> {
+  const res = await fetch(`${API_BASE}/v1/data/${id}?table=${table}`, {
+    headers: headers(),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) return null;
+  return res.json() as Promise<Record<string, unknown>>;
+}
 
-    CREATE TABLE IF NOT EXISTS clowder_messages (
-      id TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL REFERENCES clowder_sessions(id),
-      org_id TEXT NOT NULL DEFAULT 'default',
-      expert_id TEXT,
-      role TEXT NOT NULL DEFAULT 'user',
-      content TEXT NOT NULL,
-      phase TEXT NOT NULL DEFAULT 'assembling',
-      metadata TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-  `);
+async function apiPatch(table: string, id: string, data: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/v1/data/${id}?table=${table}`, {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Data API PATCH ${table}/${id} failed (${res.status}): ${err.slice(0, 200)}`);
+  }
+  return res.json() as Promise<Record<string, unknown>>;
+}
+
+async function apiList(table: string, limit = 100): Promise<Record<string, unknown>[]> {
+  const res = await fetch(`${API_BASE}/v1/data?table=${table}&limit=${limit}&order_by=created_at.desc`, {
+    headers: headers(),
+  });
+  if (!res.ok) return [];
+  const data = await res.json() as { data?: Record<string, unknown>[] };
+  return data.data ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -100,60 +80,67 @@ export interface SessionRow {
   updated_at: string;
 }
 
-export function createSession(body: {
+function toSessionRow(raw: Record<string, unknown>): SessionRow {
+  return {
+    id: String(raw.id ?? ""),
+    org_id: String(raw.org_id ?? "default"),
+    name: String(raw.name ?? ""),
+    description: raw.description != null ? String(raw.description) : null,
+    phase: String(raw.phase ?? "assembling"),
+    input_type: String(raw.input_type ?? "text"),
+    app_id: raw.app_id != null ? String(raw.app_id) : null,
+    app_url: raw.app_url != null ? String(raw.app_url) : null,
+    force_started_at: raw.force_started_at != null ? String(raw.force_started_at) : null,
+    created_at: String(raw.created_at ?? new Date().toISOString()),
+    updated_at: String(raw.updated_at ?? new Date().toISOString()),
+  };
+}
+
+export async function createSession(body: {
   name?: string;
   description: string;
   input_type?: string;
-}): SessionRow {
-  const db = getDb();
-  const id = randomUUID();
+}): Promise<SessionRow> {
   let name = body.name || body.description;
   if (name.length > 60) {
     const cut = name.lastIndexOf(" ", 60);
     name = cut > 20 ? name.slice(0, cut) : name.slice(0, 60);
-    // Trim trailing punctuation for cleaner display
     name = name.replace(/[,;:\-–—]+$/, "").trimEnd();
   }
-  const now = new Date().toISOString();
 
-  db.prepare(
-    `INSERT INTO clowder_sessions (id, name, description, input_type, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(id, name, body.description, body.input_type ?? "text", now, now);
-
-  return getSession(id)!;
+  const raw = await apiPost("clowder_sessions", {
+    org_id: "default",
+    name,
+    description: body.description,
+    phase: "assembling",
+    input_type: body.input_type ?? "text",
+  });
+  return toSessionRow(raw);
 }
 
-export function getSession(id: string): SessionRow | null {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_sessions WHERE id = ?").get(id) as SessionRow | null;
+export async function getSession(id: string): Promise<SessionRow | null> {
+  const raw = await apiGet("clowder_sessions", id);
+  return raw ? toSessionRow(raw) : null;
 }
 
-export function updateSessionPhase(id: string, phase: string): void {
-  const db = getDb();
-  const now = new Date().toISOString();
-  db.prepare("UPDATE clowder_sessions SET phase = ?, updated_at = ? WHERE id = ?").run(phase, now, id);
+export async function updateSessionPhase(id: string, phase: string): Promise<void> {
+  await apiPatch("clowder_sessions", id, { phase });
 }
 
-export function listSessions(limit = 10): SessionRow[] {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_sessions ORDER BY created_at DESC LIMIT ?").all(limit) as SessionRow[];
+export async function listSessions(limit = 10): Promise<SessionRow[]> {
+  const rows = await apiList("clowder_sessions", limit);
+  return rows.map(toSessionRow);
 }
 
-export function updateSessionApp(id: string, appId: string, appUrl: string): void {
-  const db = getDb();
-  const now = new Date().toISOString();
-  db.prepare(
-    "UPDATE clowder_sessions SET app_id = ?, app_url = ?, updated_at = ? WHERE id = ?"
-  ).run(appId, appUrl, now, id);
+export async function updateSessionApp(id: string, appId: string, appUrl: string): Promise<void> {
+  await apiPatch("clowder_sessions", id, { app_id: appId, app_url: appUrl });
 }
 
-export function setForceStarted(id: string): void {
-  const db = getDb();
-  const now = new Date().toISOString();
-  db.prepare(
-    "UPDATE clowder_sessions SET force_started_at = ?, phase = 'planning', updated_at = ? WHERE id = ?"
-  ).run(now, now, id);
+export async function setForceStarted(id: string): Promise<void> {
+  await apiPatch("clowder_sessions", id, {
+    force_started_at: new Date().toISOString(),
+    phase: "planning",
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -170,14 +157,34 @@ export interface ExpertRow {
   voice_id: string | null;
   confidence: number;
   status: string;
-  blockers: string; // JSON string
+  blockers: string; // JSON string — kept for API compat with expertToApi()
   system_prompt: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
 }
 
-export function createExpert(
+function toExpertRow(raw: Record<string, unknown>): ExpertRow {
+  const blockers = raw.blockers;
+  return {
+    id: String(raw.id ?? ""),
+    session_id: String(raw.session_id ?? ""),
+    org_id: String(raw.org_id ?? "default"),
+    name: String(raw.name ?? ""),
+    role: String(raw.role ?? "core"),
+    domain: String(raw.domain ?? ""),
+    voice_id: raw.voice_id != null ? String(raw.voice_id) : null,
+    confidence: Number(raw.confidence ?? 0),
+    status: String(raw.status ?? "unclear"),
+    blockers: typeof blockers === "string" ? blockers : JSON.stringify(blockers ?? []),
+    system_prompt: raw.system_prompt != null ? String(raw.system_prompt) : null,
+    sort_order: Number(raw.sort_order ?? 0),
+    created_at: String(raw.created_at ?? new Date().toISOString()),
+    updated_at: String(raw.updated_at ?? new Date().toISOString()),
+  };
+}
+
+export async function createExpert(
   sessionId: string,
   body: {
     name: string;
@@ -187,30 +194,39 @@ export function createExpert(
     system_prompt?: string;
     sort_order?: number;
   }
-): ExpertRow {
-  const db = getDb();
-  const id = randomUUID();
-  const now = new Date().toISOString();
-
-  db.prepare(
-    `INSERT INTO clowder_experts (id, session_id, name, role, domain, voice_id, system_prompt, sort_order, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, sessionId, body.name, body.role, body.domain, body.voice_id ?? null, body.system_prompt ?? null, body.sort_order ?? 0, now, now);
-
-  return getExpert(id)!;
+): Promise<ExpertRow> {
+  const raw = await apiPost("clowder_experts", {
+    session_id: sessionId,
+    org_id: "default",
+    name: body.name,
+    role: body.role,
+    domain: body.domain,
+    voice_id: body.voice_id ?? null,
+    confidence: 0,
+    status: "unclear",
+    blockers: [],
+    system_prompt: body.system_prompt ?? null,
+    sort_order: body.sort_order ?? 0,
+  });
+  return toExpertRow(raw);
 }
 
-export function getExpert(id: string): ExpertRow | null {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_experts WHERE id = ?").get(id) as ExpertRow | null;
+export async function getExpert(id: string): Promise<ExpertRow | null> {
+  const raw = await apiGet("clowder_experts", id);
+  return raw ? toExpertRow(raw) : null;
 }
 
-export function listExperts(sessionId: string): ExpertRow[] {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_experts WHERE session_id = ? ORDER BY sort_order").all(sessionId) as ExpertRow[];
+export async function listExperts(sessionId: string): Promise<ExpertRow[]> {
+  // Data API jsonb mode doesn't support column filtering — fetch all and filter client-side.
+  // Clowder has at most ~50 experts across all sessions, so this is fine.
+  const rows = await apiList("clowder_experts", 200);
+  return rows
+    .filter((r) => r.session_id === sessionId)
+    .map(toExpertRow)
+    .sort((a, b) => a.sort_order - b.sort_order);
 }
 
-export function updateExpert(
+export async function updateExpert(
   id: string,
   body: {
     confidence?: number;
@@ -218,36 +234,19 @@ export function updateExpert(
     blockers?: string[];
     system_prompt?: string;
   }
-): ExpertRow {
-  const db = getDb();
-  const parts: string[] = [];
-  const values: unknown[] = [];
+): Promise<ExpertRow> {
+  const patch: Record<string, unknown> = {};
+  if (body.confidence !== undefined) patch.confidence = body.confidence;
+  if (body.status !== undefined) patch.status = body.status;
+  if (body.blockers !== undefined) patch.blockers = body.blockers;
+  if (body.system_prompt !== undefined) patch.system_prompt = body.system_prompt;
 
-  if (body.confidence !== undefined) {
-    parts.push("confidence = ?");
-    values.push(body.confidence);
+  if (Object.keys(patch).length > 0) {
+    const raw = await apiPatch("clowder_experts", id, patch);
+    return toExpertRow(raw);
   }
-  if (body.status !== undefined) {
-    parts.push("status = ?");
-    values.push(body.status);
-  }
-  if (body.blockers !== undefined) {
-    parts.push("blockers = ?");
-    values.push(JSON.stringify(body.blockers));
-  }
-  if (body.system_prompt !== undefined) {
-    parts.push("system_prompt = ?");
-    values.push(body.system_prompt);
-  }
-
-  if (parts.length > 0) {
-    parts.push("updated_at = ?");
-    values.push(new Date().toISOString());
-    values.push(id);
-    db.prepare(`UPDATE clowder_experts SET ${parts.join(", ")} WHERE id = ?`).run(...values);
-  }
-
-  return getExpert(id)!;
+  const raw = await apiGet("clowder_experts", id);
+  return toExpertRow(raw ?? {});
 }
 
 // ---------------------------------------------------------------------------
@@ -262,11 +261,26 @@ export interface MessageRow {
   role: string;
   content: string;
   phase: string;
-  metadata: string; // JSON string
+  metadata: string; // JSON string — kept for API compat with messageToApi()
   created_at: string;
 }
 
-export function createMessage(
+function toMessageRow(raw: Record<string, unknown>): MessageRow {
+  const metadata = raw.metadata;
+  return {
+    id: String(raw.id ?? ""),
+    session_id: String(raw.session_id ?? ""),
+    org_id: String(raw.org_id ?? "default"),
+    expert_id: raw.expert_id != null ? String(raw.expert_id) : null,
+    role: String(raw.role ?? "user"),
+    content: String(raw.content ?? ""),
+    phase: String(raw.phase ?? "assembling"),
+    metadata: typeof metadata === "string" ? metadata : JSON.stringify(metadata ?? {}),
+    created_at: String(raw.created_at ?? new Date().toISOString()),
+  };
+}
+
+export async function createMessage(
   sessionId: string,
   body: {
     content: string;
@@ -274,41 +288,37 @@ export function createMessage(
     role?: string;
     metadata?: Record<string, unknown>;
   }
-): MessageRow {
-  const db = getDb();
-  const id = randomUUID();
-  const session = getSession(sessionId);
-  const now = new Date().toISOString();
+): Promise<MessageRow> {
+  const session = await getSession(sessionId);
 
-  db.prepare(
-    `INSERT INTO clowder_messages (id, session_id, expert_id, role, content, phase, metadata, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    sessionId,
-    body.expert_id ?? null,
-    body.role ?? "user",
-    body.content,
-    session?.phase ?? "assembling",
-    JSON.stringify(body.metadata ?? {}),
-    now
-  );
-
-  return getMessage(id)!;
+  const raw = await apiPost("clowder_messages", {
+    session_id: sessionId,
+    org_id: "default",
+    expert_id: body.expert_id ?? null,
+    role: body.role ?? "user",
+    content: body.content,
+    phase: session?.phase ?? "assembling",
+    metadata: body.metadata ?? {},
+  });
+  return toMessageRow(raw);
 }
 
-export function getMessage(id: string): MessageRow | null {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_messages WHERE id = ?").get(id) as MessageRow | null;
+export async function getMessage(id: string): Promise<MessageRow | null> {
+  const raw = await apiGet("clowder_messages", id);
+  return raw ? toMessageRow(raw) : null;
 }
 
-export function listMessages(sessionId: string): MessageRow[] {
-  const db = getDb();
-  return db.prepare("SELECT * FROM clowder_messages WHERE session_id = ? ORDER BY created_at").all(sessionId) as MessageRow[];
+export async function listMessages(sessionId: string): Promise<MessageRow[]> {
+  // Client-side filtering — message count per session is typically <50
+  const rows = await apiList("clowder_messages", 500);
+  return rows
+    .filter((r) => r.session_id === sessionId)
+    .map(toMessageRow)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
 // ---------------------------------------------------------------------------
-// Row → API type converters
+// Row → API type converters (unchanged interface)
 // ---------------------------------------------------------------------------
 
 export function sessionToApi(row: SessionRow) {
@@ -338,7 +348,7 @@ export function expertToApi(row: ExpertRow) {
     voice_id: row.voice_id,
     confidence: row.confidence,
     status: row.status,
-    blockers: JSON.parse(row.blockers),
+    blockers: typeof row.blockers === "string" ? JSON.parse(row.blockers) : row.blockers,
     system_prompt: row.system_prompt,
     sort_order: row.sort_order,
     created_at: row.created_at,
@@ -355,7 +365,7 @@ export function messageToApi(row: MessageRow) {
     role: row.role,
     content: row.content,
     phase: row.phase,
-    metadata: JSON.parse(row.metadata),
+    metadata: typeof row.metadata === "string" ? JSON.parse(row.metadata) : row.metadata,
     created_at: row.created_at,
   };
 }

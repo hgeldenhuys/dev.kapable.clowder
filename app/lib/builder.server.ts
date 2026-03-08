@@ -647,8 +647,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       const slug = session.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
       const appUrl = `https://${slug}.kapable.run`;
 
-      // Persist project info in local DB
-      updateSessionApp(sessionId, projectId, appUrl);
+      // Persist project info via Data API
+      await updateSessionApp(sessionId, projectId, appUrl);
 
       provisionResult = { projectId, apiKey, tables: createdTables };
 
@@ -693,8 +693,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     );
 
     if (deployResult) {
-      // Update local DB with final app URL
-      updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
+      // Update Data API with final app URL
+      await updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
     }
   }
 

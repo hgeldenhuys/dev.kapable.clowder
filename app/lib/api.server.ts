@@ -1,7 +1,8 @@
 /**
  * BFF API layer for Clowder.
  *
- * All operations use local SQLite (db.server.ts) — no Rust API dependency.
+ * All operations use the Kapable Data API (db.server.ts) for persistent
+ * storage that survives container deploys.
  * SSE events are emitted via sse.server.ts for real-time updates.
  */
 
@@ -99,17 +100,17 @@ export async function createClowderSession(body: {
   description: string;
   input_type?: string;
 }): Promise<ClowderSession> {
-  const row = createSession(body);
+  const row = await createSession(body);
   return sessionToApi(row) as ClowderSession;
 }
 
 export async function listClowderSessions(): Promise<ClowderSession[]> {
-  const rows = listSessions();
+  const rows = await listSessions();
   return rows.map(sessionToApi) as ClowderSession[];
 }
 
 export async function updateSessionPhase(sessionId: string, phase: ClowderSession["phase"]): Promise<void> {
-  dbUpdateSessionPhase(sessionId, phase);
+  await dbUpdateSessionPhase(sessionId, phase);
   emitPhaseChanged(sessionId, phase);
 }
 
@@ -117,9 +118,9 @@ export async function getClowderSession(sessionId: string): Promise<{
   session: ClowderSession;
   experts: ClowderExpert[];
 }> {
-  const row = getSession(sessionId);
+  const row = await getSession(sessionId);
   if (!row) throw new Error(`Session not found: ${sessionId}`);
-  const expertRows = listExperts(sessionId);
+  const expertRows = await listExperts(sessionId);
   return {
     session: sessionToApi(row) as ClowderSession,
     experts: expertRows.map(expertToApi) as ClowderExpert[],
@@ -127,7 +128,7 @@ export async function getClowderSession(sessionId: string): Promise<{
 }
 
 export async function listClowderMessages(sessionId: string): Promise<ClowderMessage[]> {
-  const rows = listMessages(sessionId);
+  const rows = await listMessages(sessionId);
   return rows.map(messageToApi) as ClowderMessage[];
 }
 
@@ -140,7 +141,7 @@ export async function sendClowderMessage(
     metadata?: Record<string, unknown>;
   }
 ): Promise<ClowderMessage> {
-  const row = createMessage(sessionId, body);
+  const row = await createMessage(sessionId, body);
   const msg = messageToApi(row) as ClowderMessage;
 
   // Emit SSE event
@@ -157,7 +158,7 @@ export async function sendClowderMessage(
 }
 
 export async function listClowderExperts(sessionId: string): Promise<ClowderExpert[]> {
-  const rows = listExperts(sessionId);
+  const rows = await listExperts(sessionId);
   return rows.map(expertToApi) as ClowderExpert[];
 }
 
@@ -172,7 +173,7 @@ export async function createClowderExpert(
     sort_order?: number;
   }
 ): Promise<ClowderExpert> {
-  const row = createExpert(sessionId, body);
+  const row = await createExpert(sessionId, body);
   const expert = expertToApi(row) as ClowderExpert;
 
   // Emit SSE event (include domain/role so client can add new experts)
@@ -199,7 +200,7 @@ export async function updateClowderExpert(
     system_prompt?: string;
   }
 ): Promise<ClowderExpert> {
-  const row = updateExpert(expertId, body);
+  const row = await updateExpert(expertId, body);
   const expert = expertToApi(row) as ClowderExpert;
 
   // Emit SSE event (include domain/role so client can add new experts)
@@ -217,8 +218,8 @@ export async function updateClowderExpert(
 }
 
 export async function forceStartBuild(sessionId: string): Promise<ClowderSession> {
-  setForceStarted(sessionId);
-  const row = getSession(sessionId);
+  await setForceStarted(sessionId);
+  const row = await getSession(sessionId);
   if (!row) throw new Error(`Session not found: ${sessionId}`);
 
   // Emit SSE events
