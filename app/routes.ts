@@ -11,4 +11,5 @@ export default [
   route("api/clowder-session/:sessionId/force-start", "routes/api.clowder-force-start.ts"),
   route("api/clowder-sessions", "routes/api.clowder-sessions.ts"),
   route("health", "routes/api.health.ts"),
+  route("api/purge", "routes/api.purge.ts"),
 ] satisfies RouteConfig;

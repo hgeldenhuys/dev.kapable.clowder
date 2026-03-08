@@ -53,6 +53,14 @@ async function apiPatch(table: string, id: string, data: Record<string, unknown>
   return res.json() as Promise<Record<string, unknown>>;
 }
 
+async function apiDelete(table: string, id: string): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/v1/data/${id}?table=${table}`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+  return res.ok;
+}
+
 async function apiList(table: string, limit = 300): Promise<Record<string, unknown>[]> {
   const res = await fetch(`${API_BASE}/v1/data?table=${table}&limit=${limit}`, {
     headers: headers(),
@@ -322,6 +330,41 @@ export async function listMessages(sessionId: string): Promise<MessageRow[]> {
     .filter((r) => r.session_id === sessionId)
     .map(toMessageRow)
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+// ---------------------------------------------------------------------------
+// Purge stale sessions (pool maintenance)
+// ---------------------------------------------------------------------------
+
+export async function purgeStale(): Promise<{ sessions: number; rows: number }> {
+  const allRows = await apiList("clowder_sessions");
+  const stalePhases = new Set(["assembling", "ideating", "planning"]);
+  const staleSessions = allRows.filter((r) => stalePhases.has(String(r.phase ?? "")));
+  const staleIds = new Set(staleSessions.map((r) => String(r.id)));
+
+  if (staleIds.size === 0) return { sessions: 0, rows: 0 };
+
+  // Delete orphaned experts and messages for stale sessions
+  let deletedRows = 0;
+  const experts = await apiList("clowder_experts");
+  for (const e of experts) {
+    if (staleIds.has(String(e.session_id))) {
+      if (await apiDelete("clowder_experts", String(e.id))) deletedRows++;
+    }
+  }
+  const messages = await apiList("clowder_messages");
+  for (const m of messages) {
+    if (staleIds.has(String(m.session_id))) {
+      if (await apiDelete("clowder_messages", String(m.id))) deletedRows++;
+    }
+  }
+
+  // Delete the sessions themselves
+  for (const id of staleIds) {
+    if (await apiDelete("clowder_sessions", id)) deletedRows++;
+  }
+
+  return { sessions: staleIds.size, rows: deletedRows };
 }
 
 // ---------------------------------------------------------------------------
