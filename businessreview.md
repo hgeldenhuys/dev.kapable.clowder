@@ -299,3 +299,37 @@ SSH unavailable for mounting persistent volumes.
 - **Flow:** Fully autonomous + persists across deploys (Data API)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
 - **Data API backend:** Stable across 3 rounds (no new issues)
+
+---
+
+## E2E Testing Round 8 — 2026-03-08
+
+### Goal: Build another app, discover pool scaling issues
+
+### Iteration 24: Neighborhood Fitness Challenge — 13 tables!
+- Session `4da1a8e7` → **13 tables**: users, neighborhoods, challenges, teams, challenge_participants, team_members, activity_logs, leaderboards, badges, user_badges, social_posts, post_likes, post_comments
+- **2 messages** (initial short description + comprehensive follow-up) → ideating → planning → building
+- Project provisioned: `e890751e-7b14-4c79-9a4c-7783bf4eacdd`
+- **Most complex app yet** — 13 tables with social features (feed, likes, comments)
+
+### Iteration 25: Shared jsonb pool scaling fix
+- **Problem:** Pool reached 83 rows (54 messages, 21 experts, 6 sessions, 2 legacy). At `limit=100`, client-side `_type` filtering could start truncating results as the pool grows.
+- **Discovery:** `limit=200` and `limit=300` now return 200 OK (previously `limit=500` caused 502, which may have been a temporary API issue).
+- **Fix:** Increased default `apiList` limit from 100 to 300. Removed explicit `100` from all 3 callers. Gives ~3.5x headroom.
+- **Math:** At ~13 messages/session, 300 rows covers ~23 sessions. Sufficient for current scale.
+- **Long-term:** jsonb shared pool will eventually need pagination or per-table isolation.
+- Commit: `b8c9d36`
+
+### Deployed
+- Push + Connect App Pipeline deploy successful
+- Health check: OK
+- Pool limit fix now live on production
+
+### Cumulative Stats (Rounds 1-8)
+- **Total apps built:** 11 (+fitness challenge)
+- **Total tables provisioned:** ~78
+- **Most complex app:** 13 tables (fitness challenge)
+- **Pool capacity:** 300 rows (~23 more sessions of headroom)
+- **Ideation speed:** 1-2 messages (depends on initial description length)
+- **Flow:** Fully autonomous + persists across deploys
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
