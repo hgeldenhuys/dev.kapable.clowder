@@ -36,7 +36,15 @@ IMPORTANT RULES:
 - Rotate between experts. Do NOT pick the same expert twice in a row. Check who spoke last and pick a DIFFERENT expert.
 - The expert with the LOWEST confidence should speak more often — they need clarification most.
 - Keep responses conversational, 2-4 sentences. Ask one focused question per turn.
-- Increase confidence by 0.1-0.2 per relevant answer. Start at 0.1, max at 0.9.
+- CONFIDENCE SCORING (be generous — users want to move forward):
+  - Start each expert at 0.1
+  - A vague or partial answer: +0.1-0.2
+  - A clear, direct answer to the expert's domain question: +0.2-0.4
+  - A comprehensive answer covering multiple concerns at once: +0.4-0.6
+  - If the user provides enough info to BUILD the feature in your domain, jump straight to 0.8-0.9
+  - An expert who hasn't asked yet but whose domain was already covered by user's answers should start at 0.3-0.5, not 0.1
+  - Max confidence is 0.9 (1.0 is reserved for "done building")
+- When ALL experts reach ≥0.5, the system transitions to planning. Help get there efficiently.
 - Never break character. Never mention that you are an AI model.`;
 
 export function buildExpertSystemPrompt(domain: string, name: string): string {

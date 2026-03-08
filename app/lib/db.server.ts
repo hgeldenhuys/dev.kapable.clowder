@@ -8,8 +8,12 @@
 import { Database } from "bun:sqlite";
 import { randomUUID } from "node:crypto";
 
-// Store DB in /app/data for container persistence, fallback to local dir
-const DB_PATH = process.env.CLOWDER_DB_PATH ?? "./clowder.db";
+// Store DB in /app/data for container persistence (survives deploys).
+// Falls back to ./clowder.db if /app/data doesn't exist (local dev).
+import { existsSync } from "node:fs";
+const PERSIST_DIR = "/app/data";
+const DB_PATH = process.env.CLOWDER_DB_PATH
+  ?? (existsSync(PERSIST_DIR) ? `${PERSIST_DIR}/clowder.db` : "./clowder.db");
 
 let _db: Database | null = null;
 
