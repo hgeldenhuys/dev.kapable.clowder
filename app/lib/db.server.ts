@@ -339,12 +339,16 @@ export async function listMessages(sessionId: string): Promise<MessageRow[]> {
 export async function purgeStale(): Promise<{ sessions: number; rows: number }> {
   const allRows = await apiList("clowder_sessions");
 
-  // Always purge stuck sessions (incomplete phases)
+  // Never purge sessions created in the last 5 minutes (prevents race with in-flight builds)
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const purgeable = allRows.filter((r) => String(r.created_at ?? "") < fiveMinAgo);
+
+  // Purge stuck sessions (incomplete phases) older than 5 min
   const stuckPhases = new Set(["assembling", "ideating", "planning"]);
-  const stuckSessions = allRows.filter((r) => stuckPhases.has(String(r.phase ?? "")));
+  const stuckSessions = purgeable.filter((r) => stuckPhases.has(String(r.phase ?? "")));
 
   // Keep only the 5 most recent delivered/building sessions, purge the rest
-  const completedSessions = allRows
+  const completedSessions = purgeable
     .filter((r) => r.phase === "delivered" || r.phase === "building")
     .sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
   const excessCompleted = completedSessions.slice(5);
