@@ -234,3 +234,41 @@ SSH unavailable for mounting persistent volumes.
 - **Ideation speed:** 2 messages (stable)
 - **Flow:** Fully autonomous + now persists across deploys (Data API)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 6 — 2026-03-08
+
+### Goal: Build another app, verify session persistence, fix home page
+
+### Iteration 19: Book Exchange App — Full autonomous build
+- Session `8c0cfed1` → **5 tables**: users, books, requests, messages, reviews
+- **2 messages** → ideating → planning → building (fully autonomous)
+- Project provisioned: `e92582b7-cf9f-4da4-93a8-8fe53f1b7750`
+
+### Iteration 20: Home page sessions not listed
+- **Problem:** `listSessions()` called `apiList("clowder_sessions", 10)` — shared jsonb pool returned 10 rows, none of which were sessions after `_type` filtering.
+- **Fix:** Increased to `limit=100` (not 500 — larger limits cause 502).
+- **Result:** Home page now shows all 5 sessions with correct phase badges.
+
+### Iteration 21: Data API 502 at high limits
+- **Problem:** `limit=500` on apiList caused 502 Bad Gateway from the platform API. Even `limit=100` briefly 502'd during an API outage.
+- **Root cause:** Platform API temporarily down (all endpoints returning 502).
+- **Fix:** Reduced all list limits to 100. `apiList` already returns `[]` on error, so Clowder degrades gracefully.
+- Commit: `64b81a2`
+
+### Iteration 22: Duplicate session on home page
+- **Observed:** "Pet sitting marketplace" appears twice (BUILDING and IDEATING). Likely a non-session record that passed `_type` filter (created before `_type` discriminator was added, with `!r._type` fallback).
+- **Low priority:** Will self-resolve as old records age out or can be cleaned up manually.
+
+### Commits
+- `64b81a2` — fix: reduce apiList limits to 100 for shared jsonb pool
+
+### Cumulative Stats (Rounds 1-6)
+- **Total apps built:** 9 (+book exchange)
+- **Total tables provisioned:** ~57
+- **Home page:** Now shows recent sessions with phase badges
+- **Data persistence:** Confirmed across 3 deploys
+- **Ideation speed:** 2 messages (stable)
+- **Flow:** Fully autonomous + now persists across deploys (Data API)
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
