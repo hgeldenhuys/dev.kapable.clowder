@@ -788,3 +788,25 @@ SSH unavailable for mounting persistent volumes.
 - **Avg tables per build:** 16
 - **Success rate:** 100% (since Gemini parser fix)
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 22 — 2026-03-08
+
+### Goal: Home page UX — show app URLs for delivered sessions
+
+### Improvement Made
+- **App URL in session list** — Delivered sessions now show a "Visit app →" link directly on the home page, saving users a click to find their deployed project.
+
+### Iteration 53: Home Services Marketplace — 11.9s, 15 tables
+- Session `31e5fe19` → **15 tables**: homeowners, properties, maintenance_history_logs, service_providers, service_categories, provider_service_categories, portfolio_photos, service_requests, quotes, appointments, reviews, recurring_maintenances, bulletin_board_posts, revenue_tracking, admin_dashboard
+- **Build time: 11.9s** — delivered on first poll
+
+### Cumulative Stats (Rounds 1-22)
+- **Total apps built:** 30
+- **Total tables provisioned:** ~309
+- **Avg build time:** 12.8s (from live stats)
+- **Fastest build:** 8.5 seconds
+- **Success rate:** 100% (last 6 builds)
+- **Pool:** Self-cleaning, stable
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
