@@ -457,3 +457,43 @@ SSH unavailable for mounting persistent volumes.
 - **Data hygiene:** All rows typed, newest-first sort, no legacy leaks
 - **Flow:** Single-request, ~21s, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 12 — 2026-03-08
+
+### Goal: Build another app, improve UX
+
+### Iteration 35: Sports League Manager — 19s build (new record!)
+- Session `e3318bb1` → **11 tables**: users, leagues, seasons, teams, team_members, games, scores, venues, venue_ratings, pickup_games, notifications
+- Project provisioned: `039218a4-38dc-495e-87d8-8ac0bdcb6ff8`
+- **Total time: 19 seconds** (new fastest, down from 21s)
+- Single-request flow: 5th consecutive success
+
+### Iteration 36: Word counter UX improvement
+- Added live word counter to home page textarea
+- Shows count in bottom-right, turns green at 200+ words with "instant build!" indicator
+- Guides power users toward the single-request auto-build threshold
+- Updated placeholder text to explain the 200-word feature
+- Commit: `07efeae`
+
+### Pool Status
+- 166 rows (55% of 300 limit), ~11 sessions headroom
+- 5 stale sessions consuming 19 rows (11%) — dead but not worth deleting
+
+### Speed Evolution
+| Round | Time | Model | Notes |
+|-------|------|-------|-------|
+| 1-8 | ~56s | Sonnet | Baseline |
+| 9 | ~70s | Sonnet | Fall-through fix |
+| 10 | ~23s | Flash | 2.4x faster |
+| 11 | ~21s | Flash | Previous record |
+| 12 | **~19s** | Flash | **New record, 2.9x faster** |
+
+### Cumulative Stats (Rounds 1-12)
+- **Total apps built:** 18 (+sports league manager)
+- **Total tables provisioned:** ~145
+- **Fastest build:** 19 seconds (2.9x improvement over baseline)
+- **UX:** Word counter guides users toward instant build
+- **Flow:** Single-request, ~19s, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
