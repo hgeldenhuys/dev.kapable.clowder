@@ -6,20 +6,23 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-// Explicitly load .env (systemd services may not trigger Bun's auto-load)
-try {
-  const envContent = readFileSync(".env", "utf-8");
-  for (const line of envContent.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eqIdx = trimmed.indexOf("=");
-    if (eqIdx > 0) {
-      const key = trimmed.slice(0, eqIdx).trim();
-      const val = trimmed.slice(eqIdx + 1).trim();
-      if (!process.env[key]) process.env[key] = val;
+// Load env files (systemd services may not trigger Bun's auto-load)
+// Try .env first (local overrides), then .env.production (committed defaults)
+for (const envFile of [".env", ".env.production"]) {
+  try {
+    const envContent = readFileSync(envFile, "utf-8");
+    for (const line of envContent.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim();
+        if (!process.env[key]) process.env[key] = val;
+      }
     }
-  }
-} catch { /* no .env file — use defaults */ }
+  } catch { /* env file not found — continue */ }
+}
 
 const BUILD_DIR = "./build";
 const PORT = Number(process.env.PORT) || 3025;
