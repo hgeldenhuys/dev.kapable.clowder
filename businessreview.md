@@ -723,3 +723,39 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** Self-cleaning, stable at 60 rows
 - **Flow:** Single-request JSON API, self-timed, parallel provisioning, "delivered" phase
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 20 — 2026-03-08
+
+### Goal: Trim spec prompt, add stats endpoint, fix critical bugs
+
+### Improvements Made
+1. **Stats endpoint** — `GET /api/stats` returns session counts by phase for monitoring
+2. **Prompt trimming** — Skip conversation context echo, remove summary paragraph request, maxTokens 4096→3072
+3. **Purge race condition fix** — Sessions < 5 min old are protected from purge (prevents deleting in-flight builds)
+4. **Flexible data model parser** — Handles Gemini's `{"json:data_model": [...]}` wrapper object + `json` and bare fenced blocks
+
+### Bugs Discovered & Fixed
+- **CRITICAL: Purge race condition** — Auto-purge from build N deleted session from build N+1 while it was still in "assembling" phase. Session `f6d0ab90` was completely destroyed. Fixed with 5-minute age guard.
+- **CRITICAL: Gemini JSON wrapper** — Gemini Flash wraps the data model in `{"json:data_model": [...]}` instead of using it as a code fence label. `parseDataModel` couldn't unwrap it → 0 tables. Fixed with object-key extraction fallback.
+- **Prompt over-trimming** — One-line compact JSON example confused the LLM. Restored multi-line example format.
+
+### Iteration 49: Emergency Preparedness (attempt 1) — purged mid-build
+- Session `f6d0ab90` → destroyed by purge race condition. Never reached delivered.
+
+### Iteration 50: Emergency Preparedness (attempt 2) — 0 tables
+- Session `05d5c9e1` → LLM returned spec but Gemini wrapper format unrecognized. 0 tables provisioned.
+
+### Iteration 51: Emergency Preparedness (attempt 3) — 10.8s, 15 tables ✓
+- Session `b5c7d865` → **15 tables**: households, emergency_readiness_checklists, skills_registry, emergency_supplies, incidents, shelters, missing_persons, wellness_checks, volunteer_deployments, communications, damage_assessments, insurance_claims, utility_restorations, debris_removals, mutual_aid_resources
+- **Build time: 10.8s** — delivered on first poll
+
+### Cumulative Stats (Rounds 1-20)
+- **Total apps built:** 28 (+emergency preparedness)
+- **Total tables provisioned:** ~279
+- **Fastest build:** 8.5 seconds (farmers market, 9 tables)
+- **Most complex build:** 20 tables (book club + university campus)
+- **Pool:** Self-cleaning with 5-min age guard
+- **Critical bugs fixed:** 2 (purge race, Gemini wrapper)
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
