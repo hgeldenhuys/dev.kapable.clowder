@@ -610,3 +610,24 @@ SSH unavailable for mounting persistent volumes.
 - **Pool:** Self-cleaning (auto-purge after each build)
 - **Flow:** Single-request, sub-10s possible, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 16 — 2026-03-08
+
+### Goal: Build another app, verify stable sub-15s builds
+
+### Iteration 44: Skill Swap Platform — 10.9s build
+- Session `9011b1c5` → **13 tables**: users, skills, user_skills_teachable, user_skills_wanted, skill_matches, sessions, session_reviews, reputation_badges, group_workshops, workshop_signups, learning_milestones, announcements, messages
+- Project provisioned: `95858b45-87a8-487a-af4d-2c4035448475`
+- **Total time: 10.9 seconds** (spec gen: 9.6s)
+- Pool: 193/300 (64%), ~8 sessions headroom
+- Build stable in 9-11s range
+
+### Cumulative Stats (Rounds 1-16)
+- **Total apps built:** 23 (+skill swap platform)
+- **Total tables provisioned:** ~207
+- **Fastest build:** 8.8 seconds (6.4x improvement over baseline)
+- **Pool:** Self-cleaning (auto-purge after each build)
+- **Flow:** Single-request, sub-15s consistent, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
