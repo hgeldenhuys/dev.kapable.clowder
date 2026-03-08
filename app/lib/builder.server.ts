@@ -86,7 +86,14 @@ function parseDataModel(spec: string): TableDef[] {
     spec.match(/```\n(\[[\s\S]+?\])\n```/);
   if (!match) return [];
   try {
-    const tables: TableDef[] = JSON.parse(match[1]);
+    let parsed = JSON.parse(match[1]);
+    // Gemini wraps in {"json:data_model": [...]} — extract the array
+    if (parsed && !Array.isArray(parsed) && typeof parsed === "object") {
+      const key = Object.keys(parsed).find((k) => Array.isArray(parsed[k]));
+      if (key) parsed = parsed[key];
+    }
+    const tables: TableDef[] = parsed;
+    if (!Array.isArray(tables)) return [];
     return tables
       .map((t) => ({
         name: t.name.toLowerCase().replace(/[^a-z0-9_]/g, "_"),
