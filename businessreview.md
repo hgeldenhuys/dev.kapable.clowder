@@ -416,3 +416,44 @@ SSH unavailable for mounting persistent volumes.
 - **Slug collisions:** Fixed with random suffix
 - **Flow:** Single-request, 23s, fully autonomous
 - **Scaffold deploy:** Still blocked on GITHUB_TOKEN
+
+---
+
+## E2E Testing Round 11 — 2026-03-08
+
+### Goal: Build another app, clean up data hygiene
+
+### Iteration 33: Household Expense Tracker — 21s build
+- Session `05aa04a8` → **10 tables**: users, households, household_memberships, expense_categories, expenses, expense_line_items, payments, recurring_expenses, shopping_list_items, activity_feed
+- Project provisioned: `440dfc9d-5bb8-4b09-b662-d9484831f3a3`
+- **Total time: 21 seconds** (new fastest)
+- Slug with random suffix confirmed working (`-ocuj`)
+- Single-request flow: 4th consecutive success
+
+### Iteration 34: Data hygiene cleanup
+- **Patched 2 untyped legacy rows** — added `_type: "clowder_sessions"` to pre-discriminator records
+- **Removed `!r._type` fallback** in `apiList` — all rows now have `_type`, so the fallback was just a leak risk
+- **Added `created_at` desc sort** to `listSessions()` — home page now shows newest sessions first
+- Commit: `68ea861`
+
+### Pool Status
+- 154 rows total (39 experts, 101 messages, 14 sessions, 0 untyped)
+- ~13 sessions of headroom at limit=300
+- Average 12 rows/session (down from 13 — fewer messages with single-request builds)
+
+### Speed Evolution
+| Round | Time | Model | Notes |
+|-------|------|-------|-------|
+| 1-8 | ~56s | Sonnet | Baseline |
+| 9 | ~70s | Sonnet | Fall-through fix |
+| 10 | ~23s | Flash | 2.4x faster |
+| 11 | **~21s** | Flash | New record |
+
+### Cumulative Stats (Rounds 1-11)
+- **Total apps built:** 17 (+household expense tracker)
+- **Total tables provisioned:** ~134
+- **Fastest build:** 21 seconds
+- **Build speed:** 56s → 21s (2.7x improvement)
+- **Data hygiene:** All rows typed, newest-first sort, no legacy leaks
+- **Flow:** Single-request, ~21s, fully autonomous
+- **Scaffold deploy:** Still blocked on GITHUB_TOKEN
