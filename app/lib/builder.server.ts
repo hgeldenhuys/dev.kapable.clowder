@@ -445,23 +445,15 @@ async function generatePlanningArtifacts(
     .map((m) => `${m.role}: ${m.content}`)
     .join("\n");
 
-  const prompt = `Based on this app idea and expert discussion, generate a planning document.
+  const prompt = `Extract a database schema from this app description.
 
-App Idea: ${sessionDescription}
+App: ${sessionDescription}
 
-Expert Discussion:
+Context:
 ${conversationSummary}
 
-Generate a comprehensive spec in markdown. Include:
-1. App overview and value proposition
-2. Target users
-3. Core features (MVP)
-4. User flows
-5. Data model (entities and relationships)
-6. Technical architecture
-7. Implementation backlog (10-15 prioritized stories)
+Output a brief app summary (3-5 sentences), then a JSON data model block.
 
-IMPORTANT: At the end of your markdown, include a JSON code block with the data model:
 \`\`\`json:data_model
 [
   { "name": "table_name", "columns": [
@@ -469,13 +461,17 @@ IMPORTANT: At the end of your markdown, include a JSON code block with the data 
   ]}
 ]
 \`\`\`
-Supported column types: text, integer, boolean, timestamp, json, uuid, vector
-Every table should include an "id" column of type "uuid" and a "created_at" column of type "timestamp".
 
-Output only the markdown document, no preamble.`;
+Rules:
+- Supported column types: text, integer, boolean, timestamp, json, uuid, vector
+- Every table MUST include "id" (uuid, required) and "created_at" (timestamp, required)
+- Use foreign key columns (e.g. "user_id" of type "uuid") for relationships
+- Include all entities mentioned in the description
+- Keep table/column names lowercase with underscores
+- Output ONLY the summary paragraph and the json:data_model block, nothing else`;
 
   try {
-    const spec = await callLLM(prompt, { maxTokens: 8192, timeout: 120000 });
+    const spec = await callLLM(prompt, { maxTokens: 4096, timeout: 60000 });
 
     if (spec.length > 100) {
       return [
