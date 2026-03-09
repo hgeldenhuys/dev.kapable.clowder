@@ -1,6 +1,8 @@
 import type { Route } from "./+types/api.clowder-messages";
 import { listClowderMessages, sendClowderMessage } from "~/lib/api.server";
 import { orchestrate } from "~/lib/orchestrator.server";
+import { appendVaultLine, sessionVaultPath } from "~/lib/vault.server";
+import { buildInterviewLine } from "~/lib/context.server";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const messages = await listClowderMessages(params.sessionId);
@@ -27,6 +29,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   // Save user message
   const userMessage = await sendClowderMessage(sessionId, { content, role: "user" });
+
+  // Accumulate user message in Vault interviews log (best-effort)
+  const interviewsPath = sessionVaultPath(sessionId, "interviews.jsonl");
+  appendVaultLine(interviewsPath, buildInterviewLine("user", content, "user")).catch((e) =>
+    console.error("Vault user interview append failed:", e),
+  );
 
   // Trigger PO orchestrator async — don't await on the request path for snappier UX.
   // The expert response arrives via SSE. We fire-and-forget here.

@@ -34,6 +34,9 @@ import {
   type ClowderMessage,
   type ClowderExpert,
 } from "./api.server";
+import { readVaultFile, writeVaultFile, appendVaultLine, sessionVaultPath } from "./vault.server";
+import { buildContextMarkdown, buildInterviewLine } from "./context.server";
+import type { ContextTeamMember } from "./context.server";
 
 interface POResponse {
   responding_expert: string;
@@ -229,9 +232,14 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     return { role: m.role, content: m.content, expertName };
   });
 
+  // Read context document from Vault (best-effort — PO works without it)
+  const contextPath = sessionVaultPath(sessionId, "context.md");
+  const contextDoc = await readVaultFile(contextPath).catch(() => null);
+
   // Build the PO prompt with session context
   const prompt = buildPOPrompt({
     sessionDescription: session.description ?? "Unknown app",
+    contextDocument: contextDoc ?? undefined,
     recentMessages,
     experts: experts.map((e) => ({
       name: e.name,
@@ -316,6 +324,13 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
       blockers: poResponse.blockers,
     },
   });
+
+  // Accumulate interview in Vault (best-effort, non-blocking)
+  const interviewsPath = sessionVaultPath(sessionId, "interviews.jsonl");
+  appendVaultLine(
+    interviewsPath,
+    buildInterviewLine(respondingExpert.name, poResponse.message, "expert", poResponse.confidence),
+  ).catch((e) => console.error("Vault interview append failed:", e));
 
   // Spawn specialists if requested
   if (poResponse.spawn_specialists?.length) {

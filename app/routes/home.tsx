@@ -3,6 +3,8 @@ import { Link, redirect, useSubmit } from "react-router";
 import type { Route } from "./+types/home";
 import { createClowderSession, listClowderSessions, sendClowderMessage } from "~/lib/api.server";
 import { orchestrate } from "~/lib/orchestrator.server";
+import { writeVaultFile, sessionVaultPath } from "~/lib/vault.server";
+import { buildContextMarkdown } from "~/lib/context.server";
 import { StepWizard } from "~/components/wizard/StepWizard";
 import { Step1Context, isStep1Valid } from "~/components/wizard/Step1Context";
 import type { Step1Data } from "~/components/wizard/Step1Context";
@@ -24,6 +26,22 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const session = await createClowderSession({ name: name || undefined, description });
+
+  // Create initial context document in Vault (best-effort, non-blocking)
+  const contextMd = buildContextMarkdown({
+    appName: name || "Untitled App",
+    description,
+    files: [],
+    team: [
+      { name: "Strategist", role: "core" },
+      { name: "Designer", role: "core" },
+      { name: "Architect", role: "core" },
+    ],
+    interviews: [],
+  });
+  writeVaultFile(sessionVaultPath(session.id, "context.md"), contextMd).catch((e) => {
+    console.error("Failed to create initial context doc:", e);
+  });
 
   // Auto-send the description as the first user message so experts respond immediately
   await sendClowderMessage(session.id, { content: description, role: "user" });

@@ -83,6 +83,7 @@ Help the user clarify their app idea by asking focused questions in your domain.
 
 export function buildPOPrompt(params: {
   sessionDescription: string;
+  contextDocument?: string;
   recentMessages: Array<{ role: string; content: string; expertName?: string }>;
   experts: Array<{ name: string; domain: string; confidence: number; blockers: string[] }>;
 }): string {
@@ -101,8 +102,13 @@ export function buildPOPrompt(params: {
   // Find who spoke last to enforce rotation
   const lastExpert = [...params.recentMessages].reverse().find((m) => m.role === "expert")?.expertName;
 
-  return `App Idea: ${params.sessionDescription}
+  // Include context document if available (gives PO full project knowledge)
+  const contextSection = params.contextDocument
+    ? `\n## Full Context\n${params.contextDocument}\n`
+    : "";
 
+  return `App Idea: ${params.sessionDescription}
+${contextSection}
 Current Expert Status:
 ${expertStatus}
 
