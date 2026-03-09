@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import { Link, redirect, useSubmit } from "react-router";
 import type { Route } from "./+types/home";
 import { createClowderSession, listClowderSessions, sendClowderMessage } from "~/lib/api.server";
@@ -133,6 +134,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
     onError: useCallback((error: string) => {
       console.error("Typehead stream error:", error);
       setTypeheadLoading(false);
+      toast.error("Team analysis failed. Proceeding with suggested team.");
     }, []),
   });
 
@@ -158,13 +160,19 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         body: JSON.stringify({ text }),
         signal: controller.signal,
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        toast.error("Expert prediction failed. Try adding more detail.");
+        return;
+      }
       const data = await res.json() as { specialists: PredictedSpecialist[] };
       if (!controller.signal.aborted) {
         setSpecialists(data.specialists ?? []);
       }
-    } catch {
-      // Aborted or network error — ignore
+    } catch (e) {
+      // Aborted requests are expected — only toast on real errors
+      if (!controller.signal.aborted) {
+        toast.error("Could not reach expert prediction service.");
+      }
     } finally {
       if (!controller.signal.aborted) {
         setPredicting(false);

@@ -172,6 +172,7 @@ export function useClowderSession({
       await fetch(`/api/clowder-session/${session.id}/force-start`, { method: "POST" });
     } catch (e) {
       console.error("Force start error:", e);
+      toast.error("Failed to start build. Please try again.");
     }
   }, [session.id]);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { toast } from "sonner";
 
 export type ClowderSSEEvent =
   | { type: "session_created"; session_id: string }
@@ -78,6 +79,10 @@ export function useClowderSSE({ sessionId, onEvent, enabled = true }: UseClowder
       es.onerror = () => {
         es?.close();
         if (!mounted) return;
+        // Toast only when backoff exceeds 8s (3+ consecutive failures)
+        if (retryDelay >= 8000) {
+          toast.error("Live updates disconnected. Reconnecting...", { id: "sse-disconnect" });
+        }
         // Exponential backoff: 1s → 2s → 4s → 8s → 16s → 30s max
         retryTimer = setTimeout(() => {
           retryDelay = Math.min(retryDelay * 2, 30000);
@@ -86,6 +91,10 @@ export function useClowderSSE({ sessionId, onEvent, enabled = true }: UseClowder
       };
 
       es.onopen = () => {
+        // Show reconnected toast if we had been disconnected
+        if (retryDelay >= 8000) {
+          toast.success("Live updates reconnected.", { id: "sse-disconnect" });
+        }
         // Reset backoff on successful connection
         retryDelay = 1000;
       };
