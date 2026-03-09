@@ -5,11 +5,13 @@ import { createClowderSession, listClowderSessions, sendClowderMessage } from "~
 import { orchestrate } from "~/lib/orchestrator.server";
 import { writeVaultFile, sessionVaultPath } from "~/lib/vault.server";
 import { buildContextMarkdown } from "~/lib/context.server";
+import type { ContextTeamMember } from "~/lib/context.server";
 import { StepWizard } from "~/components/wizard/StepWizard";
 import { Step1Context, isStep1Valid } from "~/components/wizard/Step1Context";
 import type { Step1Data } from "~/components/wizard/Step1Context";
 import { Step2Assembly } from "~/components/wizard/Step2Assembly";
 import type { Specialist } from "~/components/wizard/Step2Assembly";
+import { useTypeheadStream } from "~/hooks/useTypeheadStream";
 
 export async function loader() {
   const sessions = await listClowderSessions();
@@ -25,18 +27,38 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Please describe your app idea" };
   }
 
+  // Parse specialist team from form data (JSON array)
+  const specialistsJson = String(formData.get("specialists") ?? "[]");
+  let specialists: Array<{ type: string; name: string; confidence: number; reason?: string }> = [];
+  try {
+    specialists = JSON.parse(specialistsJson);
+  } catch {
+    // Invalid JSON — proceed with empty specialists
+  }
+
   const session = await createClowderSession({ name: name || undefined, description });
+
+  // Build team for context document
+  const team: ContextTeamMember[] = [
+    { name: "Strategist", role: "core" },
+    { name: "Designer", role: "core" },
+    { name: "Architect", role: "core" },
+  ];
+  for (const s of specialists) {
+    team.push({
+      name: s.name || s.type,
+      role: "specialist",
+      confidence: s.confidence,
+      reason: s.reason,
+    });
+  }
 
   // Create initial context document in Vault (best-effort, non-blocking)
   const contextMd = buildContextMarkdown({
     appName: name || "Untitled App",
     description,
     files: [],
-    team: [
-      { name: "Strategist", role: "core" },
-      { name: "Designer", role: "core" },
-      { name: "Architect", role: "core" },
-    ],
+    team,
     interviews: [],
   });
   writeVaultFile(sessionVaultPath(session.id, "context.md"), contextMd).catch((e) => {
@@ -75,6 +97,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   const [step1Data, setStep1Data] = useState<Step1Data>({
     appName: "",
     description: "",
+    files: [],
   });
 
   // Specialist prediction state (used in both Step 1 preview + Step 2)
@@ -84,14 +107,41 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastWordCountRef = useRef(0);
 
-  // Step 2 specialists (confirmed team, derived from predictions)
+  // Step 2 specialists (confirmed team, derived from predictions + typehead)
   const [step2Specialists, setStep2Specialists] = useState<Specialist[]>([]);
+  const [typeheadRunId, setTypeheadRunId] = useState<string | null>(null);
+  const [typeheadFlowId, setTypeheadFlowId] = useState<string | null>(null);
+  const [typeheadLoading, setTypeheadLoading] = useState(false);
+  const [typeheadTimedOut, setTypeheadTimedOut] = useState(false);
+  const typeheadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Typehead SSE stream
+  useTypeheadStream({
+    runId: typeheadRunId,
+    flowId: typeheadFlowId,
+    onSpecialistFound: useCallback((specialist) => {
+      setStep2Specialists((prev) => {
+        // Don't add duplicates
+        if (prev.some((s) => s.type === specialist.type)) return prev;
+        return [...prev, specialist];
+      });
+    }, []),
+    onComplete: useCallback(() => {
+      setTypeheadLoading(false);
+      if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+    }, []),
+    onError: useCallback((error: string) => {
+      console.error("Typehead stream error:", error);
+      setTypeheadLoading(false);
+    }, []),
+  });
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (abortRef.current) abortRef.current.abort();
+      if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
     };
   }, []);
 
@@ -146,31 +196,69 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
     [predictExperts],
   );
 
-  // Advance to Step 2 — seed step2 specialists from predictions
-  const handleGoToStep2 = useCallback(() => {
-    setStep2Specialists(
-      specialists.map((s) => ({
-        type: s.domain,
-        name: s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) + " Specialist",
-        confidence: s.confidence,
-        reason: s.reason,
-      })),
-    );
+  // Advance to Step 2 — seed specialists from predict-experts and trigger typehead flow
+  const handleGoToStep2 = useCallback(async () => {
+    // Seed with predict-experts results first (instant)
+    const seeded = specialists.map((s) => ({
+      type: s.domain,
+      name: s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) + " Specialist",
+      confidence: s.confidence,
+      reason: s.reason,
+    }));
+    setStep2Specialists(seeded);
     setCurrentStep(2);
-  }, [specialists]);
+
+    // Trigger typehead flow for more accurate specialist prediction
+    setTypeheadLoading(true);
+    setTypeheadTimedOut(false);
+
+    // 30s timeout — proceed with current team if typehead doesn't complete
+    typeheadTimeoutRef.current = setTimeout(() => {
+      setTypeheadLoading(false);
+      setTypeheadTimedOut(true);
+    }, 30000);
+
+    try {
+      const res = await fetch("/api/clowder-typehead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: step1Data.appName,
+          description: step1Data.description,
+          file_summaries: step1Data.files
+            .filter((f) => f.status === "done" && f.type === "text")
+            .map((f) => f.name),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json() as { runId: string; flowId: string };
+        setTypeheadRunId(data.runId);
+        setTypeheadFlowId(data.flowId);
+      } else {
+        // Typehead not available — proceed with predict-experts results
+        setTypeheadLoading(false);
+        if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+      }
+    } catch {
+      setTypeheadLoading(false);
+      if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+    }
+  }, [specialists, step1Data]);
 
   // Remove a specialist from Step 2
   const handleRemoveSpecialist = useCallback((type: string) => {
     setStep2Specialists((prev) => prev.filter((s) => s.type !== type));
   }, []);
 
-  // Step 2 confirm → create session via form submit
+  // Step 2 confirm → create session via form submit (includes specialist team)
   const handleConfirmTeam = useCallback(() => {
     const formData = new FormData();
     formData.set("name", step1Data.appName);
     formData.set("description", step1Data.description);
+    formData.set("specialists", JSON.stringify(step2Specialists));
     submit(formData, { method: "post", action: "?index" });
-  }, [step1Data, submit]);
+  }, [step1Data, step2Specialists, submit]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
@@ -191,7 +279,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           canProceed={
             currentStep === 1
               ? isStep1Valid(step1Data)
-              : !predicting
+              : !typeheadLoading
           }
         >
           {currentStep === 1 && (
@@ -229,12 +317,19 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           )}
 
           {currentStep === 2 && (
-            <Step2Assembly
-              appName={step1Data.appName}
-              specialists={step2Specialists}
-              loading={false}
-              onRemoveSpecialist={handleRemoveSpecialist}
-            />
+            <>
+              <Step2Assembly
+                appName={step1Data.appName}
+                specialists={step2Specialists}
+                loading={typeheadLoading}
+                onRemoveSpecialist={handleRemoveSpecialist}
+              />
+              {typeheadTimedOut && (
+                <p className="text-xs text-yellow-500 text-center mt-2">
+                  Team prediction timed out. Proceeding with current team.
+                </p>
+              )}
+            </>
           )}
         </StepWizard>
 

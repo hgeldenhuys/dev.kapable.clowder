@@ -14,4 +14,6 @@ export default [
   route("api/purge", "routes/api.purge.ts"),
   route("api/stats", "routes/api.stats.ts"),
   route("api/predict-experts", "routes/api.predict-experts.ts"),
+  route("api/clowder-upload", "routes/api.clowder-upload.ts"),
+  route("api/clowder-typehead", "routes/api.clowder-typehead.ts"),
 ] satisfies RouteConfig;

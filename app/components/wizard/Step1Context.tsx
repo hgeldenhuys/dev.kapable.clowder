@@ -1,17 +1,21 @@
 import type { ReactNode } from "react";
+import type { UploadedFile } from "~/lib/uploads.server";
+import { FileDropZone } from "./FileDropZone";
 
 export interface Step1Data {
   appName: string;
   description: string;
+  files: UploadedFile[];
 }
 
 interface Step1Props {
   data: Step1Data;
   onChange: (data: Step1Data) => void;
+  sessionId?: string; // needed for file uploads
   children?: ReactNode; // slot for specialist preview chips
 }
 
-export function Step1Context({ data, onChange, children }: Step1Props) {
+export function Step1Context({ data, onChange, sessionId, children }: Step1Props) {
   const descriptionLength = data.description.trim().length;
   const isValid = data.appName.trim().length >= 1 && descriptionLength >= 20;
   const wordCount = data.description.trim() ? data.description.trim().split(/\s+/).length : 0;
@@ -84,12 +88,30 @@ export function Step1Context({ data, onChange, children }: Step1Props) {
           </div>
         </div>
 
-        {/* File upload placeholder — Phase 3 */}
-        <div className="border border-dashed border-zinc-700 rounded-lg p-6 text-center">
-          <p className="text-sm text-zinc-500">
-            📎 File upload coming soon — drag & drop wireframes, requirements, or
-            reference docs
-          </p>
+        {/* File upload */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">
+            Reference Files <span className="text-muted-foreground font-normal">(optional)</span>
+          </label>
+          <FileDropZone
+            sessionId={sessionId}
+            files={data.files}
+            onFileAdded={(file) => {
+              // Replace existing file with same name (update status), or add new
+              const existing = data.files.findIndex((f) => f.name === file.name);
+              const updated = [...data.files];
+              if (existing >= 0) {
+                updated[existing] = file;
+              } else {
+                updated.push(file);
+              }
+              onChange({ ...data, files: updated });
+            }}
+            onFileRemoved={(filename) => {
+              onChange({ ...data, files: data.files.filter((f) => f.name !== filename) });
+            }}
+            disabled={!sessionId}
+          />
         </div>
       </div>
 
