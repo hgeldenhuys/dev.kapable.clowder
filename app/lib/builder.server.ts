@@ -3,13 +3,14 @@
  *
  * When the user triggers "force start" or all experts reach sufficient confidence,
  * this orchestrator:
- * 1. Synthesizes the planning artifacts (spec, backlog, arch doc, data model)
- * 2. Saves them to Org Vault via the platform API
- * 3. (v1 stub) Marks experts as "building" and the session as "building"
- * 4. (v2) Creates KAIT sessions per expert and monitors build progress
+ * 1. Synthesizes the planning artifacts (spec JSON with data model)
+ * 2. Saves spec.json to Org Vault via the platform API
+ * 3. Provisions project + tables on Kapable
+ * 4. Triggers the clowder.build flow (Loop/Agent pipeline) or falls back to scaffoldAndDeploy
+ * 5. Streams flow events as chat system messages
  *
- * V1 is intentionally stubbed for the build phase execution.
- * V2 will wire KAIT sessions to each expert.
+ * V1: scaffoldAndDeploy (LLM → GitHub → Deploy) — legacy fallback
+ * V2: clowder.build flow (Loop node → Agent node → iterative sprints)
  */
 
 import {
@@ -20,8 +21,29 @@ import {
   updateClowderExpert,
   updateSessionPhase,
   getApiBaseUrl,
+  getAdminKey,
 } from "./api.server";
 import { updateSessionApp, purgeStale } from "./db.server";
+import { writeVaultFile, sessionVaultPath } from "./vault.server";
+import { emitMessage } from "./sse.server";
+
+// ---------------------------------------------------------------------------
+// Structured spec types (Task 10: spec.json instead of spec.md)
+// ---------------------------------------------------------------------------
+
+interface TableDef {
+  name: string;
+  columns: Array<{ name: string; type: string; required?: boolean }>;
+}
+
+interface FromSpecPayload {
+  name: string;
+  tables: string[];
+  spec: {
+    tables: TableDef[];
+    flows?: Array<{ name: string; description: string }>;
+  };
+}
 
 interface BuildArtifact {
   type: "spec" | "backlog" | "architecture" | "data_model";
@@ -29,10 +51,10 @@ interface BuildArtifact {
   content: string;
 }
 
-/**
- * Call an LLM via OpenRouter API.
- * Uses OPENROUTER_API_KEY from env, falls back to empty string.
- */
+// ---------------------------------------------------------------------------
+// LLM helpers
+// ---------------------------------------------------------------------------
+
 const LLM_MODELS = ["minimax/minimax-m2.5", "google/gemini-3.1-flash-lite-preview"] as const;
 
 async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?: number; model?: string }): Promise<string> {
@@ -65,17 +87,17 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
       if (!res.ok) {
         const body = await res.text().catch(() => "");
         console.error(`LLM ${model} failed (${res.status}): ${body.slice(0, 200)}`);
-        continue; // Try next model
+        continue;
       }
 
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content ?? "";
       if (content.length > 50) return content;
       console.error(`LLM ${model} returned short response (${content.length} chars)`);
-      continue; // Try next model
+      continue;
     } catch (e) {
       console.error(`LLM ${model} error:`, e);
-      continue; // Try next model
+      continue;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -88,15 +110,9 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
 // Data model parsing (BL-CLW-003)
 // ---------------------------------------------------------------------------
 
-interface TableDef {
-  name: string;
-  columns: Array<{ name: string; type: string; required?: boolean }>;
-}
-
 const VALID_TYPES = new Set(["text", "integer", "boolean", "timestamp", "json", "uuid", "vector"]);
 
 function parseDataModel(spec: string): TableDef[] {
-  // Try exact format first, then common LLM variations
   const match =
     spec.match(/```json:data_model\n([\s\S]+?)\n```/) ||
     spec.match(/```json\n([\s\S]+?)\n```/) ||
@@ -104,7 +120,6 @@ function parseDataModel(spec: string): TableDef[] {
   if (!match) return [];
   try {
     let parsed = JSON.parse(match[1]);
-    // Gemini wraps in {"json:data_model": [...]} — extract the array
     if (parsed && !Array.isArray(parsed) && typeof parsed === "object") {
       const key = Object.keys(parsed).find((k) => Array.isArray(parsed[k]));
       if (key) parsed = parsed[key];
@@ -153,7 +168,6 @@ async function provisionTables(
   apiKey: string,
   tables: TableDef[]
 ): Promise<string[]> {
-  // Fire all table creation requests concurrently — tables are independent (jsonb mode)
   const results = await Promise.allSettled(
     tables.map(async (table) => {
       const platformColumns = table.columns
@@ -188,13 +202,9 @@ async function provisionTables(
 }
 
 // ---------------------------------------------------------------------------
-// Scaffold + Deploy (BL-CLW-002)
+// Scaffold + Deploy — LEGACY FALLBACK (BL-CLW-002)
 // ---------------------------------------------------------------------------
 
-/**
- * GitHub REST API helpers — no CLI tools needed on production.
- * Requires GITHUB_TOKEN env var.
- */
 function githubHeaders(): Record<string, string> {
   const token = process.env.GITHUB_TOKEN ?? "";
   return {
@@ -210,7 +220,7 @@ async function createGitHubRepo(repoName: string): Promise<boolean> {
     headers: { ...githubHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ name: repoName, auto_init: true, private: false }),
   });
-  if (res.status === 422) return true; // Already exists — OK
+  if (res.status === 422) return true;
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     console.error(`GitHub repo create failed (${res.status}): ${body.slice(0, 200)}`);
@@ -224,7 +234,6 @@ async function pushFilesToGitHub(
   repo: string,
   files: Array<{ path: string; content: string }>,
 ): Promise<boolean> {
-  // Get the default branch's latest commit SHA
   const refRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`, {
     headers: githubHeaders(),
   });
@@ -235,7 +244,6 @@ async function pushFilesToGitHub(
   const refData = await refRes.json() as any;
   const latestCommitSha = refData.object.sha;
 
-  // Create blobs for each file
   const treeItems: Array<{ path: string; mode: string; type: string; sha: string }> = [];
   for (const file of files) {
     const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
@@ -253,7 +261,6 @@ async function pushFilesToGitHub(
 
   if (treeItems.length === 0) return false;
 
-  // Create a tree
   const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
     method: "POST",
     headers: { ...githubHeaders(), "Content-Type": "application/json" },
@@ -265,7 +272,6 @@ async function pushFilesToGitHub(
   }
   const treeData = await treeRes.json() as any;
 
-  // Create a commit
   const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
     method: "POST",
     headers: { ...githubHeaders(), "Content-Type": "application/json" },
@@ -281,7 +287,6 @@ async function pushFilesToGitHub(
   }
   const commitData = await commitRes.json() as any;
 
-  // Update the ref to point to the new commit
   const updateRefRes = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`,
     {
@@ -297,10 +302,6 @@ async function pushFilesToGitHub(
   return true;
 }
 
-/**
- * Generate a minimal RR7 + Bun scaffold via LLM,
- * push to GitHub via REST API, register as Connect App, and trigger deploy.
- */
 async function scaffoldAndDeploy(
   sessionId: string,
   sessionName: string,
@@ -319,7 +320,6 @@ async function scaffoldAndDeploy(
     return null;
   }
 
-  // Step 1: Generate scaffold with LLM
   await sendProgress("Generating your app code...");
 
   const tableDescriptions = tables
@@ -376,7 +376,6 @@ Plus route files for each table's CRUD pages.`;
       return null;
     }
 
-    // Parse the file blocks
     const fileBlocks = output.matchAll(/--- FILE: (.+?) ---\n([\s\S]*?)--- END FILE ---/g);
     const files: Array<{ path: string; content: string }> = [];
     for (const match of fileBlocks) {
@@ -390,7 +389,6 @@ Plus route files for each table's CRUD pages.`;
 
     await sendProgress(`Generated ${files.length} files. Pushing to GitHub...`);
 
-    // Step 2: Create GitHub repo and push files via REST API
     const repoName = `clowder-${slug}`;
     const owner = "hgeldenhuys";
     const repoUrl = `https://github.com/${owner}/${repoName}`;
@@ -401,7 +399,6 @@ Plus route files for each table's CRUD pages.`;
       return null;
     }
 
-    // Small delay to let GitHub initialize the repo
     await new Promise((r) => setTimeout(r, 2000));
 
     const pushed = await pushFilesToGitHub(owner, repoName, files);
@@ -410,7 +407,6 @@ Plus route files for each table's CRUD pages.`;
       return null;
     }
 
-    // Step 3: Register as Connect App
     await sendProgress("Registering app on Kapable...");
 
     const registerRes = await fetch(`${getApiBaseUrl()}/v1/apps`, {
@@ -435,7 +431,6 @@ Plus route files for each table's CRUD pages.`;
     const appData = await registerRes.json() as any;
     const appId = appData.app?.id ?? appData.id;
 
-    // Step 4: Trigger deploy
     await sendProgress("Deploying your app...");
 
     const deployRes = await fetch(
@@ -460,15 +455,19 @@ Plus route files for each table's CRUD pages.`;
   }
 }
 
+// ---------------------------------------------------------------------------
+// Task 10: Generate structured spec JSON (not markdown)
+// ---------------------------------------------------------------------------
+
 /**
- * Generate planning artifacts using Claude headless.
- * Falls back to stub content if Claude is not available.
+ * Generate a structured FromSpec payload from the session description.
+ * Returns a JSON object ready for POST /v1/board/from-spec.
  */
-async function generatePlanningArtifacts(
+async function generateSpecJson(
+  sessionName: string,
   sessionDescription: string,
   messages: Array<{ role: string; content: string }>
-): Promise<BuildArtifact[]> {
-  // Only include conversation context if experts added meaningful content beyond echoing the description
+): Promise<{ specPayload: FromSpecPayload; tables: TableDef[] } | null> {
   const expertMessages = messages.filter((m) => m.role === "expert");
   const hasExpertContext = expertMessages.length > 1;
   const contextBlock = hasExpertContext
@@ -499,67 +498,218 @@ Rules:
     const spec = await callLLM(prompt, { maxTokens: 3072, timeout: 30000 });
 
     if (spec.length > 100) {
-      return [
-        {
-          type: "spec",
-          title: "App Specification",
-          content: spec,
-        },
-      ];
+      const tables = parseDataModel(spec);
+      if (tables.length > 0) {
+        const payload: FromSpecPayload = {
+          name: sessionName,
+          tables: tables.map((t) => t.name),
+          spec: { tables },
+        };
+        return { specPayload: payload, tables };
+      }
     }
   } catch (e) {
     console.error("LLM spec generation failed:", e);
-    // Fall through to stub
   }
 
-  // Stub artifacts — used when Claude is not available
-  return [
-    {
-      type: "spec",
-      title: "App Specification",
-      content: `# App Specification
+  return null;
+}
 
-## Overview
-${sessionDescription}
+// ---------------------------------------------------------------------------
+// Task 11: Trigger clowder.build flow via API
+// ---------------------------------------------------------------------------
 
-## Status
-Planning artifacts will be generated by the expert committee during the build phase.
+/**
+ * Trigger the clowder.build flow pipeline.
+ * Returns the flow run_id for event streaming, or null if flow not configured.
+ */
+async function triggerBuildFlow(
+  sessionId: string,
+  specPayload: FromSpecPayload,
+  projectId: string,
+  projectApiKey: string,
+): Promise<{ runId: string } | null> {
+  const buildFlowId = process.env.CLOWDER_BUILD_FLOW_ID;
+  if (!buildFlowId) {
+    console.warn("CLOWDER_BUILD_FLOW_ID not configured — falling back to legacy scaffold");
+    return null;
+  }
 
-## Next Steps
-- Expert committee to finalize requirements
-- Architecture review
-- Implementation kickoff
-`,
-    },
-    {
-      type: "backlog",
-      title: "Implementation Backlog",
-      content: `# Implementation Backlog
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/v1/flows/${buildFlowId}/run`, {
+      method: "POST",
+      headers: platformHeaders(),
+      body: JSON.stringify({
+        variables: {
+          input: JSON.stringify({
+            ...specPayload,
+            sessionId,
+            projectId,
+            apiKey: projectApiKey,
+          }),
+        },
+      }),
+    });
 
-## Epic 1: Core Infrastructure
-- [ ] Project setup and scaffolding
-- [ ] Database schema implementation
-- [ ] Authentication system
-- [ ] API layer
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`Build flow trigger failed (${res.status}): ${body.slice(0, 200)}`);
+      return null;
+    }
 
-## Epic 2: Core Features
-- [ ] Primary user flow
-- [ ] Data management UI
-- [ ] User account management
+    const data = await res.json() as any;
+    const runId = data.data?.run_id ?? data.run_id ?? data.data?.id;
+    if (!runId) {
+      console.error("Build flow response missing run_id:", JSON.stringify(data).slice(0, 200));
+      return null;
+    }
 
-## Epic 3: Polish
-- [ ] Responsive design
-- [ ] Error handling
-- [ ] Performance optimization
-- [ ] Documentation
-`,
-    },
-  ];
+    return { runId };
+  } catch (e) {
+    console.error("Build flow trigger error:", e);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Task 12: Stream flow events as chat system messages
+// ---------------------------------------------------------------------------
+
+/**
+ * Connect to the flow run SSE stream and forward log/node events
+ * as system messages in the Clowder chat.
+ * Runs in the background — does not block.
+ */
+async function streamFlowEvents(
+  sessionId: string,
+  flowId: string,
+  runId: string,
+): Promise<void> {
+  const url = `${getApiBaseUrl()}/v1/flows/${flowId}/runs/${runId}/events`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        ...platformHeaders(),
+        Accept: "text/event-stream",
+      },
+      signal: AbortSignal.timeout(1800000), // 30 min max
+    });
+
+    if (!res.ok || !res.body) {
+      console.error(`Flow event stream failed (${res.status})`);
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Parse SSE lines
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? ""; // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6).trim();
+        if (!jsonStr) continue;
+
+        try {
+          const event = JSON.parse(jsonStr);
+          await handleFlowEvent(sessionId, event);
+        } catch {
+          // Skip malformed events
+        }
+      }
+    }
+  } catch (e) {
+    if (String(e).includes("abort")) return; // Timeout is expected
+    console.error("Flow event stream error:", e);
+  }
 }
 
 /**
- * Save artifacts to Org Vault via the platform API.
+ * Handle a single flow event and forward relevant ones to Clowder chat.
  */
+async function handleFlowEvent(
+  sessionId: string,
+  event: Record<string, any>,
+): Promise<void> {
+  const eventType = event.event_type ?? event.type;
+
+  // Forward log node outputs as system messages
+  if (eventType === "node_complete" && event.node_type === "log") {
+    const message = event.output ?? event.message ?? "";
+    if (message) {
+      await sendClowderMessage(sessionId, {
+        content: message,
+        role: "system",
+        metadata: { source: "flow", node_type: "log" },
+      });
+    }
+    return;
+  }
+
+  // Forward loop iteration progress
+  if (eventType === "log" && event.event_name === "loop_iteration_start") {
+    const iteration = event.data?.iteration ?? "?";
+    const max = event.data?.max ?? "?";
+    await sendClowderMessage(sessionId, {
+      content: `Sprint ${iteration}/${max} starting...`,
+      role: "system",
+      metadata: { source: "flow", event_name: "loop_iteration_start" },
+    });
+    return;
+  }
+
+  // Forward agent node completions
+  if (eventType === "node_complete" && event.node_type === "agent") {
+    const output = event.output ?? "";
+    const summary = output.length > 200 ? output.slice(0, 200) + "..." : output;
+    if (summary) {
+      await sendClowderMessage(sessionId, {
+        content: `Agent completed: ${summary}`,
+        role: "system",
+        metadata: { source: "flow", node_type: "agent" },
+      });
+    }
+    return;
+  }
+
+  // Forward flow completion
+  if (eventType === "flow_complete" || eventType === "run_complete") {
+    const status = event.status ?? "done";
+    await sendClowderMessage(sessionId, {
+      content: status === "done"
+        ? "Build pipeline completed successfully!"
+        : `Build pipeline finished with status: ${status}`,
+      role: "system",
+      metadata: { source: "flow", event_type: eventType, status },
+    });
+    return;
+  }
+
+  // Forward flow errors
+  if (eventType === "node_error" || eventType === "flow_error") {
+    const error = event.error_message ?? event.error ?? "Unknown error";
+    await sendClowderMessage(sessionId, {
+      content: `Build pipeline error: ${String(error).slice(0, 300)}`,
+      role: "system",
+      metadata: { source: "flow", event_type: eventType },
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Save artifacts to Vault
+// ---------------------------------------------------------------------------
+
 async function saveArtifactsToVault(
   orgId: string,
   sessionName: string,
@@ -580,16 +730,18 @@ async function saveArtifactsToVault(
       });
     } catch (e) {
       console.error(`Failed to save artifact ${path}:`, e);
-      // Non-fatal — continue with other artifacts
     }
   }
 }
 
+// ---------------------------------------------------------------------------
+// Main build phase
+// ---------------------------------------------------------------------------
+
 /**
  * Run the build phase for a session.
  *
- * V1: Generates artifacts, saves to vault, marks session as "building".
- * V2: Will spawn KAIT sessions per expert for actual implementation.
+ * Priority: clowder.build flow (if CLOWDER_BUILD_FLOW_ID set) > scaffoldAndDeploy
  */
 export async function runBuildPhase(sessionId: string): Promise<void> {
   const buildStart = Date.now();
@@ -606,32 +758,80 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     metadata: { phase: "planning" },
   });
 
-  // Generate artifacts
-  const artifacts = await generatePlanningArtifacts(
+  // ---------------------------------------------------------------------------
+  // Task 10: Generate structured spec JSON
+  // ---------------------------------------------------------------------------
+
+  const specResult = await generateSpecJson(
+    session.name,
     session.description ?? "",
     messages.map((m) => ({ role: m.role, content: m.content }))
   );
 
-  // Save artifacts to platform (Clowder artifacts table)
-  for (const artifact of artifacts) {
-    try {
-      await fetch(`${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/artifacts`, {
-        method: "POST",
-        headers: platformHeaders(),
-        body: JSON.stringify({
-          artifact_type: artifact.type === "spec" ? "spec" : artifact.type,
-          title: artifact.title,
-          content: artifact.content,
-          created_by: "po",
-        }),
-      });
-    } catch (e) {
-      console.error("Failed to save artifact:", e);
+  let tables: TableDef[] = [];
+  let specPayload: FromSpecPayload | null = null;
+
+  if (specResult) {
+    tables = specResult.tables;
+    specPayload = specResult.specPayload;
+
+    // Write spec.json to Vault
+    const specJsonPath = sessionVaultPath(sessionId, "spec.json");
+    await writeVaultFile(specJsonPath, JSON.stringify(specPayload, null, 2)).catch((e) =>
+      console.error("Vault spec.json write failed:", e)
+    );
+
+    // Save legacy markdown artifact too (for human readability)
+    const artifacts: BuildArtifact[] = [{
+      type: "spec",
+      title: "App Specification",
+      content: JSON.stringify(specPayload, null, 2),
+    }];
+
+    // Save to platform artifacts table
+    for (const artifact of artifacts) {
+      try {
+        await fetch(`${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/artifacts`, {
+          method: "POST",
+          headers: platformHeaders(),
+          body: JSON.stringify({
+            artifact_type: artifact.type,
+            title: artifact.title,
+            content: artifact.content,
+            created_by: "po",
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to save artifact:", e);
+      }
+    }
+
+    await saveArtifactsToVault(session.org_id, session.name, artifacts).catch(() => {});
+  } else {
+    // Fallback: generate stub artifacts (no tables extracted)
+    const stubArtifacts: BuildArtifact[] = [{
+      type: "spec",
+      title: "App Specification",
+      content: `# App Specification\n\n## Overview\n${session.description ?? ""}\n\n## Status\nNo structured data model was extracted. Planning artifacts will be generated manually.`,
+    }];
+
+    for (const artifact of stubArtifacts) {
+      try {
+        await fetch(`${getApiBaseUrl()}/v1/clowder/sessions/${sessionId}/artifacts`, {
+          method: "POST",
+          headers: platformHeaders(),
+          body: JSON.stringify({
+            artifact_type: artifact.type,
+            title: artifact.title,
+            content: artifact.content,
+            created_by: "po",
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to save artifact:", e);
+      }
     }
   }
-
-  // Also try vault (non-fatal)
-  await saveArtifactsToVault(session.org_id, session.name, artifacts).catch(() => {});
 
   // Mark all experts as "building"
   for (const expert of experts) {
@@ -644,9 +844,6 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
   // ---------------------------------------------------------------------------
   // Platform provisioning: create project + tables from spec
   // ---------------------------------------------------------------------------
-
-  const specContent = artifacts.find((a) => a.type === "spec")?.content ?? "";
-  const tables = parseDataModel(specContent);
 
   let provisionResult: { projectId: string; apiKey: string; tables: string[] } | null = null;
 
@@ -668,7 +865,6 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
       const createdTables = await provisionTables(apiKey, tables);
 
-      // Store project ID now; app_url set later only if scaffold deploys
       await updateSessionApp(sessionId, projectId, "");
 
       provisionResult = { projectId, apiKey, tables: createdTables };
@@ -689,41 +885,73 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
-  // Scaffold + Deploy: generate frontend, push to GitHub, deploy
+  // Task 11: Trigger build flow (or fallback to scaffold)
   // ---------------------------------------------------------------------------
 
   let deployResult: { appId: string; appUrl: string; repoUrl: string } | null = null;
+  let flowTriggered = false;
 
-  if (provisionResult && provisionResult.tables.length > 0) {
-    const sendProgress = async (msg: string, meta?: Record<string, unknown>) => {
-      await sendClowderMessage(sessionId, {
-        content: msg,
-        role: "system",
-        metadata: { phase: "building", ...meta },
-      });
-    };
-
-    deployResult = await scaffoldAndDeploy(
+  if (provisionResult && provisionResult.tables.length > 0 && specPayload) {
+    // Try flow-based build first
+    const flowResult = await triggerBuildFlow(
       sessionId,
-      session.name,
-      specContent,
-      tables,
-      provisionResult.apiKey,
+      specPayload,
       provisionResult.projectId,
-      sendProgress,
+      provisionResult.apiKey,
     );
 
-    if (deployResult) {
-      // Update Data API with final app URL
-      await updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
+    if (flowResult) {
+      flowTriggered = true;
+      const buildFlowId = process.env.CLOWDER_BUILD_FLOW_ID!;
+
+      await sendClowderMessage(sessionId, {
+        content: `Build pipeline started! Your app is being built iteratively by AI agents.`,
+        role: "system",
+        metadata: {
+          phase: "building",
+          flow_run_id: flowResult.runId,
+          flow_id: buildFlowId,
+        },
+      });
+
+      // Task 12: Stream flow events in the background (fire-and-forget)
+      streamFlowEvents(sessionId, buildFlowId, flowResult.runId).catch((e) =>
+        console.error("Flow event stream error:", e)
+      );
+    } else {
+      // Fallback to legacy scaffold
+      const sendProgress = async (msg: string, meta?: Record<string, unknown>) => {
+        await sendClowderMessage(sessionId, {
+          content: msg,
+          role: "system",
+          metadata: { phase: "building", ...meta },
+        });
+      };
+
+      deployResult = await scaffoldAndDeploy(
+        sessionId,
+        session.name,
+        JSON.stringify(specPayload),
+        tables,
+        provisionResult.apiKey,
+        provisionResult.projectId,
+        sendProgress,
+      );
+
+      if (deployResult) {
+        await updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
+      }
     }
   }
 
+  // ---------------------------------------------------------------------------
   // Final summary message
+  // ---------------------------------------------------------------------------
+
   const summaryLines = [
     `Planning complete! Here's what was created:`,
     ``,
-    ...artifacts.map((a) => `- ${a.title}`),
+    `- App Specification (spec.json)`,
   ];
 
   if (provisionResult) {
@@ -733,14 +961,20 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       `- Project ID: \`${provisionResult.projectId}\``,
       `- Tables: ${provisionResult.tables.map((t) => `\`${t}\``).join(", ")}`,
     );
-  } else if (tables.length === 0 && specContent.length > 100) {
+  } else if (tables.length === 0) {
     summaryLines.push(
       ``,
       `No structured data model was found in the spec. A developer can provision tables manually.`,
     );
   }
 
-  if (deployResult) {
+  if (flowTriggered) {
+    summaryLines.push(
+      ``,
+      `**Build pipeline running:**`,
+      `Your app is being built iteratively by AI agents. Progress updates will appear in chat.`,
+    );
+  } else if (deployResult) {
     summaryLines.push(
       ``,
       `**Your app is live!**`,
@@ -751,9 +985,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
   summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
 
-  // Update session phase based on outcome
-  // "delivered" when provisioned (even without scaffold deploy — project + tables are the core value)
-  const finalPhase = provisionResult ? "delivered" : "planning";
+  // Phase: "building" if flow is running, "delivered" if scaffold deployed, "planning" if nothing deployed
+  const finalPhase = flowTriggered ? "building" : (provisionResult ? "delivered" : "planning");
   await updateSessionPhase(sessionId, finalPhase);
 
   await sendClowderMessage(sessionId, {
@@ -761,12 +994,12 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     role: "system",
     metadata: {
       phase: finalPhase,
-      artifacts_count: artifacts.length,
       provisioned: !!provisionResult,
       tables_created: provisionResult?.tables.length ?? 0,
       table_names: provisionResult?.tables ?? [],
       project_id: provisionResult?.projectId ?? null,
       deployed: !!deployResult,
+      flow_triggered: flowTriggered,
       app_url: deployResult?.appUrl,
       build_time_ms: Date.now() - buildStart,
     },

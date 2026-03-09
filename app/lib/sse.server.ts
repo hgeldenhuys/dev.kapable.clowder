@@ -54,3 +54,7 @@ export function emitPhaseChanged(sessionId: string, phase: string) {
 export function emitForceStarted(sessionId: string) {
   emit(sessionId, "force_started", {});
 }
+
+export function emitBuildProgress(sessionId: string, data: Record<string, unknown>) {
+  emit(sessionId, "build_progress", data);
+}
