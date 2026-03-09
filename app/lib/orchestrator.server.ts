@@ -145,7 +145,7 @@ async function callPOAgent(prompt: string): Promise<POResponse | null> {
         temperature: 0.7,
         max_tokens: 500,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
     });
 
     if (!res.ok) {
@@ -237,7 +237,7 @@ async function callInterviewer(prompt: string): Promise<string | null> {
         temperature: 0.7,
         max_tokens: 300,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(45000),
     });
 
     if (!res.ok) {
@@ -294,7 +294,7 @@ async function generateIntentDocument(
         temperature: 0.3,
         max_tokens: 800,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
     });
 
     if (!res.ok) return null;
