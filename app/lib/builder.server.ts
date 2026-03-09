@@ -205,8 +205,29 @@ async function provisionTables(
 // Scaffold + Deploy — LEGACY FALLBACK (BL-CLW-002)
 // ---------------------------------------------------------------------------
 
-function githubHeaders(): Record<string, string> {
-  const token = process.env.GITHUB_TOKEN ?? "";
+/**
+ * Get an ephemeral GitHub write token from the platform's Develop App.
+ * Falls back to static GITHUB_TOKEN env var if the platform call fails.
+ */
+async function getGitHubToken(): Promise<string> {
+  // Try platform's GitHub App first (ephemeral, 1-hour TTL)
+  try {
+    const res = await fetch(
+      `${getApiBaseUrl()}/v1/git/develop/token?installation_id=113953574`,
+      { headers: platformHeaders() },
+    );
+    if (res.ok) {
+      const data = await res.json() as { token: string };
+      if (data.token) return data.token;
+    }
+  } catch (e) {
+    console.warn("Platform GitHub token fetch failed, trying static fallback:", e);
+  }
+  // Static fallback
+  return process.env.GITHUB_TOKEN ?? "";
+}
+
+function githubHeadersFromToken(token: string): Record<string, string> {
   return {
     Accept: "application/vnd.github+json",
     Authorization: `Bearer ${token}`,
@@ -214,10 +235,11 @@ function githubHeaders(): Record<string, string> {
   };
 }
 
-async function createGitHubRepo(repoName: string): Promise<boolean> {
+async function createGitHubRepo(repoName: string, token: string): Promise<boolean> {
+  const headers = githubHeadersFromToken(token);
   const res = await fetch("https://api.github.com/user/repos", {
     method: "POST",
-    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ name: repoName, auto_init: true, private: false }),
   });
   if (res.status === 422) return true;
@@ -233,9 +255,11 @@ async function pushFilesToGitHub(
   owner: string,
   repo: string,
   files: Array<{ path: string; content: string }>,
+  token: string,
 ): Promise<boolean> {
+  const headers = githubHeadersFromToken(token);
   const refRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`, {
-    headers: githubHeaders(),
+    headers,
   });
   if (!refRes.ok) {
     console.error(`GitHub get ref failed (${refRes.status})`);
@@ -248,7 +272,7 @@ async function pushFilesToGitHub(
   for (const file of files) {
     const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
       method: "POST",
-      headers: { ...githubHeaders(), "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ content: file.content, encoding: "utf-8" }),
     });
     if (!blobRes.ok) {
@@ -263,7 +287,7 @@ async function pushFilesToGitHub(
 
   const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
     method: "POST",
-    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ base_tree: latestCommitSha, tree: treeItems }),
   });
   if (!treeRes.ok) {
@@ -274,7 +298,7 @@ async function pushFilesToGitHub(
 
   const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
     method: "POST",
-    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({
       message: "Initial scaffold from Clowder",
       tree: treeData.sha,
@@ -291,7 +315,7 @@ async function pushFilesToGitHub(
     `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`,
     {
       method: "PATCH",
-      headers: { ...githubHeaders(), "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ sha: commitData.sha }),
     },
   );
@@ -314,9 +338,9 @@ async function scaffoldAndDeploy(
   const suffix = Math.random().toString(36).slice(2, 6);
   const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 25) + "-" + suffix;
 
-  const githubToken = process.env.GITHUB_TOKEN ?? "";
+  const githubToken = await getGitHubToken();
   if (!githubToken) {
-    await sendProgress("GITHUB_TOKEN not configured — skipping scaffold deploy.");
+    await sendProgress("GitHub token not available — skipping scaffold deploy. Install the Kapable Develop App on GitHub to enable this.");
     return null;
   }
 
@@ -393,7 +417,7 @@ Plus route files for each table's CRUD pages.`;
     const owner = "hgeldenhuys";
     const repoUrl = `https://github.com/${owner}/${repoName}`;
 
-    const repoCreated = await createGitHubRepo(repoName);
+    const repoCreated = await createGitHubRepo(repoName, githubToken);
     if (!repoCreated) {
       await sendProgress("Failed to create GitHub repo. The scaffold was generated but not saved.");
       return null;
@@ -401,7 +425,7 @@ Plus route files for each table's CRUD pages.`;
 
     await new Promise((r) => setTimeout(r, 2000));
 
-    const pushed = await pushFilesToGitHub(owner, repoName, files);
+    const pushed = await pushFilesToGitHub(owner, repoName, files, githubToken);
     if (!pushed) {
       await sendProgress(`Failed to push files to GitHub. Repo created at: ${repoUrl}`);
       return null;
