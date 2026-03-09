@@ -120,7 +120,7 @@ async function spawnSpecialists(
  * Uses Gemini Flash for fast, cheap responses.
  * Falls back to null if API key not configured or call fails.
  */
-async function callPOAgent(prompt: string): Promise<POResponse | null> {
+async function callPOAgent(prompt: string, timeoutMs = 60_000): Promise<POResponse | null> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     console.warn("OPENROUTER_API_KEY not set — using fallback responses");
@@ -145,7 +145,7 @@ async function callPOAgent(prompt: string): Promise<POResponse | null> {
         temperature: 0.7,
         max_tokens: 500,
       }),
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
 
     if (!res.ok) {
@@ -458,7 +458,11 @@ async function conductInterview(sessionId: string): Promise<OrchestrateResult | 
     })),
   });
 
-  const poResponse = await callPOAgent(autoPrompt);
+  let poResponse = await callPOAgent(autoPrompt);
+  if (!poResponse) {
+    console.log("[Interview→Ideation] PO agent failed, retrying with 90s timeout...");
+    poResponse = await callPOAgent(autoPrompt, 90_000);
+  }
   if (poResponse) {
     const respondingExpert = experts.find(
       (e) => e.name.toLowerCase() === poResponse.responding_expert.toLowerCase(),
@@ -577,8 +581,12 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     })),
   });
 
-  // Call Claude (or use fallback)
+  // Call Claude (or use fallback). Retry once with longer timeout on failure.
   let poResponse = await callPOAgent(prompt);
+  if (!poResponse) {
+    console.log("[Orchestrator] PO agent failed, retrying with 90s timeout...");
+    poResponse = await callPOAgent(prompt, 90_000);
+  }
   if (!poResponse) {
     poResponse = fallbackResponse(experts, session.description ?? "");
   }
