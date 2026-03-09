@@ -31,7 +31,7 @@ import { emitMessage } from "./sse.server";
 // Structured spec types (Task 10: spec.json instead of spec.md)
 // ---------------------------------------------------------------------------
 
-interface TableDef {
+export interface TableDef {
   name: string;
   columns: Array<{ name: string; type: string; required?: boolean }>;
 }
@@ -112,7 +112,8 @@ async function callLLM(prompt: string, options?: { maxTokens?: number; timeout?:
 
 const VALID_TYPES = new Set(["text", "integer", "boolean", "timestamp", "json", "uuid", "vector"]);
 
-function parseDataModel(spec: string): TableDef[] {
+/** @internal Exported for testing only */
+export function parseDataModel(spec: string): TableDef[] {
   const match =
     spec.match(/```json:data_model\n([\s\S]+?)\n```/) ||
     spec.match(/```json\n([\s\S]+?)\n```/) ||
