@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { StepIndicator } from "./StepIndicator";
 
 interface StepWizardProps {
@@ -25,6 +26,18 @@ export function StepWizard({
 
   const defaultNextLabel = step === 1 ? "Continue →" : step === 2 ? "Start Building →" : "";
 
+  // Cmd/Ctrl+Enter keyboard shortcut to proceed
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canProceed && step < 3) {
+        e.preventDefault();
+        onNext();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onNext, canProceed, step]);
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <StepIndicator currentStep={step} labels={labels} />
@@ -51,14 +64,19 @@ export function StepWizard({
           ) : (
             <div />
           )}
-          <button
-            type="button"
-            onClick={onNext}
-            disabled={!canProceed}
-            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {nextLabel || defaultNextLabel}
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canProceed}
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {nextLabel || defaultNextLabel}
+            </button>
+            <span className="text-xs text-muted-foreground">
+              {typeof navigator !== "undefined" && /Mac/.test(navigator.userAgent) ? "⌘" : "Ctrl"}+Enter
+            </span>
+          </div>
         </div>
       )}
     </div>

@@ -21,12 +21,8 @@ Discovered during end-to-end testing (2026-03-07). Three apps built:
 When the POST to send a message failed, the optimistic message was silently removed.
 Only `console.error` logged. Now shows sonner toast.
 
-### Homepage submit button below fold
-The "Assemble Your Clowder" button is not visible without scrolling. Users type
-their idea and don't know how to submit. Options:
-- Move button directly below the textarea
-- Add Cmd+Enter / Ctrl+Enter shortcut to submit
-- Make textarea auto-submit on Enter (with Shift+Enter for newline, like the chat)
+### Homepage submit button below fold (FIXED)
+Added Cmd/Ctrl+Enter keyboard shortcut to StepWizard. Hint shown below button.
 
 ### Session creation via API doesn't auto-trigger experts
 `POST /api/clowder-sessions` creates the session and redirects, but the initial
@@ -41,9 +37,8 @@ Fix: Trigger initial orchestration in the session creation endpoint.
 When no specific expert is active, the status bar shows "Committee discussion".
 Should show phase-specific text like "Planning your app..." or hide entirely.
 
-### "Skip ideation - build now" label
-Users may not understand "ideation". Consider: "I'm ready - start building" or
-"Start planning my app".
+### "Skip ideation - build now" label (FIXED)
+Changed to "I'm ready — start building".
 
 ### Expert labels truncated in aurora strip
 With 3 experts the labels fit, but with more they may overflow. No responsive

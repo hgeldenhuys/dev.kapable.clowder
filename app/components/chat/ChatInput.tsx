@@ -82,7 +82,7 @@ export function ChatInput({
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
           >
             <Play size={12} className="group-hover:text-primary" />
-            <span>Skip ideation — build now</span>
+            <span>I'm ready — start building</span>
           </button>
         )}
       </div>
