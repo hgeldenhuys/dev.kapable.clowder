@@ -8,11 +8,13 @@
  */
 
 const VAULT_BASE = process.env.KAPABLE_API_URL ?? "https://api.kapable.dev";
-const API_KEY = process.env.CLOWDER_INTERNAL_API_KEY ?? "";
+// Vault routes require x-admin-key (not x-api-key). If no admin key is
+// configured, skip all Vault calls — they are best-effort anyway.
+const ADMIN_KEY = process.env.KAPABLE_ADMIN_API_KEY ?? "";
 
 function vaultHeaders(contentType = "text/plain"): Record<string, string> {
   return {
-    "x-api-key": API_KEY,
+    "x-admin-key": ADMIN_KEY,
     "Content-Type": contentType,
   };
 }
@@ -21,6 +23,7 @@ function vaultHeaders(contentType = "text/plain"): Record<string, string> {
  * Write a file to the org vault.
  */
 export async function writeVaultFile(path: string, content: string): Promise<void> {
+  if (!ADMIN_KEY) return; // Skip — no admin key configured
   const contentType = path.endsWith(".json") || path.endsWith(".jsonl")
     ? "application/json"
     : path.endsWith(".md")
@@ -45,8 +48,9 @@ export async function writeVaultFile(path: string, content: string): Promise<voi
  * Returns null if not found.
  */
 export async function readVaultFile(path: string): Promise<string | null> {
+  if (!ADMIN_KEY) return null; // Skip — no admin key configured
   const res = await fetch(`${VAULT_BASE}/v1/vault/files/${path}`, {
-    headers: { "x-api-key": API_KEY },
+    headers: { "x-admin-key": ADMIN_KEY },
   });
 
   if (res.status === 404) return null;
