@@ -21,6 +21,10 @@ import {
   PO_SYSTEM_PROMPT,
   buildPOPrompt,
   buildExpertSystemPrompt,
+  INTERVIEWER_SYSTEM_PROMPT,
+  INTERVIEW_QUESTIONS,
+  buildInterviewTurnPrompt,
+  buildIntentDocumentPrompt,
 } from "./prompts.server";
 import { runBuildPhase } from "./builder.server";
 import {
@@ -208,6 +212,324 @@ function fallbackResponse(
 }
 
 /**
+ * Call the interviewer agent via OpenRouter API.
+ * Uses the same model as PO but with the interviewer system prompt.
+ */
+async function callInterviewer(prompt: string): Promise<string | null> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://clowder.kapable.run",
+        "X-Title": "Clowder AI App Builder",
+      },
+      body: JSON.stringify({
+        model: "minimax/minimax-m2.5",
+        messages: [
+          { role: "system", content: INTERVIEWER_SYSTEM_PROMPT },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 300,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!res.ok) {
+      console.error("Interviewer API error:", res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) return null;
+
+    // Extract JSON
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return text; // fallback: use raw text as message
+
+    const parsed = JSON.parse(match[0]) as { message?: string };
+    return parsed.message ?? text;
+  } catch (e) {
+    console.error("Interviewer API error:", e);
+    return null;
+  }
+}
+
+/**
+ * Generate the Intent Document from interview conversation.
+ * Returns the structured intent as JSON, or null on failure.
+ */
+async function generateIntentDocument(
+  sessionDescription: string,
+  conversationHistory: Array<{ role: string; content: string }>,
+): Promise<Record<string, unknown> | null> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null;
+
+  const prompt = buildIntentDocumentPrompt({ sessionDescription, conversationHistory });
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://clowder.kapable.run",
+        "X-Title": "Clowder AI App Builder",
+      },
+      body: JSON.stringify({
+        model: "minimax/minimax-m2.5",
+        messages: [
+          { role: "system", content: "You generate structured JSON documents. Respond with ONLY valid JSON." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.3,
+        max_tokens: 800,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) return null;
+
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+
+    return JSON.parse(match[0]) as Record<string, unknown>;
+  } catch (e) {
+    console.error("Intent document generation error:", e);
+    return null;
+  }
+}
+
+/**
+ * Conduct one turn of the intent interview.
+ *
+ * Determines which question to ask based on user message count,
+ * calls the LLM to generate a natural response, and after all
+ * questions are answered, generates the Intent Document and
+ * transitions to the "assembling" phase (spawns experts).
+ */
+async function conductInterview(sessionId: string): Promise<OrchestrateResult | null> {
+  const { session } = await getClowderSession(sessionId);
+  const allMessages = await listClowderMessages(sessionId);
+
+  // Count user messages to determine interview step
+  const userMessages = allMessages.filter((m) => m.role === "user");
+  const userMsgCount = userMessages.length;
+
+  // Build conversation history for the LLM
+  const conversationHistory = allMessages.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  // Determine which question to ask (0-indexed: Q1=after 1st msg, Q2=after 2nd, etc.)
+  const questionIndex = userMsgCount - 1; // 1st user msg → index 0 → ask Q1
+
+  if (questionIndex < INTERVIEW_QUESTIONS.length) {
+    // Ask the next interview question
+    const question = INTERVIEW_QUESTIONS[questionIndex];
+
+    const prompt = buildInterviewTurnPrompt({
+      sessionDescription: session.description ?? "Unknown app",
+      questionPrompt: question.prompt,
+      conversationSoFar: conversationHistory,
+    });
+
+    let message = await callInterviewer(prompt);
+
+    // Fallback if LLM fails
+    if (!message) {
+      const fallbacks: Record<string, string> = {
+        who: "That sounds exciting! Who is this app for? Who are the primary users, and what roles do they play?",
+        actions: "Great, that helps a lot! Now, what are the 3 most important things a user can DO in this app?",
+        success: "Perfect. Now imagine I built this perfectly — what would you show someone to prove it works? Walk me through a quick demo.",
+        scope: "Almost there! Last question: what should this app NOT do? What's explicitly out of scope for the first version?",
+      };
+      message = fallbacks[question.key] ?? "Can you tell me more about that?";
+    }
+
+    // Save as a system message (the PO interviewer, not an expert)
+    const interviewMessage = await sendClowderMessage(sessionId, {
+      content: message,
+      role: "expert", // Use "expert" role so the UI shows it in the chat flow
+      metadata: {
+        interview_step: questionIndex + 1,
+        interview_total: INTERVIEW_QUESTIONS.length,
+        interview_key: question.key,
+      },
+    });
+
+    // Log to Vault
+    const interviewsPath = sessionVaultPath(sessionId, "interviews.jsonl");
+    appendVaultLine(
+      interviewsPath,
+      buildInterviewLine("PO (Interview)", message, "expert"),
+    ).catch(() => {});
+
+    // Return a synthetic result (no expert entity during interview)
+    return {
+      expertMessage: interviewMessage,
+      updatedExpert: null as unknown as ClowderExpert, // No expert yet during interview
+    };
+  }
+
+  // All questions answered — generate the Intent Document
+  console.log(`[Interview] All ${INTERVIEW_QUESTIONS.length} questions answered for session ${sessionId}. Generating Intent Document...`);
+
+  const intentDoc = await generateIntentDocument(
+    session.description ?? "Unknown app",
+    conversationHistory,
+  );
+
+  // Store Intent Document
+  if (intentDoc) {
+    // Save to Vault as markdown
+    const intentMd = formatIntentDocument(intentDoc);
+    const intentPath = sessionVaultPath(sessionId, "intent.md");
+    writeVaultFile(intentPath, intentMd).catch((e) =>
+      console.error("Vault intent write failed:", e),
+    );
+
+    // Save to session as JSON (via Data API patch)
+    // We store it in the session description field as enriched context
+    // (or we could add an intent_document field — for v1, we use Vault)
+  }
+
+  // Send summary message to chat
+  const summary = intentDoc
+    ? `**Your vision is clear!** Here's what I've captured:\n\n` +
+      `**Mission:** ${intentDoc.mission ?? "—"}\n\n` +
+      `**Success looks like:** ${intentDoc.success_scenario ?? "—"}\n\n` +
+      `Your expert team is assembling now — they'll refine the details in their domains.`
+    : "Great, I have a good understanding of your vision! Let me assemble your expert team.";
+
+  const summaryMessage = await sendClowderMessage(sessionId, {
+    content: summary,
+    role: "system",
+    metadata: {
+      type: "intent_captured",
+      intent_document: intentDoc,
+    },
+  });
+
+  // Transition: interviewing → assembling
+  await updateSessionPhase(sessionId, "assembling");
+
+  // Write full context document for experts (includes intent)
+  if (intentDoc) {
+    const contextMd = `# Intent Document\n\n${formatIntentDocument(intentDoc)}\n\n---\n\n# Interview Transcript\n\n` +
+      conversationHistory.map((m) => `**${m.role === "user" ? "User" : "PO"}:** ${m.content}`).join("\n\n");
+    const contextPath = sessionVaultPath(sessionId, "context.md");
+    writeVaultFile(contextPath, contextMd).catch(() => {});
+  }
+
+  // Now spawn experts and immediately trigger first expert exchange
+  // The next user message will hit the regular orchestrate() path
+  // But we can also auto-trigger by transitioning to ideating with a synthetic prompt
+  const experts = await spawnCoreExperts(sessionId);
+  await updateSessionPhase(sessionId, "ideating");
+
+  // Auto-trigger the first expert exchange using the intent summary
+  // This makes the transition seamless — experts start discussing immediately
+  const autoPrompt = buildPOPrompt({
+    sessionDescription: session.description ?? "Unknown app",
+    contextDocument: intentDoc ? formatIntentDocument(intentDoc) : undefined,
+    recentMessages: [{ role: "system", content: summary }],
+    experts: experts.map((e) => ({
+      name: e.name,
+      domain: e.domain,
+      confidence: e.confidence,
+      blockers: [],
+    })),
+  });
+
+  const poResponse = await callPOAgent(autoPrompt);
+  if (poResponse) {
+    const respondingExpert = experts.find(
+      (e) => e.name.toLowerCase() === poResponse.responding_expert.toLowerCase(),
+    ) ?? experts[0];
+
+    if (respondingExpert) {
+      await updateClowderExpert(sessionId, respondingExpert.id, {
+        confidence: poResponse.confidence,
+        status: "on_stage",
+      });
+
+      await sendClowderMessage(sessionId, {
+        content: poResponse.message,
+        expert_id: respondingExpert.id,
+        role: "expert",
+        metadata: {
+          confidence: poResponse.confidence,
+          blockers: poResponse.blockers,
+        },
+      });
+    }
+  }
+
+  return {
+    expertMessage: summaryMessage,
+    updatedExpert: null as unknown as ClowderExpert,
+  };
+}
+
+/**
+ * Format an Intent Document as readable markdown.
+ */
+function formatIntentDocument(doc: Record<string, unknown>): string {
+  const lines: string[] = [];
+  lines.push(`## Mission\n${doc.mission ?? "—"}\n`);
+
+  const personas = doc.personas as Array<{ name: string; role: string; can: string[] }> | undefined;
+  if (personas?.length) {
+    lines.push("## Personas");
+    for (const p of personas) {
+      lines.push(`- **${p.name}** (${p.role}): ${(p.can ?? []).join(", ")}`);
+    }
+    lines.push("");
+  }
+
+  const stories = doc.core_stories as string[] | undefined;
+  if (stories?.length) {
+    lines.push("## Core Stories");
+    for (const s of stories) {
+      lines.push(`- ${s}`);
+    }
+    lines.push("");
+  }
+
+  if (doc.success_scenario) {
+    lines.push(`## Success Scenario\n${doc.success_scenario}\n`);
+  }
+
+  const outOfScope = doc.out_of_scope as string[] | undefined;
+  if (outOfScope?.length) {
+    lines.push("## Out of Scope");
+    for (const s of outOfScope) {
+      lines.push(`- ${s}`);
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+/**
  * Main orchestration function.
  *
  * Call this after saving the user's message to DB.
@@ -216,6 +538,12 @@ function fallbackResponse(
 export async function orchestrate(sessionId: string): Promise<OrchestrateResult | null> {
   // Load current state
   const { session } = await getClowderSession(sessionId);
+
+  // If we're in the interview phase, conduct the interview instead of expert routing
+  if (session.phase === "interviewing") {
+    return conductInterview(sessionId);
+  }
+
   let experts = await listClowderExperts(sessionId);
 
   // If no experts yet, spawn the core 3 first

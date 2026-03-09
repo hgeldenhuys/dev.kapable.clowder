@@ -122,7 +122,7 @@ export async function createSession(body: {
     org_id: "default",
     name,
     description: body.description,
-    phase: "assembling",
+    phase: "interviewing",
     input_type: body.input_type ?? "text",
   });
   return toSessionRow(raw);
@@ -344,7 +344,7 @@ export async function purgeStale(): Promise<{ sessions: number; rows: number }> 
   const purgeable = allRows.filter((r) => String(r.created_at ?? "") < fiveMinAgo);
 
   // Purge stuck sessions (incomplete phases) older than 5 min
-  const stuckPhases = new Set(["assembling", "ideating", "planning"]);
+  const stuckPhases = new Set(["interviewing", "assembling", "ideating", "planning"]);
   const stuckSessions = purgeable.filter((r) => stuckPhases.has(String(r.phase ?? "")));
 
   // Keep only the 5 most recent delivered/building sessions, purge the rest

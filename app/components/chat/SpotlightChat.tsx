@@ -66,7 +66,11 @@ export function SpotlightChat({
       {!activeExpert && (
         <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-border">
           <p className="text-sm text-muted-foreground">
-            {messages.length === 0 ? "Describe your app to begin" : "Committee discussion"}
+            {messages.length === 0
+              ? "Describe your app to begin"
+              : phase === "interviewing"
+                ? "Understanding your vision"
+                : "Committee discussion"}
           </p>
           <PhaseChip phase={phase} />
         </div>
@@ -81,9 +85,9 @@ export function SpotlightChat({
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-muted-foreground max-w-xs">
               <p className="text-4xl mb-3">🐱</p>
-              <p className="text-sm font-medium">Your Clowder is assembled.</p>
+              <p className="text-sm font-medium">Welcome to Clowder</p>
               <p className="text-xs mt-1">
-                Tell us about your app idea and the experts will ask questions to refine it.
+                Tell us about your app idea. We'll ask a few questions to understand your vision, then assemble your expert team.
               </p>
             </div>
           </div>
@@ -91,6 +95,10 @@ export function SpotlightChat({
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} experts={experts} />
         ))}
+        {/* Interview progress indicator */}
+        {phase === "interviewing" && messages.length > 0 && (
+          <InterviewProgress messages={messages} />
+        )}
         {isWaitingForExpert && (
           <div className="flex items-center gap-2 px-3 py-2">
             <div className="flex gap-1">
@@ -99,7 +107,9 @@ export function SpotlightChat({
               <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
             <span className="text-xs text-muted-foreground">
-              {activeExpert ? `${activeExpert.name} is thinking…` : "Experts are thinking…"}
+              {phase === "interviewing"
+                ? "Understanding your vision…"
+                : activeExpert ? `${activeExpert.name} is thinking…` : "Experts are thinking…"}
             </span>
           </div>
         )}
@@ -118,8 +128,49 @@ export function SpotlightChat({
   );
 }
 
+const INTERVIEW_STEPS = ["Your idea", "Who uses it", "Core actions", "Success scenario", "Scope"];
+
+function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
+  // Count user messages to determine progress
+  const userMsgCount = messages.filter((m) => m.role === "user").length;
+  const step = Math.min(userMsgCount, INTERVIEW_STEPS.length);
+
+  return (
+    <div className="flex items-center gap-1.5 px-4 py-2">
+      {INTERVIEW_STEPS.map((label, i) => (
+        <div key={label} className="flex items-center gap-1.5">
+          <div
+            className={`w-2 h-2 rounded-full transition-colors ${
+              i < step
+                ? "bg-amber-400"
+                : i === step
+                  ? "bg-amber-400/50 animate-pulse"
+                  : "bg-muted-foreground/20"
+            }`}
+          />
+          <span
+            className={`text-[10px] ${
+              i < step
+                ? "text-amber-400"
+                : i === step
+                  ? "text-amber-400/70"
+                  : "text-muted-foreground/40"
+            }`}
+          >
+            {label}
+          </span>
+          {i < INTERVIEW_STEPS.length - 1 && (
+            <span className="text-muted-foreground/20 text-[10px]">›</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PhaseChip({ phase }: { phase: string }) {
   const phaseLabels: Record<string, { label: string; color: string }> = {
+    interviewing: { label: "Understanding", color: "text-amber-400" },
     assembling: { label: "Assembling", color: "text-yellow-400" },
     ideating: { label: "Ideating", color: "text-blue-400" },
     planning: { label: "Planning", color: "text-purple-400" },

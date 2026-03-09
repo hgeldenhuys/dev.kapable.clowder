@@ -2,8 +2,8 @@
  * System prompts for the Clowder expert committee.
  *
  * The PO (Product Owner) agent is the main brain:
- * - Reads the user's message
- * - Decides which expert should respond
+ * - Conducts the Intent Interview (phase: interviewing)
+ * - Decides which expert should respond (phase: ideating)
  * - Generates that expert's response in-character
  * - Reports updated confidence for the expert
  */
@@ -117,4 +117,124 @@ ${history || "(no messages yet — this is the first turn)"}
 
 ${lastExpert ? `IMPORTANT: ${lastExpert} spoke last. You MUST pick a DIFFERENT expert this turn.` : ""}
 Now decide which expert responds and what they say. Pick the expert with the lowest confidence who has relevant questions.`;
+}
+
+// ---------------------------------------------------------------------------
+// Intent Interview — structured 5-question intake before experts activate
+// ---------------------------------------------------------------------------
+
+/**
+ * The 5 interview questions (question 0 = the user's initial description).
+ * After the user answers all 5, the PO generates an Intent Document.
+ */
+export const INTERVIEW_QUESTIONS = [
+  // Q1: Who — asked after the user's initial description (1 user message)
+  {
+    key: "who",
+    label: "Who uses this?",
+    prompt: `The user just described their app idea. Now ask them WHO this app is for.
+Ask about: primary users, secondary users, and what roles they play.
+Be warm and encouraging. Acknowledge their idea briefly, then ask ONE focused question about the target audience.
+Keep it to 2-3 sentences. End with a clear question.`,
+  },
+  // Q2: Core Actions — asked after user answers Who (2 user messages)
+  {
+    key: "actions",
+    label: "Core actions",
+    prompt: `The user told you who the app is for. Now ask about the CORE ACTIONS.
+Ask: "What are the 3 most important things a user can DO in this app?"
+Be specific — you want verb-noun pairs (e.g., "publish a recipe", "search by ingredient").
+Acknowledge their previous answer briefly, then ask ONE focused question.
+Keep it to 2-3 sentences.`,
+  },
+  // Q3: Success Scenario — asked after user answers Core Actions (3 user messages)
+  {
+    key: "success",
+    label: "Success scenario",
+    prompt: `The user told you the core actions. Now ask for a SUCCESS SCENARIO.
+Ask: "If I built this perfectly, what would you show someone to prove it works? Walk me through a quick 30-second demo."
+You want a concrete narrative: open app → do X → see Y → do Z → result.
+Acknowledge their previous answer briefly, then ask ONE focused question.
+Keep it to 2-3 sentences.`,
+  },
+  // Q4: Out of Scope — asked after user answers Success Scenario (4 user messages)
+  {
+    key: "scope",
+    label: "Out of scope",
+    prompt: `The user gave you a success scenario. Now ask about SCOPE BOUNDARIES.
+Ask: "What should this app NOT do? What's explicitly out of scope for the first version?"
+This prevents scope creep and helps the team focus.
+Acknowledge their previous answer briefly, then ask ONE final question.
+Keep it to 2-3 sentences. Mention this is the last question.`,
+  },
+];
+
+export const INTERVIEWER_SYSTEM_PROMPT = `You are the Product Owner (PO) for Clowder, an AI app builder.
+You are conducting a structured intake interview to understand what the user wants to build.
+Your goal is to capture their INTENT — not just features, but the outcome they want.
+
+Rules:
+- Be warm, encouraging, and conversational
+- Acknowledge the user's previous answer briefly (1 short sentence)
+- Ask exactly ONE question per turn (the one given to you)
+- Keep responses to 2-3 sentences total
+- Never break character. Never mention AI, prompts, or the interview structure.
+- You are a friendly product manager helping them clarify their vision.
+- Respond with ONLY valid JSON: { "message": "<your response>" }`;
+
+/**
+ * Build the prompt for one interview turn.
+ */
+export function buildInterviewTurnPrompt(params: {
+  sessionDescription: string;
+  questionPrompt: string;
+  conversationSoFar: Array<{ role: string; content: string }>;
+}): string {
+  const history = params.conversationSoFar
+    .map((m) => `${m.role === "user" ? "User" : "PO"}: ${m.content}`)
+    .join("\n");
+
+  return `App Idea: ${params.sessionDescription}
+
+Conversation so far:
+${history || "(first turn)"}
+
+YOUR TASK: ${params.questionPrompt}
+
+Respond with JSON: { "message": "<your response>" }`;
+}
+
+/**
+ * Build the prompt to generate the Intent Document from all interview answers.
+ */
+export function buildIntentDocumentPrompt(params: {
+  sessionDescription: string;
+  conversationHistory: Array<{ role: string; content: string }>;
+}): string {
+  const history = params.conversationHistory
+    .map((m) => `${m.role === "user" ? "User" : "PO"}: ${m.content}`)
+    .join("\n");
+
+  return `You just completed a 5-question intake interview. Generate a structured Intent Document from the conversation.
+
+App Idea: ${params.sessionDescription}
+
+Full Interview:
+${history}
+
+Generate a JSON Intent Document with this exact structure:
+{
+  "mission": "<one-sentence mission statement>",
+  "personas": [
+    { "name": "<role name>", "role": "primary|secondary", "can": ["<action 1>", "<action 2>"] }
+  ],
+  "core_stories": [
+    "As a <persona>, I can <action> so that <outcome>"
+  ],
+  "success_scenario": "<the concrete demo narrative the user described>",
+  "out_of_scope": ["<item 1>", "<item 2>"],
+  "summary": "<2-3 sentence summary suitable for showing the expert team>"
+}
+
+Respond with ONLY valid JSON — no markdown, no preamble.`;
 }
