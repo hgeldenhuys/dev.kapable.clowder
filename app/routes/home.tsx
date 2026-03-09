@@ -1,8 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Link, redirect } from "react-router";
+import { Link, redirect, useSubmit } from "react-router";
 import type { Route } from "./+types/home";
 import { createClowderSession, listClowderSessions, sendClowderMessage } from "~/lib/api.server";
 import { orchestrate } from "~/lib/orchestrator.server";
+import { StepWizard } from "~/components/wizard/StepWizard";
+import { Step1Context, isStep1Valid } from "~/components/wizard/Step1Context";
+import type { Step1Data } from "~/components/wizard/Step1Context";
+import { Step2Assembly } from "~/components/wizard/Step2Assembly";
+import type { Specialist } from "~/components/wizard/Step2Assembly";
 
 export async function loader() {
   const sessions = await listClowderSessions();
@@ -11,13 +16,14 @@ export async function loader() {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
+  const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
 
   if (!description) {
     return { error: "Please describe your app idea" };
   }
 
-  const session = await createClowderSession({ description });
+  const session = await createClowderSession({ name: name || undefined, description });
 
   // Auto-send the description as the first user message so experts respond immediately
   await sendClowderMessage(session.id, { content: description, role: "user" });
@@ -36,29 +42,6 @@ const phaseColors: Record<string, string> = {
   delivered: "text-emerald-400",
 };
 
-// Domain display config — colors and labels for specialist chips
-const domainConfig: Record<string, { label: string; color: string }> = {
-  commerce: { label: "Commerce", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
-  compliance: { label: "Compliance", color: "bg-red-500/20 text-red-300 border-red-500/30" },
-  growth: { label: "Growth", color: "bg-green-500/20 text-green-300 border-green-500/30" },
-  analytics: { label: "Analytics", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" },
-  security: { label: "Security", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" },
-  iot: { label: "IoT", color: "bg-violet-500/20 text-violet-300 border-violet-500/30" },
-  content: { label: "Content", color: "bg-pink-500/20 text-pink-300 border-pink-500/30" },
-  ai_ml: { label: "AI/ML", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-  realtime: { label: "Realtime", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
-  mapping: { label: "Mapping", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
-  social: { label: "Social", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" },
-  scheduling: { label: "Scheduling", color: "bg-teal-500/20 text-teal-300 border-teal-500/30" },
-  logistics: { label: "Logistics", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
-  healthcare: { label: "Healthcare", color: "bg-rose-500/20 text-rose-300 border-rose-500/30" },
-  education: { label: "Education", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" },
-  finance: { label: "Finance", color: "bg-lime-500/20 text-lime-300 border-lime-500/30" },
-  media: { label: "Media", color: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30" },
-};
-
-const defaultChipColor = "bg-gray-500/20 text-gray-300 border-gray-500/30";
-
 interface PredictedSpecialist {
   domain: string;
   confidence: number;
@@ -67,12 +50,24 @@ interface PredictedSpecialist {
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
   const { sessions } = loaderData;
-  const [wordCount, setWordCount] = useState(0);
+  const submit = useSubmit();
+
+  // Step wizard state
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [step1Data, setStep1Data] = useState<Step1Data>({
+    appName: "",
+    description: "",
+  });
+
+  // Specialist prediction state (used in both Step 1 preview + Step 2)
   const [specialists, setSpecialists] = useState<PredictedSpecialist[]>([]);
   const [predicting, setPredicting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastWordCountRef = useRef(0);
+
+  // Step 2 specialists (confirmed team, derived from predictions)
+  const [step2Specialists, setStep2Specialists] = useState<Specialist[]>([]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -83,7 +78,6 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   }, []);
 
   const predictExperts = useCallback(async (text: string) => {
-    // Cancel any in-flight request
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -110,107 +104,123 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
     }
   }, []);
 
-  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
-    setWordCount(words);
+  // Trigger predict-experts on description changes
+  const handleStep1Change = useCallback(
+    (data: Step1Data) => {
+      setStep1Data(data);
 
-    // Trigger prediction every 3 words (on word-count boundaries)
-    const wordBoundary = Math.floor(words / 3);
-    const lastBoundary = Math.floor(lastWordCountRef.current / 3);
-    lastWordCountRef.current = words;
+      const words = data.description.trim().split(/\s+/).filter(Boolean).length;
+      const wordBoundary = Math.floor(words / 3);
+      const lastBoundary = Math.floor(lastWordCountRef.current / 3);
+      lastWordCountRef.current = words;
 
-    if (wordBoundary > lastBoundary && words >= 3) {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        predictExperts(text);
-      }, 300);
-    }
+      if (wordBoundary > lastBoundary && words >= 3) {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+          predictExperts(data.description);
+        }, 300);
+      }
 
-    // Clear predictions if text is too short
-    if (words < 3) {
-      setSpecialists([]);
-    }
-  }, [predictExperts]);
+      if (words < 3) {
+        setSpecialists([]);
+      }
+    },
+    [predictExperts],
+  );
+
+  // Advance to Step 2 — seed step2 specialists from predictions
+  const handleGoToStep2 = useCallback(() => {
+    setStep2Specialists(
+      specialists.map((s) => ({
+        type: s.domain,
+        name: s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) + " Specialist",
+        confidence: s.confidence,
+        reason: s.reason,
+      })),
+    );
+    setCurrentStep(2);
+  }, [specialists]);
+
+  // Remove a specialist from Step 2
+  const handleRemoveSpecialist = useCallback((type: string) => {
+    setStep2Specialists((prev) => prev.filter((s) => s.type !== type));
+  }, []);
+
+  // Step 2 confirm → create session via form submit
+  const handleConfirmTeam = useCallback(() => {
+    const formData = new FormData();
+    formData.set("name", step1Data.appName);
+    formData.set("description", step1Data.description);
+    submit(formData, { method: "post", action: "?index" });
+  }, [step1Data, submit]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
-      <div className="max-w-2xl w-full text-center space-y-8">
+      <div className="w-full max-w-2xl text-center space-y-8">
         <div className="space-y-3">
           <h1 className="text-5xl font-bold tracking-tight">
             <span className="text-primary">Clowder</span>
           </h1>
           <p className="text-xl text-muted-foreground">
-            Describe your app idea. A committee of AI experts will guide you from
-            concept to deployed product.
+            A committee of AI experts will guide you from concept to deployed product.
           </p>
         </div>
 
-        <form method="post" action="?index" className="space-y-4">
-          <div className="relative">
-            <textarea
-              name="description"
-              placeholder="Describe your app idea in detail — who are the users, what do they do, what data is needed? (200+ words triggers instant auto-build)"
-              className="w-full min-h-[140px] p-4 pb-8 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary text-base"
-              required
-              onChange={handleTextChange}
-            />
-            <span className={`absolute bottom-2 right-3 text-xs ${wordCount >= 200 ? "text-green-400" : "text-muted-foreground"}`}>
-              {wordCount} word{wordCount !== 1 ? "s" : ""}{wordCount >= 200 ? " — instant build!" : ""}
-            </span>
-          </div>
-
-          {/* Predicted specialist chips */}
-          {specialists.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-center">
-              {/* Always-present core experts */}
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/20 text-primary border-primary/30">
-                Strategist
-              </span>
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/20 text-primary border-primary/30">
-                Designer
-              </span>
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/20 text-primary border-primary/30">
-                Architect
-              </span>
-              {/* Predicted specialists */}
-              {specialists.map((s) => {
-                const config = domainConfig[s.domain];
-                const label = config?.label ?? s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                const colorClass = config?.color ?? defaultChipColor;
-                return (
-                  <span
-                    key={s.domain}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity duration-300 ${colorClass}`}
-                    style={{ opacity: Math.max(0.4, s.confidence) }}
-                    title={s.reason}
-                  >
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
-                    {label}
-                  </span>
-                );
-              })}
-              {predicting && (
-                <span className="inline-flex items-center px-2 py-1 text-xs text-muted-foreground animate-pulse">
-                  ...
-                </span>
+        <StepWizard
+          step={currentStep}
+          onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
+          onBack={() => setCurrentStep(1)}
+          canProceed={
+            currentStep === 1
+              ? isStep1Valid(step1Data)
+              : !predicting
+          }
+        >
+          {currentStep === 1 && (
+            <Step1Context
+              data={step1Data}
+              onChange={handleStep1Change}
+            >
+              {/* Specialist preview chips */}
+              {specialists.length > 0 && (
+                <div className="space-y-2 mt-4">
+                  <p className="text-xs text-muted-foreground text-center">
+                    Suggested specialists — confirmed in next step
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {specialists.map((s) => (
+                      <span
+                        key={s.domain}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-zinc-800/50 text-zinc-400 border-zinc-700"
+                        style={{ opacity: Math.max(0.4, s.confidence) }}
+                        title={s.reason}
+                      >
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                        {s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </span>
+                    ))}
+                    {predicting && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs text-muted-foreground animate-pulse">
+                        ...
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
-            </div>
+            </Step1Context>
           )}
 
-          <button
-            type="submit"
-            className="w-full py-4 px-8 rounded-xl bg-primary text-primary-foreground font-semibold text-lg hover:opacity-90 transition-opacity"
-          >
-            Assemble Your Clowder
-          </button>
-        </form>
+          {currentStep === 2 && (
+            <Step2Assembly
+              appName={step1Data.appName}
+              specialists={step2Specialists}
+              loading={false}
+              onRemoveSpecialist={handleRemoveSpecialist}
+            />
+          )}
+        </StepWizard>
 
-        <p className="text-sm text-muted-foreground">
-          A clowder is a group of cats — and a team of expert AI agents that will
-          build your app together.
-        </p>
-
+        {/* Recent Sessions */}
         {sessions.length > 0 && (
           <div className="mt-8 text-left space-y-3">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -253,6 +263,11 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        <p className="text-sm text-muted-foreground">
+          A clowder is a group of cats — and a team of expert AI agents that will
+          build your app together.
+        </p>
       </div>
     </main>
   );
