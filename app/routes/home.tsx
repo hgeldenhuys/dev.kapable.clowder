@@ -624,7 +624,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-orange-50 hover:border-orange-300 shadow-lg hover:shadow-xl hover:-translate-y-1.5 cursor-pointer transition-all duration-300 group border-l-3"
+                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-orange-50 hover:border-orange-300 shadow-lg hover:shadow-xl hover:-translate-y-3 cursor-pointer transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
