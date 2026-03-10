@@ -3,6 +3,12 @@ interface StepIndicatorProps {
   labels: [string, string, string];
 }
 
+const STEP_SUBTITLES = [
+  "Tell us your idea",
+  "AI experts form your team",
+  "Deploy in minutes",
+];
+
 const STEP_ICONS = [
   <svg key="describe" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
   <svg key="assemble" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
@@ -59,6 +65,7 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
               >
                 {label}
               </span>
+              <span className="hidden sm:block text-[10px] text-muted-foreground/60 leading-tight">{STEP_SUBTITLES[i]}</span>
             </div>
           </div>
         );
