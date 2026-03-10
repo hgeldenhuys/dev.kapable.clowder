@@ -73,10 +73,10 @@
   --phase-building: #81B29A;
   --phase-delivered: #81B29A;
 
-  /* Shadows — warm tinted */
-  --shadow-sm: 0 1px 3px rgba(51, 49, 46, 0.04), 0 1px 2px rgba(51, 49, 46, 0.06);
-  --shadow-md: 0 4px 12px rgba(51, 49, 46, 0.06), 0 2px 4px rgba(51, 49, 46, 0.04);
-  --shadow-lg: 0 10px 30px rgba(51, 49, 46, 0.08), 0 4px 8px rgba(51, 49, 46, 0.04);
+  /* Shadows — warm tinted, strong presence */
+  --shadow-sm: 0 1px 3px rgba(51, 49, 46, 0.08), 0 1px 2px rgba(51, 49, 46, 0.12);
+  --shadow-md: 0 4px 16px rgba(51, 49, 46, 0.10), 0 2px 6px rgba(51, 49, 46, 0.08);
+  --shadow-lg: 0 12px 40px rgba(51, 49, 46, 0.12), 0 4px 12px rgba(51, 49, 46, 0.08);
 }
 
 * {
@@ -115,9 +115,9 @@ a, button, input, textarea, select {
 /* ─── Hero gradient — warm paper with subtle color wash ─── */
 .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 50% 35%, #E07A5F12 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 70% 60%, #81B29A0A 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 30% 70%, #E8A83808 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 50% 35%, #E07A5F18 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 70% 60%, #81B29A12 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 30% 70%, #E8A83810 0%, transparent 70%),
     var(--background);
 }
 
@@ -152,10 +152,11 @@ a, button, input, textarea, select {
 
 /* ─── Glass card effect ─── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid #E8E5DF;
+  box-shadow: 0 4px 16px rgba(51, 49, 46, 0.08);
 }
 
 /* ─── Animations ─── */

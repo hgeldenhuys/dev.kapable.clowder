@@ -75,11 +75,11 @@ export function StepWizard({
               type="button"
               onClick={onNext}
               disabled={!canProceed}
-              className="hero-cta px-7 py-3 font-semibold text-base text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-95 hover:scale-[1.02] active:scale-[0.98]"
+              className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-95 disabled:grayscale hover:scale-[1.02] active:scale-[0.98]"
             >
               {nextLabel || defaultNextLabel}
             </button>
-            <span className="text-[10px] text-muted-foreground/40">
+            <span className="text-[11px] text-muted-foreground/60 font-medium">
               {isMac ? "⌘" : "Ctrl"}+Enter
             </span>
           </div>

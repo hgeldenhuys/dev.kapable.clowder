@@ -20,12 +20,12 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
         return (
           <div key={step} className="flex items-center">
             {i > 0 && (
-              <div className="w-16 h-px mx-1">
+              <div className="w-16 h-0.5 mx-1 bg-border rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 ${
                     isCompleted
-                      ? "bg-gradient-to-r from-accent/40 to-primary/40"
-                      : "bg-border"
+                      ? "bg-gradient-to-r from-accent to-primary w-full"
+                      : "w-0"
                   }`}
                 />
               </div>
@@ -34,9 +34,9 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
               <div
                 className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                   isCompleted
-                    ? "bg-accent/15 text-accent border border-accent/30"
+                    ? "bg-accent/20 text-accent border-2 border-accent/50 shadow-sm shadow-accent/10"
                     : isActive
-                      ? "bg-primary/15 text-primary border border-primary/40 shadow-lg shadow-primary/15 animate-pulse-glow"
+                      ? "bg-primary/20 text-primary border-2 border-primary/60 shadow-lg shadow-primary/20 animate-pulse-glow"
                       : "bg-secondary text-muted-foreground/50 border border-border"
                 }`}
               >
@@ -49,12 +49,12 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
                 )}
               </div>
               <span
-                className={`text-[11px] font-semibold tracking-wide transition-colors duration-300 ${
+                className={`text-xs font-semibold tracking-wide transition-colors duration-300 ${
                   isCompleted
                     ? "text-accent"
                     : isActive
-                      ? "text-primary"
-                      : "text-muted-foreground/40"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground/60"
                 }`}
               >
                 {label}

@@ -400,29 +400,29 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               alt="Clowder"
               className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-lg"
             />
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
               <span className="bg-gradient-to-r from-[#E07A5F] via-[#D16B50] to-[#C25D43] bg-clip-text text-transparent animate-gradient">
                 Clowder
               </span>
             </h1>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground/45">
+          <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground/70">
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               No signup
             </span>
-            <span className="opacity-20">·</span>
+            <span className="opacity-60">·</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               Free to use
             </span>
-            <span className="opacity-20">·</span>
+            <span className="opacity-60">·</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               Deploys in minutes
@@ -451,8 +451,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             >
               {/* Specialist preview chips */}
               {specialists.length > 0 && (
-                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/20 border border-border/10">
-                  <p className="text-[11px] text-muted-foreground/50 text-center font-medium">
+                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40">
+                  <p className="text-[11px] text-muted-foreground/70 text-center font-medium">
                     Your AI team is forming — confirmed in next step
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
@@ -468,8 +468,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                       </span>
                     ))}
                     {predicting && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-muted-foreground/40 animate-pulse">
-                        <span className="w-1 h-1 rounded-full bg-primary/30" />
+                      <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-muted-foreground/60 animate-pulse">
+                        <span className="w-1 h-1 rounded-full bg-primary/60" />
                         analyzing...
                       </span>
                     )}
@@ -496,7 +496,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <button
                   type="button"
                   onClick={cancelAutoAdvance}
-                  className="mt-3 px-4 py-1.5 rounded-full text-xs text-muted-foreground/60 hover:text-foreground bg-card/30 hover:bg-card/50 border border-border/20 hover:border-border/40 transition-all duration-200 mx-auto block cursor-pointer"
+                  className="mt-3 px-4 py-1.5 rounded-full text-xs text-muted-foreground/70 hover:text-foreground bg-card/60 hover:bg-card/80 border border-border/40 hover:border-border/50 transition-all duration-200 mx-auto block cursor-pointer"
                 >
                   Auto-starting in {autoAdvanceCountdown}s... (click to review team)
                 </button>
@@ -506,7 +506,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </StepWizard>
 
         {/* Powered by badge */}
-        <div className="flex items-center justify-center gap-2 mt-4 opacity-30 hover:opacity-50 transition-opacity">
+        <div className="flex items-center justify-center gap-2 mt-4 opacity-50 hover:opacity-70 transition-opacity">
           <span className="text-[10px] text-muted-foreground">Powered by</span>
           <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground font-semibold hover:text-primary transition-colors">
             Kapable
@@ -517,26 +517,26 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Social proof metrics */}
         {sessions.length > 0 && (
           <div className="space-y-3 mt-8 mb-8">
-            <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-card/50 border border-border/15 shadow-[var(--shadow-sm)]">
+            <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-secondary border border-border/50 shadow-[var(--shadow-sm)]">
               <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                <p className="text-xl font-bold text-foreground">{sessions.length}</p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Apps Built</p>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
+                <p className="text-[11px] text-muted-foreground/70 uppercase tracking-wider font-medium">Apps Built</p>
               </div>
-              <div className="w-px h-12 bg-border/20" />
+              <div className="w-px h-12 bg-border/40" />
               <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <p className="text-xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Deployed</p>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <p className="text-2xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
+                <p className="text-[11px] text-muted-foreground/70 uppercase tracking-wider font-medium">Deployed</p>
               </div>
-              <div className="w-px h-12 bg-border/20" />
+              <div className="w-px h-12 bg-border/40" />
               <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <p className="text-xl font-bold text-primary">~5 min</p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Avg Build</p>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <p className="text-2xl font-bold text-primary">~5 min</p>
+                <p className="text-[11px] text-muted-foreground/70 uppercase tracking-wider font-medium">Avg Build</p>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground/35 text-center font-medium">Join the builders creating apps with AI</p>
+            <p className="text-xs text-muted-foreground/60 text-center font-medium">Join the builders creating apps with AI</p>
           </div>
         )}
 
@@ -548,15 +548,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
                   Your Apps
                 </h2>
-                <div className="flex-1 h-px bg-border/20" />
-                <span className="text-[10px] text-muted-foreground/30">{sessions.length} total</span>
+                <div className="flex-1 h-px bg-border/40" />
+                <span className="text-[10px] text-muted-foreground/60">{sessions.length} total</span>
               </div>
               <div className="space-y-2.5 stagger-children">
                 {sessions.slice(0, 6).map((s) => (
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-4 rounded-2xl border border-border/20 bg-white hover:bg-white hover:border-border/40 shadow-[var(--shadow-sm)] transition-all duration-300 group border-l-2"
+                    className="session-card block p-4 rounded-2xl border border-border/50 bg-card hover:bg-card hover:border-border/60 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -570,7 +570,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                             AI Built
                           </span>
                         )}
-                        <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap px-2.5 py-1 rounded-full border ${
+                        <span className={`text-[11px] font-bold uppercase tracking-wider whitespace-nowrap px-2.5 py-1 rounded-full border ${
                           s.phase === "delivered"
                             ? "bg-accent/10 text-accent border-accent/20"
                             : s.phase === "building"
@@ -586,7 +586,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[11px] text-muted-foreground/40" suppressHydrationWarning>
+                      <p className="text-[11px] text-muted-foreground/60" suppressHydrationWarning>
                         {relativeTime(s.created_at)}
                       </p>
                       {s.app_url && (
@@ -606,17 +606,13 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 opacity-40">
-              {/* Cat silhouette SVG */}
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="mb-4">
-                <path d="M16 52c0-4 2-8 6-10 2-1 3-3 3-5V22c0-2 1-4 3-4l4-8 2 6h12l2-6 4 8c2 0 3 2 3 4v15c0 2 1 4 3 5 4 2 6 6 6 10" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="26" cy="28" r="2" fill="var(--muted-foreground)"/>
-                <circle cx="38" cy="28" r="2" fill="var(--muted-foreground)"/>
-                <path d="M30 33c1 1 3 1 4 0" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M20 30l-8-2M20 33l-8 1M44 30l8-2M44 33l8 1" stroke="var(--muted-foreground)" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+            <div className="flex flex-col items-center justify-center py-12">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-60">
+                <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.636 5.636l2.121 2.121M16.243 16.243l2.121 2.121M5.636 18.364l2.121-2.121M16.243 7.757l2.121-2.121"/>
+                <circle cx="12" cy="12" r="4"/>
               </svg>
-              <p className="text-sm text-muted-foreground font-medium">No apps yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Describe your first idea above</p>
+              <p className="text-sm text-muted-foreground/70 font-medium">No apps yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Describe your first idea above to get started</p>
             </div>
           )}
         </div>
@@ -625,41 +621,31 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/10 py-10 px-6 sm:px-8 mt-auto bg-secondary/30">
+      <footer className="border-t border-border/40 py-10 px-6 sm:px-8 mt-auto bg-secondary/30">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-30" />
-              <span className="text-[11px] text-muted-foreground/40">
+              <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-60" />
+              <span className="text-[11px] text-muted-foreground/60">
                 Clowder by{" "}
-                <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/60 transition-colors underline-offset-2 hover:underline">
+                <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/70 transition-colors underline-offset-2 hover:underline">
                   Kapable
                 </a>{" "}
                 · &copy; 2026
               </span>
             </div>
-            <div className="flex items-center gap-6 text-[11px] text-muted-foreground/40">
-              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">About Kapable</a>
-              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Privacy</a>
-              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Terms</a>
+            <div className="flex items-center gap-6 text-[11px] text-muted-foreground/60">
+              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">About Kapable</a>
+              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">Privacy</a>
+              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">Terms</a>
             </div>
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="text-[11px] text-primary/40 hover:text-primary/60 transition-colors font-medium"
+              className="text-[11px] text-primary/70 hover:text-primary transition-colors font-medium"
             >
               Build something &#8594;
             </a>
-          </div>
-          {/* Paw print brand element */}
-          <div className="flex justify-center mt-6">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--muted-foreground)" className="opacity-10">
-              <ellipse cx="8" cy="7" rx="2.5" ry="3" />
-              <ellipse cx="16" cy="7" rx="2.5" ry="3" />
-              <ellipse cx="5" cy="14" rx="2" ry="2.5" />
-              <ellipse cx="19" cy="14" rx="2" ry="2.5" />
-              <path d="M12 20c-3 0-5.5-2.5-5.5-5 0-1.5 1-3 2.5-3.5 1-.4 2-.6 3-.6s2 .2 3 .6c1.5.5 2.5 2 2.5 3.5 0 2.5-2.5 5-5.5 5z" />
-            </svg>
           </div>
         </div>
       </footer>
