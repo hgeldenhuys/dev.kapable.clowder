@@ -64,13 +64,13 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground/60 text-center font-medium">Or start with a template</p>
           <div className="relative">
-          <div className="flex flex-col sm:flex-row gap-2 sm:overflow-x-auto pb-1 sm:-mx-2 sm:px-2 sm:snap-x sm:scroll-smooth">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`sm:flex-none sm:snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-full sm:w-[185px]`}
+                className={`text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-full`}
                 aria-label={`Start with ${t.name} template`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -83,8 +83,6 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               </button>
             ))}
           </div>
-          {/* Right fade to indicate scrollable */}
-          <div className="hidden sm:block absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-[#FAF9F6] to-transparent pointer-events-none rounded-r-xl" />
           </div>
         </div>
       )}
