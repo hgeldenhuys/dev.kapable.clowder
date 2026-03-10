@@ -67,13 +67,13 @@ export function ChatInput({
             placeholder="Reply to your expert committee… (Enter to send, Shift+Enter for newline)"
             onKeyDown={handleKeyDown}
             rows={2}
-            className="w-full px-4 py-3 pr-12 rounded-2xl border border-border/30 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/20 focus:bg-card/60 text-sm backdrop-blur-sm transition-all"
+            className="w-full px-4 py-3 pr-12 rounded-2xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white text-sm backdrop-blur-sm transition-all"
             autoFocus
           />
         </div>
         <button
           type="submit"
-          className="flex-none p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all self-end"
+          className="flex-none p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[var(--shadow-sm)] hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all self-end"
           aria-label="Send message"
         >
           <Send size={18} />

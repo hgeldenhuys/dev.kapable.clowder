@@ -30,7 +30,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
   return (
     <div className="h-full flex flex-col bg-[#FAF9F6]">
       {/* Preview toolbar */}
-      <div className="flex-none flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-white">
+      <div className="flex-none flex items-center gap-2 px-4 py-2.5 bg-white border-b border-[#E8E5DF] shadow-[var(--shadow-sm)]">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#81B29A] animate-pulse" />
           <span className="text-xs font-medium text-[#81B29A]">Live</span>
@@ -80,7 +80,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
       </div>
 
       {/* iframe container */}
-      <div className="flex-1 flex items-start justify-center overflow-hidden p-2">
+      <div className="flex-1 flex items-start justify-center overflow-hidden p-2 bg-[#F4F1EB]">
         <div
           className={`relative rounded-lg overflow-hidden shadow-2xl shadow-primary/5 transition-all duration-300 h-full ${
             viewport === "mobile" ? "w-[375px]" : "w-full"

@@ -63,7 +63,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/20 bg-gradient-to-br ${t.accent} ${t.borderAccent} hover:shadow-md hover:shadow-primary/5 transition-all duration-200 group w-[160px]`}
+                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/20 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-200 group w-[160px]`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-base group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
@@ -91,7 +91,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base"
+            className="w-full px-4 py-3 rounded-xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white transition-all text-base"
           />
           <span className="text-[10px] text-muted-foreground/40 mt-1 block text-right">
             {data.appName.length}/60
@@ -113,7 +113,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base leading-relaxed"
+              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${

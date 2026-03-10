@@ -121,13 +121,13 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
     <div className="space-y-1 py-2">
       {/* Header */}
       <div className="flex items-center justify-between px-1 mb-3">
-        <span className="text-xs font-medium text-foreground/80">Build Progress</span>
+        <span className="text-xs font-medium text-[#33312E]">Build Progress</span>
         <div className="flex items-center gap-2">
           {logEntries.length > 0 && (
             <button
               type="button"
               onClick={() => setShowLog((v) => !v)}
-              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              className="text-[10px] text-[#6A6763] hover:text-[#33312E] transition-colors"
             >
               {showLog ? "Hide log" : "Show log"}
             </button>
@@ -264,7 +264,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
 
       {/* T9: Collapsible build log */}
       {showLog && logEntries.length > 0 && (
-        <div className="mt-3 mx-1 rounded-lg bg-[#F4F1EB] border border-border/30 overflow-hidden">
+        <div className="mt-3 mx-1 rounded-lg bg-[#F4F1EB] border border-[#E8E5DF] overflow-hidden">
           <div className="px-3 py-1.5 border-b border-border/20 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Build Log</span>
@@ -272,15 +272,15 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
           <div className="max-h-40 overflow-y-auto p-2 space-y-1 font-mono">
             {logEntries.map((entry) => (
               <div key={entry.id} className="flex gap-2 text-[10px] leading-relaxed">
-                <span className="text-muted-foreground/40 flex-none tabular-nums" suppressHydrationWarning>
+                <span className="text-[#6A6763]/60 flex-none tabular-nums" suppressHydrationWarning>
                   {new Date(entry.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
                 <span className={
                   entry.content.toLowerCase().includes("error") || entry.content.toLowerCase().includes("failed")
-                    ? "text-[#D94F4F]/80"
+                    ? "text-[#D94F4F]"
                     : entry.content.includes("created") || entry.content.includes("completed")
-                      ? "text-[#81B29A]/70"
-                      : "text-muted-foreground/70"
+                      ? "text-[#81B29A]"
+                      : "text-[#33312E]/80"
                 }>
                   {entry.content.length > 120 ? entry.content.slice(0, 120) + "…" : entry.content}
                 </span>

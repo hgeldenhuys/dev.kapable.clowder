@@ -101,8 +101,8 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         className="flex-none relative overflow-hidden"
         style={{
           height: isDelivered ? "56px" : experts.length === 0 ? "56px" : "200px",
-          background: "linear-gradient(180deg, #F4F1EB 0%, #FAF9F6 100%)",
-          borderBottom: "1px solid #E8E5DF",
+          background: "#F4F1EB",
+          boxShadow: "inset 0 -1px 0 #E8E5DF",
           zIndex: 0,
           transition: "height 0.4s ease-in-out",
         }}
@@ -115,7 +115,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
             <button
               type="button"
               onClick={() => setShowSidebar((v) => !v)}
-              className="flex items-center text-muted-foreground/50 hover:text-foreground transition-colors text-sm flex-none p-1 rounded-lg hover:bg-card/40"
+              className="flex items-center text-muted-foreground/50 hover:text-foreground transition-colors text-sm flex-none p-1 rounded-lg hover:bg-[#F4F1EB]"
               title="Toggle sessions (Cmd+B)"
               aria-label="Toggle sessions sidebar"
             >
@@ -124,11 +124,11 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
               </svg>
             </button>
             <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
-            <h1 className="text-xs sm:text-sm font-semibold text-foreground/80 truncate min-w-0">
+            <h1 className="text-xs sm:text-sm font-semibold text-[#33312E] truncate min-w-0">
               {session.name}
             </h1>
             <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
-            <span className="text-[10px] text-muted-foreground/50 capitalize hidden sm:inline font-medium">{session.phase}</span>
+            <span className="text-[10px] text-[#6A6763] capitalize hidden sm:inline font-medium">{session.phase}</span>
             {session.app_url && (
               <>
                 <span className="text-xs text-muted-foreground hidden md:inline">·</span>
@@ -136,7 +136,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
                   href={session.app_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex-none"
+                  className="text-xs text-[#E07A5F] hover:underline flex-none"
                 >
                   Open app ↗
                 </a>

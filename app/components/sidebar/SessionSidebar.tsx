@@ -238,8 +238,8 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
 
       {/* Delete confirmation dialog */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-xl shadow-2xl p-5 w-80 max-w-[90vw]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white border border-border rounded-xl shadow-2xl p-5 w-80 max-w-[90vw]">
             <h3 className="text-sm font-semibold text-foreground mb-2">Delete session?</h3>
             <p className="text-xs text-muted-foreground mb-4">
               This will permanently delete the session, all expert data, and all messages. This cannot be undone.

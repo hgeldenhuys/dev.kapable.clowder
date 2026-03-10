@@ -54,7 +54,7 @@ export function SpotlightChat({
     <div className="flex flex-col h-full">
       {/* Active expert header */}
       {activeExpert && (
-        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-[#E8E5DF] bg-white/80 backdrop-blur-md">
+        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-[#E8E5DF] bg-white shadow-[var(--shadow-sm)]">
           <ExpertAvatar
             domain={activeExpert.domain}
             name={activeExpert.name}
@@ -104,7 +104,7 @@ export function SpotlightChat({
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full animate-fade-in">
             <div className="text-center text-muted-foreground max-w-xs space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#E07A5F]/8 flex items-center justify-center border border-[#E07A5F]/10 animate-pulse-glow">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FDF0EC] flex items-center justify-center border border-[#E07A5F]/10 animate-pulse-glow">
                 <img src="/logo.png" alt="" className="w-8 h-8 opacity-60" />
               </div>
               <p className="text-sm font-semibold text-foreground/80">Your expert committee awaits</p>

@@ -58,11 +58,25 @@
 
   /* Brand tokens */
   --brand-terracotta: #E07A5F;
+  --brand-terracotta-hover: #D16B50;
   --brand-sage: #81B29A;
+  --brand-sage-hover: #6FA389;
   --brand-sand: #F4F1EB;
   --brand-paper: #FAF9F6;
   --brand-ink: #33312E;
   --brand-ink-light: #6A6763;
+
+  /* Phase colors */
+  --phase-assembling: #E8A838;
+  --phase-ideating: #5B8FB9;
+  --phase-planning: #9B6B8E;
+  --phase-building: #81B29A;
+  --phase-delivered: #81B29A;
+
+  /* Shadows — warm tinted */
+  --shadow-sm: 0 1px 3px rgba(51, 49, 46, 0.04), 0 1px 2px rgba(51, 49, 46, 0.06);
+  --shadow-md: 0 4px 12px rgba(51, 49, 46, 0.06), 0 2px 4px rgba(51, 49, 46, 0.04);
+  --shadow-lg: 0 10px 30px rgba(51, 49, 46, 0.08), 0 4px 8px rgba(51, 49, 46, 0.04);
 }
 
 * {
