@@ -265,8 +265,13 @@ Required files:
 - app/lib/api.ts (Kapable Data API client)
 - app/app.css (Tailwind CSS with @tailwind directives)
 - tsconfig.json
-- vite.config.ts (import { reactRouter } from "@react-router/dev/vite"; export default { plugins: [reactRouter()] })
+- vite.config.ts (MUST include resolve alias: import path from "path"; resolve: { alias: { "~": path.resolve(__dirname, "app") } } plus reactRouter plugin)
 - react-router.config.ts (import type { Config } from "@react-router/dev/config"; export default { ssr: true } satisfies Config;)
+
+CRITICAL CSS RULES:
+- Do NOT use @apply dark (dark is a variant, not a utility class)
+- Use className="dark" on html element for dark mode instead
+- Do NOT use @tailwind base/components/utilities with Tailwind v4 — use @import "tailwindcss" instead
 
 Plus route files for each table's CRUD pages. EVERY route file MUST be registered in app/routes.ts — files in routes/ are NOT auto-discovered.`;
 
