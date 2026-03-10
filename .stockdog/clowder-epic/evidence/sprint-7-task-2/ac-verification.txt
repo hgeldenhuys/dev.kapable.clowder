@@ -1,0 +1,9 @@
+Story 2 — Replace invisible hover on TEMPLATE CARDS
+AC1: Build passes — VERIFIED (exit code 0)
+AC2: Template card rest state — REQUIRES BROWSER
+AC3: hover:bg-orange-50 present in Step1Context.tsx:78 — VERIFIED
+AC4: hover:border-orange-300 present in Step1Context.tsx:78 — VERIFIED
+AC5: Before/after comparison — REQUIRES BROWSER
+AC6: Selected template ring-2 preserved in className — VERIFIED (code inspection)
+AC7: Mobile 375px — REQUIRES BROWSER
+Removed: ${t.borderAccent} from className — VERIFIED (no longer in class string)
