@@ -6,7 +6,7 @@ Lovable competitor built on Kapable. User describes an app → committee of AI e
 ## Quick Commands
 ```bash
 bun install && bun dev    # Dev server on port 3025
-bun build                 # Production build
+npx react-router build    # Production build (RR7 framework)
 bun test                  # Run tests
 ```
 
@@ -68,8 +68,10 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 
 ## Known Blockers
 - **SQLite wiped on deploy** — Sessions lost. Needs migration to platform PostgreSQL (IMP-817 / `9123bfb9`).
-- **GITHUB_TOKEN missing** — Scaffold deploy blocked (`1e9df9d9`).
-- **Hardcoded GitHub installation_id** — `builder.server.ts` line 218 (`0a72eb1a`).
+
+## Resolved (Not Blockers)
+- **~~GITHUB_TOKEN missing~~** — `builder.server.ts:213-229` already calls `GET /v1/git/develop/token?installation_id=113953574` for ephemeral GitHub App tokens. No static PAT needed. The real issue was `KAPABLE_API_URL=localhost` inside Incus containers (fixed by setting to `https://api.kapable.dev`).
+- **Hardcoded GitHub installation_id** — `113953574` is the Kapable GitHub App installation on `kapable-dev` org. This is intentional for now (`0a72eb1a`).
 
 ## Key Files
 | File | Purpose |
