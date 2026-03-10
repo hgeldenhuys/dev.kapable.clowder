@@ -156,6 +156,29 @@ export async function setForceStarted(id: string): Promise<void> {
   });
 }
 
+export async function renameSession(id: string, name: string): Promise<void> {
+  await apiPatch("clowder_sessions", id, { name });
+}
+
+export async function deleteSession(id: string): Promise<boolean> {
+  // Also delete related experts and messages
+  const experts = await apiList("clowder_experts");
+  const messages = await apiList("clowder_messages");
+
+  for (const e of experts) {
+    if (e.session_id === id) {
+      await apiDelete("clowder_experts", e.id).catch(() => {});
+    }
+  }
+  for (const m of messages) {
+    if (m.session_id === id) {
+      await apiDelete("clowder_messages", m.id).catch(() => {});
+    }
+  }
+
+  return apiDelete("clowder_sessions", id);
+}
+
 // ---------------------------------------------------------------------------
 // Experts
 // ---------------------------------------------------------------------------

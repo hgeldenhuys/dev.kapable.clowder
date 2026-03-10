@@ -17,6 +17,8 @@ import {
   createMessage,
   setForceStarted,
   updateSessionPhase as dbUpdateSessionPhase,
+  renameSession as dbRenameSession,
+  deleteSession as dbDeleteSession,
   sessionToApi,
   expertToApi,
   messageToApi,
@@ -215,6 +217,14 @@ export async function updateClowderExpert(
   });
 
   return expert;
+}
+
+export async function renameClowderSession(sessionId: string, name: string): Promise<void> {
+  await dbRenameSession(sessionId, name);
+}
+
+export async function deleteClowderSession(sessionId: string): Promise<boolean> {
+  return dbDeleteSession(sessionId);
 }
 
 export async function forceStartBuild(sessionId: string): Promise<ClowderSession> {

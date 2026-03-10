@@ -13,6 +13,7 @@ import type { Step1Data } from "~/components/wizard/Step1Context";
 import { Step2Assembly } from "~/components/wizard/Step2Assembly";
 import type { Specialist } from "~/components/wizard/Step2Assembly";
 import { useTypeheadStream } from "~/hooks/useTypeheadStream";
+import { OnboardingTooltip } from "~/components/onboarding/OnboardingTooltip";
 
 export async function loader() {
   const sessions = await listClowderSessions();
@@ -444,6 +445,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </p>
         </div>
       </section>
+
+      {/* First-time onboarding tooltip */}
+      <OnboardingTooltip />
     </main>
   );
 }
