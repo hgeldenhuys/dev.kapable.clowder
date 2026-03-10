@@ -432,7 +432,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* Wizard — immediately below branding */}
-        <div className="w-full max-w-2xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
+        <div className="w-full max-w-4xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
         <Card className="glass-card rounded-3xl border-border/50 shadow-[var(--shadow-lg)]"><CardContent className="p-6 sm:p-8">
         <StepWizard
@@ -554,7 +554,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <div className="flex-1 h-px bg-border/40" />
                 <span className="text-[11px] text-muted-foreground/70 font-medium">{sessions.length} apps</span>
               </div>
-              <div className="space-y-2.5 stagger-children">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-children">
                 {sessions.slice(0, 6).map((s) => (
                   <Link
                     key={s.id}
