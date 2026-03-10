@@ -200,7 +200,7 @@ function OrbCanvas({
       className="relative flex flex-col items-center gap-1 transition-all duration-500 ease-out cursor-pointer"
       style={{
         transform: isActive ? "scale(1.0)" : "scale(0.65)",
-        opacity: isActive ? 1 : 0.6,
+        opacity: isActive ? 1 : 0.75,
         zIndex: isActive ? 10 : 1,
       }}
     >
@@ -224,8 +224,8 @@ function OrbCanvas({
       <span
         className={`text-[10px] font-medium text-center transition-all ${
           isActive
-            ? "text-white opacity-90"
-            : "text-muted-foreground opacity-60"
+            ? "text-foreground font-semibold"
+            : "text-muted-foreground opacity-70"
         }`}
       >
         {orb.name}
