@@ -71,8 +71,8 @@ export function StepWizard({
               onClick={canProceed ? onNext : undefined}
               disabled={!canProceed}
               className={canProceed
-                ? "hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all hover:scale-[1.02] active:scale-[0.98] animate-slide-in-cta"
-                : "px-8 py-3.5 font-bold text-lg bg-stone-500 text-white border border-stone-600 cursor-not-allowed transition-all shadow-md"
+                ? "hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-slide-in-cta"
+                : "hero-cta px-8 py-3.5 font-bold text-lg text-white cursor-not-allowed transition-all duration-300 grayscale opacity-50 shadow-md"
               }
               title={!canProceed ? "Enter a name and 20+ word description to continue" : undefined}
             >
