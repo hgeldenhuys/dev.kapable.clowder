@@ -487,9 +487,37 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           )}
         </StepWizard>
 
+        {/* Powered by badge */}
+        <div className="flex items-center justify-center gap-2 mt-4 opacity-30 hover:opacity-50 transition-opacity">
+          <span className="text-[10px] text-muted-foreground">Powered by</span>
+          <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground font-semibold hover:text-primary transition-colors">
+            Kapable
+          </a>
+        </div>
+
+        {/* Social proof metrics */}
+        {sessions.length > 0 && (
+          <div className="flex items-center justify-center gap-6 py-4 px-6 rounded-2xl bg-card/30 border border-border/10 mb-8 mt-8">
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{sessions.length}</p>
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Apps Built</p>
+            </div>
+            <div className="w-px h-8 bg-border/20" />
+            <div className="text-center">
+              <p className="text-lg font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Deployed</p>
+            </div>
+            <div className="w-px h-8 bg-border/20" />
+            <div className="text-center">
+              <p className="text-lg font-bold text-primary">~5 min</p>
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Avg Build</p>
+            </div>
+          </div>
+        )}
+
         {/* Recent Sessions */}
         {sessions.length > 0 && (
-          <div className="mt-12 text-left space-y-5">
+          <div className="mt-8 text-left space-y-5">
             <div className="flex items-center gap-3">
               <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
                 Your Sessions
@@ -557,7 +585,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               Clowder by{" "}
               <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/60 transition-colors underline-offset-2 hover:underline">
                 Kapable
-              </a>
+              </a>{" "}
+              · &copy; 2026
             </span>
           </div>
           <a

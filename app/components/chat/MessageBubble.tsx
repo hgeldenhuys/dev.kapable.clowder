@@ -90,7 +90,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
       )}
 
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
+        className={`max-w-[90%] md:max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
             ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-md shadow-[var(--shadow-sm)]"
             : "bg-card text-foreground rounded-tl-md shadow-[var(--shadow-sm)] border border-border border-l-2"

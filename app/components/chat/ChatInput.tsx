@@ -64,7 +64,7 @@ export function ChatInput({
           <textarea
             ref={textareaRef}
             name="content"
-            placeholder="Reply to your expert committee… (Enter to send, Shift+Enter for newline)"
+            placeholder="Reply to your experts…"
             onKeyDown={handleKeyDown}
             rows={2}
             className="w-full px-4 py-3 pr-12 rounded-2xl border border-border bg-card text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-card text-sm backdrop-blur-sm transition-all"
@@ -82,11 +82,11 @@ export function ChatInput({
       </form>
 
       {onForceStart && (
-        <div className="flex items-center justify-center px-1">
+        <div className="flex items-center justify-center w-full">
           <button
             type="button"
             onClick={onForceStart}
-            className="flex items-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-white text-sm font-semibold transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/30"
+            className="flex items-center justify-center gap-2.5 px-6 py-3 w-full sm:w-auto rounded-2xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-white text-sm font-semibold transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Play size={14} fill="currentColor" />
             <span className="sm:hidden">Start building</span>

@@ -197,7 +197,7 @@ function OrbCanvas({
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-center gap-1 transition-all duration-500 ease-out cursor-pointer"
+      className="relative flex flex-col items-center gap-1 transition-all duration-500 ease-out cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none rounded-full"
       style={{
         transform: isActive ? "scale(1.0)" : "scale(0.7)",
         opacity: isActive ? 1 : 0.75,

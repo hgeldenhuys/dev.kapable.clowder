@@ -171,7 +171,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         {showSidebar && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 top-[56px] z-40 bg-black/50 backdrop-blur-sm md:hidden"
               onClick={() => setShowSidebar(false)}
               onKeyDown={() => {}}
               role="presentation"
@@ -187,7 +187,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         )}
 
         {/* Chat panel */}
-        <div className={isDelivered && showPreview ? "w-full md:w-[340px] lg:w-[400px] md:flex-none md:border-r border-border flex-1 md:flex-initial" : "flex-1"}>
+        <div className={isDelivered && showPreview ? "w-full md:w-[420px] lg:w-[480px] md:flex-none md:border-r border-border flex-1 md:flex-initial" : "flex-1"}>
           <SpotlightChat
             messages={messages}
             experts={experts}

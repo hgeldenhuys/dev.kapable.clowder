@@ -167,7 +167,7 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
   const currentStep = INTERVIEW_STEPS[step];
 
   return (
-    <div className="mx-4 my-3 rounded-xl bg-card/50 border border-border/50 p-3 space-y-2.5">
+    <div className="my-3 rounded-xl bg-card/50 border border-border/50 p-3 space-y-2.5">
       {/* Progress bar */}
       <div className="flex items-center gap-0">
         {INTERVIEW_STEPS.map((s, i) => (
@@ -175,7 +175,7 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
             {/* Step circle */}
             <div className="flex flex-col items-center gap-1 relative z-10">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
                   i < step
                     ? "bg-primary/10 border-2 border-primary text-primary"
                     : i === step
