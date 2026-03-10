@@ -120,12 +120,15 @@ async function spawnSpecialists(
  * Uses Gemini Flash for fast, cheap responses.
  * Falls back to null if API key not configured or call fails.
  */
-async function callPOAgent(prompt: string, timeoutMs = 60_000): Promise<POResponse | null> {
+async function callPOAgent(prompt: string, timeoutMs = 30_000): Promise<POResponse | null> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     console.warn("OPENROUTER_API_KEY not set — using fallback responses");
     return null;
   }
+
+  // Use fast model for PO routing — it only picks an expert and returns brief JSON
+  const poModel = process.env.CLOWDER_PO_MODEL ?? "google/gemini-2.0-flash-001";
 
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -137,7 +140,7 @@ async function callPOAgent(prompt: string, timeoutMs = 60_000): Promise<PORespon
         "X-Title": "Clowder AI App Builder",
       },
       body: JSON.stringify({
-        model: "minimax/minimax-m2.5",
+        model: poModel,
         messages: [
           { role: "system", content: PO_SYSTEM_PROMPT },
           { role: "user", content: prompt },
@@ -219,6 +222,9 @@ async function callInterviewer(prompt: string): Promise<string | null> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
 
+  // Interviewer needs to be FAST — it asks simple follow-up questions
+  const interviewModel = process.env.CLOWDER_INTERVIEW_MODEL ?? "google/gemini-2.0-flash-001";
+
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -229,7 +235,7 @@ async function callInterviewer(prompt: string): Promise<string | null> {
         "X-Title": "Clowder AI App Builder",
       },
       body: JSON.stringify({
-        model: "minimax/minimax-m2.5",
+        model: interviewModel,
         messages: [
           { role: "system", content: INTERVIEWER_SYSTEM_PROMPT },
           { role: "user", content: prompt },
@@ -237,7 +243,7 @@ async function callInterviewer(prompt: string): Promise<string | null> {
         temperature: 0.7,
         max_tokens: 300,
       }),
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(20000),
     });
 
     if (!res.ok) {
@@ -286,7 +292,7 @@ async function generateIntentDocument(
         "X-Title": "Clowder AI App Builder",
       },
       body: JSON.stringify({
-        model: "minimax/minimax-m2.5",
+        model: process.env.CLOWDER_INTENT_MODEL ?? "google/gemini-2.0-flash-001",
         messages: [
           { role: "system", content: "You generate structured JSON documents. Respond with ONLY valid JSON." },
           { role: "user", content: prompt },
@@ -294,7 +300,7 @@ async function generateIntentDocument(
         temperature: 0.3,
         max_tokens: 800,
       }),
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!res.ok) return null;
@@ -461,7 +467,7 @@ async function conductInterview(sessionId: string): Promise<OrchestrateResult | 
   let poResponse = await callPOAgent(autoPrompt);
   if (!poResponse) {
     console.log("[Interview→Ideation] PO agent failed, retrying with 90s timeout...");
-    poResponse = await callPOAgent(autoPrompt, 90_000);
+    poResponse = await callPOAgent(autoPrompt, 45_000);
   }
   if (poResponse) {
     const respondingExpert = experts.find(
@@ -630,25 +636,24 @@ export async function orchestrate(sessionId: string): Promise<OrchestrateResult 
     blockers: poResponse.blockers,
   });
 
-  // Boost non-responding experts too — rich user input covers multiple domains
+  // Boost non-responding experts + clear previous on_stage + set new on_stage — all in parallel
+  const expertUpdates: Promise<unknown>[] = [];
   for (const e of experts) {
-    if (e.id !== respondingExpert.id && e.confidence < confidenceFloor) {
-      const boostedStatus = confidenceFloor >= 0.5 ? "progressing" : "unclear";
-      await updateClowderExpert(sessionId, e.id, {
-        confidence: confidenceFloor,
-        status: boostedStatus,
-      });
+    if (e.id === respondingExpert.id) continue;
+    const updates: Record<string, unknown> = {};
+    if (e.confidence < confidenceFloor) {
+      updates.confidence = confidenceFloor;
+      updates.status = confidenceFloor >= 0.5 ? "progressing" : "unclear";
+    }
+    if (e.status === "on_stage") {
+      updates.status = e.confidence >= 0.5 ? "progressing" : "unclear";
+    }
+    if (Object.keys(updates).length > 0) {
+      expertUpdates.push(updateClowderExpert(sessionId, e.id, updates));
     }
   }
-
-  // Clear previous on_stage expert, then set the new one
-  for (const e of experts) {
-    if (e.status === "on_stage" && e.id !== respondingExpert.id) {
-      const resetStatus = e.confidence >= 0.5 ? "progressing" : "unclear";
-      await updateClowderExpert(sessionId, e.id, { status: resetStatus });
-    }
-  }
-  await updateClowderExpert(sessionId, respondingExpert.id, { status: "on_stage" });
+  expertUpdates.push(updateClowderExpert(sessionId, respondingExpert.id, { status: "on_stage" }));
+  await Promise.all(expertUpdates);
 
   // Save the expert's response as a message
   const expertMessage = await sendClowderMessage(sessionId, {
