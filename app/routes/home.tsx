@@ -562,7 +562,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               </a>
             </span>
           </div>
-          <div className="flex items-center gap-6 text-[11px] text-muted-foreground/20">
+          <div className="flex items-center gap-6 text-[11px] text-muted-foreground/40">
             <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Privacy</a>
             <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Terms</a>
           </div>

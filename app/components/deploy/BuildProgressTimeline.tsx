@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { ClowderMessage } from "~/lib/api.server";
 import { useState, useEffect } from "react";
 
@@ -132,7 +133,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
             </button>
           )}
           {elapsedMs > 0 && (
-            <span className="text-[10px] text-muted-foreground tabular-nums">{elapsedStr}</span>
+            <span className="text-[10px] text-muted-foreground tabular-nums" suppressHydrationWarning>{elapsedStr}</span>
           )}
         </div>
       </div>
@@ -211,15 +212,21 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                 )}
                 {/* Celebration CTA for delivered apps */}
                 {isDelivered && stage.id === "done" && appUrl && (
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-3 flex items-center gap-3">
                     <a
                       href={appUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors shadow-md shadow-emerald-900/30"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:scale-[1.02]"
                     >
                       Open your app →
                     </a>
+                    <Link
+                      to="/"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border/30 text-muted-foreground/60 hover:text-foreground hover:border-border/50 text-xs font-medium transition-all"
+                    >
+                      Build another
+                    </Link>
                   </div>
                 )}
               </div>

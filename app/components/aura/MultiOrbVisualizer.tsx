@@ -251,7 +251,7 @@ export function MultiOrbVisualizer({
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center gap-2">
+    <div className="w-full h-full flex items-center justify-center gap-2 overflow-x-auto px-2">
       {orbs.map((orb, i) => (
         <OrbCanvas
           key={orb.id}

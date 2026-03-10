@@ -93,7 +93,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
         className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
             ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-md shadow-lg shadow-primary/20"
-            : "bg-card/60 text-foreground border-l-2 rounded-tl-md shadow-sm backdrop-blur-sm border border-border/10 border-l-2"
+            : "bg-card/60 text-foreground rounded-tl-md shadow-sm backdrop-blur-sm border border-border/10 border-l-2"
         }`}
         style={
           !isUser
@@ -117,8 +117,8 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
               </span>
             )}
             {expert && expert.confidence >= 0.8 && (
-              <span className="text-[10px] text-emerald-400/70 px-1 py-0.5 rounded bg-emerald-500/10">
-                confident
+              <span className="text-[10px] text-emerald-400/70 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/15">
+                ready
               </span>
             )}
           </div>

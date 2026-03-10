@@ -67,10 +67,10 @@ export function SpotlightChat({
               <span className="capitalize">{activeExpert.domain.replace(/_/g, " ")}</span>
               <span className="mx-1.5 opacity-40">·</span>
               <span
-                className={activeExpert.confidence >= 0.8 ? "text-emerald-400" : activeExpert.confidence >= 0.5 ? "text-amber-400" : "text-zinc-500"}
-                title="How confident this expert is about the app requirements. Reaches 100% after thorough discussion."
+                className={activeExpert.confidence >= 0.8 ? "text-emerald-400" : activeExpert.confidence >= 0.5 ? "text-amber-400" : "text-zinc-400"}
+                title={`Confidence: ${Math.round(activeExpert.confidence * 100)}% — increases as you discuss requirements`}
               >
-                {Math.round(activeExpert.confidence * 100)}% confident
+                {activeExpert.confidence >= 0.8 ? "Ready to build" : activeExpert.confidence >= 0.5 ? "Getting aligned" : "Learning"}
               </span>
             </p>
           </div>
