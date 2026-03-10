@@ -57,6 +57,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
       {wordCount < 20 && (
         <div className="space-y-2">
           <p className="text-[11px] text-muted-foreground/60 text-center font-medium uppercase tracking-wider">Quick start with a template</p>
+          <div className="relative">
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x">
             {STARTER_TEMPLATES.map((t) => (
               <button
@@ -73,6 +74,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 <p className="text-[10px] text-muted-foreground/60 leading-snug line-clamp-2">{t.description.split('. ')[0]}.</p>
               </button>
             ))}
+          </div>
+          {/* Right fade to indicate scrollable */}
+          <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-white/90 to-transparent pointer-events-none rounded-r-xl" />
           </div>
         </div>
       )}

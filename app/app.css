@@ -268,6 +268,33 @@ a, button, input, textarea, select {
   scrollbar-color: #D5D0C8 transparent;
 }
 
+/* ─── Skip to content — sr-only until focused ─── */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+.skip-to-content:focus {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  padding: 12px 20px;
+  background: var(--card);
+  color: var(--foreground);
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 /* ─── Focus ring ─── */
 *:focus-visible {
   outline: 2px solid #E07A5F60;

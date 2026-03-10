@@ -517,7 +517,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Social proof metrics */}
         {sessions.length > 0 && (
           <div className="space-y-3 mt-8 mb-8">
-            <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-secondary border border-border/50 shadow-[var(--shadow-sm)]">
+            <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-card border border-border/40 shadow-[var(--shadow-md)]">
               <div className="text-center flex flex-col items-center gap-1">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
@@ -545,18 +545,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           {sessions.length > 0 ? (
             <>
               <div className="flex items-center gap-3">
-                <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                <h2 className="text-sm font-semibold text-foreground/70 tracking-tight">
                   Your Apps
                 </h2>
                 <div className="flex-1 h-px bg-border/40" />
-                <span className="text-[10px] text-muted-foreground/60">{sessions.length} total</span>
+                <span className="text-[11px] text-muted-foreground/50 font-medium">{sessions.length} apps</span>
               </div>
               <div className="space-y-2.5 stagger-children">
                 {sessions.slice(0, 6).map((s) => (
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-4 rounded-2xl border border-border/50 bg-card hover:bg-card hover:border-border/60 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
+                    className="session-card block p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-3">

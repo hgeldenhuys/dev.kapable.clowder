@@ -126,10 +126,10 @@ export function MessageBubble({
       <div
         className={`max-w-[90%] md:max-w-[75%] px-4 py-3 space-y-1 ${
           isUser
-            ? `bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[var(--shadow-sm)] ${
+            ? `bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[var(--shadow-md)] ${
                 isFirstInGroup ? "rounded-2xl rounded-tr-md" : isLastInGroup ? "rounded-2xl rounded-br-md" : "rounded-xl"
               }`
-            : `bg-card text-foreground shadow-[var(--shadow-sm)] border border-border border-l-2 ${
+            : `bg-card text-foreground shadow-[var(--shadow-md)] border border-border/60 border-l-2 ${
                 isFirstInGroup ? "rounded-2xl rounded-tl-md" : isLastInGroup ? "rounded-2xl rounded-bl-md" : "rounded-xl"
               }`
         }`}
