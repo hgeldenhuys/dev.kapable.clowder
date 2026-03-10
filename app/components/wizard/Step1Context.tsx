@@ -75,7 +75,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} shadow-[var(--shadow-sm)] hover:shadow-lg hover:bg-orange-50 hover:border-orange-300 hover:scale-[1.03] hover:-translate-y-1.5 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
+                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} shadow-sm hover:shadow-lg hover:bg-orange-50 hover:border-orange-300 hover:scale-[1.03] hover:-translate-y-1.5 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
                 aria-label={`Start with ${t.name} template`}
               >
                 {/* Gradient header — 60px colored band */}
@@ -112,7 +112,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-[var(--shadow-sm)] focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base"
+            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base"
           />
           <span className="text-[10px] text-muted-foreground/60 mt-1 block text-right">
             {data.appName.length}/60
@@ -134,7 +134,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-[var(--shadow-sm)] resize-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base leading-relaxed"
+              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
