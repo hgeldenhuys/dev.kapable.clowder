@@ -14,8 +14,8 @@ const STARTER_TEMPLATES = [
     name: "Feedback Board",
     category: "Communication",
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-    thumbnailGradient: "from-primary/25 to-primary/10",
-    accent: "from-primary/15 to-primary/8",
+    thumbnailGradient: "from-orange-200 to-orange-100",
+    accent: "from-orange-100 to-orange-50",
     borderAccent: "hover:border-primary/30",
     description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
   },
@@ -23,8 +23,8 @@ const STARTER_TEMPLATES = [
     name: "Team Task Board",
     category: "Productivity",
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
-    thumbnailGradient: "from-accent/25 to-accent/10",
-    accent: "from-accent/15 to-accent/8",
+    thumbnailGradient: "from-emerald-200 to-emerald-100",
+    accent: "from-emerald-100 to-emerald-50",
     borderAccent: "hover:border-accent/30",
     description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
   },
@@ -75,7 +75,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} shadow-sm hover:shadow-lg hover:bg-orange-50 hover:border-orange-300 hover:scale-[1.03] hover:-translate-y-1.5 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
+                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} shadow-md hover:shadow-xl hover:bg-orange-50 hover:border-orange-300 hover:scale-[1.03] hover:-translate-y-1.5 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
                 aria-label={`Start with ${t.name} template`}
               >
                 {/* Gradient header — 60px colored band */}
