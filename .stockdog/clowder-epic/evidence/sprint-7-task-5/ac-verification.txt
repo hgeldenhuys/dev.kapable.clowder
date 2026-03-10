@@ -1,0 +1,10 @@
+Story 5 — Show disabled CTA in empty form state
+AC1: Build passes — VERIFIED (exit code 0)
+AC2: Button always visible (no conditional hiding) — VERIFIED (single <div> wrapper)
+AC3: Disabled style: bg-stone-200 text-stone-400 border-stone-300 — VERIFIED
+AC4: cursor-not-allowed on disabled — VERIFIED
+AC5: title tooltip on disabled: 'Enter a name and 20+ word description to continue' — VERIFIED
+AC6: Active state: hero-cta class with hover:scale + active:scale — VERIFIED
+AC7: animate-slide-in-cta on button when active — VERIFIED
+AC8: Helper text conditional content (disabled vs active) — VERIFIED
+AC9: Mobile 375px — REQUIRES BROWSER

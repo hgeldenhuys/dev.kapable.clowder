@@ -59,32 +59,32 @@ export function StepWizard({
         </div>
       </div>
       {step < 3 && (
-        <div className="flex items-center justify-between mt-5">
-          {step > 1 ? (
+        <div className={`flex items-center mt-5 ${step > 1 ? 'justify-between' : 'justify-center'}`}>
+          {step > 1 && (
             <Button variant="ghost" onClick={onBack}>
               ← Back
             </Button>
-          ) : (
-            <div />
           )}
-          {canProceed ? (
-            <div className="flex flex-col items-end gap-1.5 animate-slide-in-cta">
-              <Button
-                size="lg"
-                onClick={onNext}
-                className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {nextLabel || defaultNextLabel}
-              </Button>
-              <span className="text-[11px] text-muted-foreground/60 font-medium">
-                <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
-              </span>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center">
-              Enter a name and 20+ word description to get started <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
-            </p>
-          )}
+          <div className="flex flex-col items-center gap-1.5">
+            <Button
+              size="lg"
+              onClick={canProceed ? onNext : undefined}
+              disabled={!canProceed}
+              className={canProceed
+                ? "hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all hover:scale-[1.02] active:scale-[0.98] animate-slide-in-cta"
+                : "px-8 py-3.5 font-bold text-lg bg-stone-200 text-stone-400 border border-stone-300 cursor-not-allowed transition-all"
+              }
+              title={!canProceed ? "Enter a name and 20+ word description to continue" : undefined}
+            >
+              {nextLabel || defaultNextLabel}
+            </Button>
+            <span className="text-[11px] text-muted-foreground/60 font-medium">
+              {canProceed
+                ? <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
+                : <span>Enter a name and 20+ word description to get started</span>
+              }
+            </span>
+          </div>
         </div>
       )}
     </div>

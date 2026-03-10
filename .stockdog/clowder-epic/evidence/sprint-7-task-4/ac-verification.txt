@@ -1,0 +1,6 @@
+Story 4 — Center 'Build my team' CTA button
+AC1: Build passes — VERIFIED (exit code 0)
+AC2: justify-center on step 1 at StepWizard.tsx:62 — VERIFIED
+AC3: justify-between on step 2 (step > 1 conditional) — VERIFIED
+AC4: Empty spacer div removed, replaced with logical AND — VERIFIED
+AC5: Cmd/Ctrl+Enter hint still present — VERIFIED
