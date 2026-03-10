@@ -238,12 +238,14 @@ function githubHeadersFromToken(token: string): Record<string, string> {
 
 async function createGitHubRepo(repoName: string, token: string): Promise<boolean> {
   const headers = githubHeadersFromToken(token);
-  const res = await fetch("https://api.github.com/user/repos", {
+  // Installation tokens (ghs_*) must create repos under the org, not /user/repos
+  const org = "kapable-dev";
+  const res = await fetch(`https://api.github.com/orgs/${org}/repos`, {
     method: "POST",
     headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ name: repoName, auto_init: true, private: false }),
   });
-  if (res.status === 422) return true;
+  if (res.status === 422) return true; // Already exists
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     console.error(`GitHub repo create failed (${res.status}): ${body.slice(0, 200)}`);
@@ -415,7 +417,7 @@ Plus route files for each table's CRUD pages.`;
     await sendProgress(`Generated ${files.length} files. Pushing to GitHub...`);
 
     const repoName = `clowder-${slug}`;
-    const owner = "hgeldenhuys";
+    const owner = "kapable-dev";
     const repoUrl = `https://github.com/${owner}/${repoName}`;
 
     const repoCreated = await createGitHubRepo(repoName, githubToken);
