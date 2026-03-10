@@ -408,12 +408,12 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             </h1>
           </div>
 
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-muted-foreground/80">
+          <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-stone-500">
             <span className="flex items-center gap-1 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-accent" />
               No signup
@@ -453,7 +453,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               {/* Specialist preview chips */}
               {specialists.length > 0 && (
                 <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <p className="text-[11px] text-muted-foreground/70 text-center font-medium">
+                  <p className="text-[11px] text-stone-500 text-center font-medium">
                     Your AI team is forming — confirmed in next step
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
@@ -469,7 +469,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                       </span>
                     ))}
                     {predicting && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-muted-foreground/60 animate-pulse">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-stone-400 animate-pulse">
                         <span className="w-1 h-1 rounded-full bg-primary/60" />
                         analyzing...
                       </span>
@@ -497,7 +497,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <button
                   type="button"
                   onClick={cancelAutoAdvance}
-                  className="mt-3 px-4 py-1.5 rounded-full text-xs text-muted-foreground/70 hover:text-foreground bg-card/60 hover:bg-card/80 border border-border/40 hover:border-border/50 transition-all duration-200 mx-auto block cursor-pointer"
+                  className="mt-3 px-4 py-1.5 rounded-full text-xs text-stone-500 hover:text-foreground bg-card/60 hover:bg-card/80 border border-border/40 hover:border-border/50 transition-all duration-200 mx-auto block cursor-pointer"
                 >
                   Auto-starting in {autoAdvanceCountdown}s... (click to review team)
                 </button>
@@ -508,8 +508,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Powered by badge */}
         <div className="flex items-center justify-center gap-2 mt-4 opacity-85 hover:opacity-100 transition-opacity">
-          <span className="text-[10px] text-muted-foreground/90">Powered by</span>
-          <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground/90 font-semibold hover:text-primary transition-colors">
+          <span className="text-[10px] text-stone-500">Powered by</span>
+          <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-stone-500 font-semibold hover:text-primary transition-colors">
             Kapable
           </a>
         </div>
@@ -519,7 +519,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {sessions.length > 0 && (
           <div className="flex items-center gap-4 mt-10 mb-2">
             <div className="flex-1 h-px bg-border/30" />
-            <span className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-medium">Community</span>
+            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">Community</span>
             <div className="flex-1 h-px bg-border/30" />
           </div>
         )}
@@ -552,14 +552,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
               </div>
               <div className="text-left min-w-0">
-                <p className="text-xs font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                <p className="text-xs font-semibold text-stone-600 group-hover:text-foreground transition-colors">
                   See Pulse — built in 10 minutes
                 </p>
-                <p className="text-[10px] text-muted-foreground/60 leading-snug">
+                <p className="text-[10px] text-stone-500 leading-snug">
                   A real-time feedback app, built and deployed by Clowder
                 </p>
               </div>
-              <span className="text-muted-foreground/40 group-hover:text-primary/60 transition-colors ml-auto flex-none">&#8599;</span>
+              <span className="text-stone-400 group-hover:text-primary/60 transition-colors ml-auto flex-none">&#8599;</span>
             </a>
           </div>
         )}
@@ -569,11 +569,11 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           {sessions.length > 0 ? (
             <>
               <div className="flex items-center gap-3">
-                <h2 className="text-sm font-semibold text-foreground/70 tracking-tight">
+                <h2 className="text-sm font-semibold text-stone-600 tracking-tight">
                   Your Apps
                 </h2>
                 <div className="flex-1 h-px bg-border/40" />
-                <span className="text-[11px] text-muted-foreground/70 font-medium">{sessions.length} apps</span>
+                <span className="text-[11px] text-stone-500 font-medium">{sessions.length} apps</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-children">
                 {sessions.slice(0, 6).map((s) => (
@@ -584,7 +584,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
-                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-2">
+                      <span className="text-sm font-medium text-stone-600 group-hover:text-foreground transition-colors min-w-0 line-clamp-2">
                         {s.name}
                       </span>
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-none">
@@ -610,7 +610,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[11px] text-muted-foreground/70" suppressHydrationWarning>
+                      <p className="text-[11px] text-stone-500" suppressHydrationWarning>
                         {relativeTime(s.created_at)}
                       </p>
                       {s.app_url && (
@@ -635,8 +635,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.636 5.636l2.121 2.121M16.243 16.243l2.121 2.121M5.636 18.364l2.121-2.121M16.243 7.757l2.121-2.121"/>
                 <circle cx="12" cy="12" r="4"/>
               </svg>
-              <p className="text-sm text-muted-foreground/70 font-medium">No apps yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Describe your first idea above to get started</p>
+              <p className="text-sm text-stone-500 font-medium">No apps yet</p>
+              <p className="text-xs text-stone-400 mt-1">Describe your first idea above to get started</p>
             </div>
           )}
         </div>
@@ -650,7 +650,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-60" />
-              <span className="text-[11px] text-foreground/50">
+              <span className="text-[11px] text-stone-500">
                 Clowder by{" "}
                 <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/70 transition-colors underline-offset-2 hover:underline">
                   Kapable
@@ -658,7 +658,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 · &copy; 2026
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-foreground/50">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-stone-500">
               <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">About Kapable</a>
               <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">Privacy</a>
               <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">Terms</a>

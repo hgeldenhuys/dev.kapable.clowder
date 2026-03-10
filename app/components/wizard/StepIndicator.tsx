@@ -43,7 +43,7 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
                     ? "bg-accent/20 text-accent border-2 border-accent/50 shadow-sm shadow-accent/10"
                     : isActive
                       ? "bg-primary/20 text-primary border-2 border-primary/60 shadow-lg shadow-primary/20 animate-pulse-glow"
-                      : "bg-secondary text-muted-foreground/50 border border-border"
+                      : "bg-secondary text-stone-400 border border-border"
                 }`}
               >
                 {isCompleted ? (
@@ -60,12 +60,12 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
                     ? "text-accent"
                     : isActive
                       ? "text-primary font-bold"
-                      : "text-muted-foreground/60"
+                      : "text-stone-500"
                 }`}
               >
                 {label}
               </span>
-              <span className="hidden sm:block text-[10px] text-muted-foreground/60 leading-tight">{STEP_SUBTITLES[i]}</span>
+              <span className="hidden sm:block text-[10px] text-stone-400 leading-tight">{STEP_SUBTITLES[i]}</span>
             </div>
           </div>
         );

@@ -67,7 +67,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
       {/* Starter templates — compact horizontal scroll, shown when empty or template selected */}
       {(wordCount < 20 || selectedTemplate !== null) && (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground/80 text-center font-medium">Or start with a template</p>
+          <p className="text-xs text-stone-500 text-center font-medium">Or start with a template</p>
           <div className="relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {STARTER_TEMPLATES.map((t) => (
@@ -80,15 +80,15 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               >
                 {/* Gradient header — 60px colored band */}
                 <div className={`h-16 bg-gradient-to-br ${t.thumbnailGradient} flex items-center justify-center`}>
-                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-foreground/80 group-hover:scale-110 transition-transform duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-stone-600 group-hover:scale-110 transition-transform duration-200">
                     {t.icon}
                   </div>
                 </div>
                 {/* Content below header */}
                 <div className="px-3.5 py-2.5">
-                  <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
-                  <p className="text-[10px] text-foreground/60 mt-0.5">{t.category}</p>
-                  <p className="text-[11px] text-muted-foreground/75 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
+                  <span className="text-xs font-bold text-stone-700 group-hover:text-primary transition-colors">{t.name}</span>
+                  <p className="text-[10px] text-stone-500 mt-0.5">{t.category}</p>
+                  <p className="text-[11px] text-stone-500 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
                 </div>
               </button>
             ))}
@@ -101,7 +101,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div>
           <label
             htmlFor="appName"
-            className="text-xs font-medium text-muted-foreground/70 mb-1.5 block"
+            className="text-xs font-medium text-stone-500 mb-1.5 block"
           >
             App name
           </label>
@@ -112,9 +112,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base"
+            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-stone-400 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base"
           />
-          <span className="text-[10px] text-muted-foreground/60 mt-1 block text-right">
+          <span className="text-[10px] text-stone-400 mt-1 block text-right">
             {data.appName.length}/60
           </span>
         </div>
@@ -122,7 +122,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div>
           <label
             htmlFor="description"
-            className="text-xs font-medium text-muted-foreground/70 mb-1.5 block"
+            className="text-xs font-medium text-stone-500 mb-1.5 block"
           >
             What do you want to build?
           </label>
@@ -134,15 +134,15 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-muted-foreground/60 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
+              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-stone-400 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
                 wordCount >= 20
                   ? "text-accent"
                   : wordCount >= 3
-                    ? "text-muted-foreground/60"
-                    : "text-muted-foreground/60"
+                    ? "text-stone-400"
+                    : "text-stone-400"
               }`}
             >
               {wordCount < 3

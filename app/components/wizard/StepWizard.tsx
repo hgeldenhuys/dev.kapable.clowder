@@ -78,7 +78,7 @@ export function StepWizard({
             >
               {nextLabel || defaultNextLabel}
             </Button>
-            <span className="text-[11px] text-muted-foreground/60 font-medium">
+            <span className="text-[11px] text-stone-400 font-medium">
               {canProceed
                 ? <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
                 : <span>Enter a name and 20+ word description to get started</span>
