@@ -292,8 +292,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
   return (
     <main className="min-h-screen flex flex-col">
-      {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center min-h-[45vh] px-6 sm:px-8 py-10 overflow-hidden">
+      {/* Hero + Wizard — combined for zero-scroll-to-input */}
+      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-10 pb-8 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -302,132 +302,45 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-amber-500/6 blur-3xl animate-float-delayed" />
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-rose-500/6 blur-2xl animate-float-slow" />
 
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-4 animate-fade-in">
+        {/* Branding */}
+        <div className="text-center space-y-4 max-w-3xl mx-auto mb-6 animate-fade-in">
+          <div className="flex items-center justify-center gap-3">
             <img
               src="/logo.png"
               alt="Clowder"
-              className="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-lg"
+              className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg"
             />
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-purple-300 via-primary to-amber-300 bg-clip-text text-transparent">
                 Clowder
               </span>
             </h1>
           </div>
 
-          <div className="space-y-3">
-            <h2 className="text-2xl sm:text-4xl font-semibold text-foreground leading-tight max-w-xl mx-auto">
-              Describe your app.{" "}
-              <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
-            </h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+            Describe your app.{" "}
+            <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
+          </h2>
 
-            <p className="text-sm sm:text-base text-muted-foreground/70 max-w-md mx-auto leading-relaxed animate-fade-in-up">
-              A committee of AI experts designs, builds, and deploys a full-stack web app with database, API, and real-time features.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-5 pt-2">
-            <button
-              type="button"
-              onClick={scrollToWizard}
-              className="hero-cta px-8 py-4 font-semibold text-lg text-white transition-all hover:scale-[1.03] active:scale-[0.98]"
-            >
-              Start Building →
-            </button>
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground/60 animate-fade-in-up">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                No signup
-              </span>
-              <span className="opacity-20">·</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                Free to use
-              </span>
-              <span className="opacity-20">·</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
-                Deploys in minutes
-              </span>
-            </div>
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground/50 animate-fade-in-up">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+              No signup
+            </span>
+            <span className="opacity-20">·</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+              Free to use
+            </span>
+            <span className="opacity-20">·</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+              Deploys in minutes
+            </span>
           </div>
         </div>
-      </section>
 
-      {/* Showcase Section */}
-      <section className="flex flex-col items-center px-6 sm:px-8 py-10">
-        <div className="max-w-4xl w-full space-y-8">
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-bold text-foreground/80">Built with Clowder</h3>
-            <p className="text-xs text-muted-foreground/50">Real apps, described in plain English, deployed in minutes</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
-            {[
-              { name: "Pulse", desc: "Live feedback board with real-time voting and idea tracking", url: "https://pulse.kapable.run", icon: "💬", accent: "from-violet-500/12 to-blue-500/5", border: "border-violet-500/15" },
-              { name: "Event Board", desc: "Community event listing with RSVP tracking and capacity management", icon: "📅", accent: "from-amber-500/12 to-orange-500/5", border: "border-amber-500/15" },
-              { name: "Tool Library", desc: "Neighborhood tool sharing with lending history and availability", icon: "🔧", accent: "from-emerald-500/12 to-teal-500/5", border: "border-emerald-500/15" },
-            ].map((app) => (
-              <div key={app.name} className={`card-glow rounded-2xl border ${app.border} bg-gradient-to-br ${app.accent} p-5 space-y-3 group`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl">{app.icon}</span>
-                    <h4 className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{app.name}</h4>
-                  </div>
-                  {app.url && (
-                    <span className="flex items-center gap-1 text-[10px] text-emerald-400/80 font-medium uppercase tracking-wide">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Live
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground/60 leading-relaxed">{app.desc}</p>
-                {app.url && (
-                  <a
-                    href={app.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary font-medium transition-colors"
-                  >
-                    Visit app
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
-                    </svg>
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works — micro section */}
-      <section className="flex flex-col items-center px-6 sm:px-8 py-8">
-        <div className="flex items-center gap-6 sm:gap-10 text-center">
-          {[
-            { num: "1", label: "Describe", desc: "Tell us your idea" },
-            { num: "2", label: "Refine", desc: "AI experts ask questions" },
-            { num: "3", label: "Ship", desc: "Deployed in minutes" },
-          ].map((step, i) => (
-            <div key={step.num} className="flex items-center gap-6 sm:gap-10">
-              {i > 0 && <div className="w-8 sm:w-12 h-px bg-border/20" />}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary/70">
-                  {step.num}
-                </span>
-                <span className="text-xs font-semibold text-foreground/70">{step.label}</span>
-                <span className="text-[10px] text-muted-foreground/40">{step.desc}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Wizard Section */}
-      <section ref={wizardRef} className="relative flex flex-col items-center px-8 py-12">
-        {/* Warm ambient glow behind wizard */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
+        {/* Wizard — immediately below branding */}
         <div className="w-full max-w-2xl text-center space-y-8 relative z-10">
 
         <StepWizard
