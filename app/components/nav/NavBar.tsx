@@ -22,7 +22,7 @@ export function NavBar() {
             rel="noopener noreferrer"
             className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
           >
-            Gallery
+            See Pulse
           </a>
           <a
             href="https://console.kapable.dev"
