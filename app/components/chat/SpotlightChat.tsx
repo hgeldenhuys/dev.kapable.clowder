@@ -86,7 +86,11 @@ export function SpotlightChat({
               ? "Describe your app to begin"
               : phase === "interviewing"
                 ? "Understanding your vision"
-                : "Committee discussion"}
+                : phase === "ideating"
+                  ? "Your experts are discussing your app"
+                  : phase === "planning"
+                    ? "Finalizing the build plan"
+                    : "Expert discussion"}
           </p>
           <PhaseChip phase={phase} />
         </div>
@@ -118,16 +122,20 @@ export function SpotlightChat({
           <InterviewProgress messages={messages} />
         )}
         {isWaitingForExpert && (
-          <div className="flex items-center gap-2 px-3 py-2">
+          <div className="flex items-center gap-3 px-3 py-3 mx-3 rounded-lg bg-card/30 border border-border/30">
             <div className="flex gap-1">
-              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
             <span className="text-xs text-muted-foreground">
               {phase === "interviewing"
-                ? "Understanding your vision…"
-                : activeExpert ? `${activeExpert.name} is thinking…` : "Experts are thinking…"}
+                ? "Preparing your next question…"
+                : activeExpert
+                  ? `${activeExpert.name} is formulating a response…`
+                  : experts.length > 0
+                    ? `${experts.map(e => e.name).join(", ")} are analyzing your requirements…`
+                    : "Assembling your expert team…"}
             </span>
           </div>
         )}

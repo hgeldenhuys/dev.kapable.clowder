@@ -80,18 +80,18 @@ export function ChatInput({
         </button>
       </form>
 
-      <div className="flex items-center justify-end px-1">
-        {onForceStart && (
+      {onForceStart && (
+        <div className="flex items-center justify-center px-1">
           <button
             type="button"
             onClick={onForceStart}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors shadow-md shadow-emerald-900/30"
           >
-            <Play size={12} className="group-hover:text-primary" />
-            <span>I'm ready — start building</span>
+            <Play size={14} fill="currentColor" />
+            <span>I'm satisfied — start building</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
