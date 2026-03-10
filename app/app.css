@@ -45,6 +45,21 @@ body {
     sans-serif;
 }
 
+/* Hero gradient background */
+.hero-gradient {
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, oklch(0.15 0.06 280) 0%, oklch(0.08 0.01 270) 70%);
+}
+
+/* Hero CTA button with gradient + glow */
+.hero-cta {
+  background: linear-gradient(135deg, oklch(0.55 0.22 280), oklch(0.50 0.18 250));
+  box-shadow: 0 0 20px oklch(0.55 0.22 280 / 0.4), 0 4px 12px oklch(0.0 0.0 0 / 0.3);
+}
+.hero-cta:hover {
+  background: linear-gradient(135deg, oklch(0.60 0.22 280), oklch(0.55 0.18 250));
+  box-shadow: 0 0 30px oklch(0.55 0.22 280 / 0.5), 0 4px 16px oklch(0.0 0.0 0 / 0.3);
+}
+
 /* Tagline reveal animation */
 @keyframes fade-in-up {
   from {
@@ -59,6 +74,34 @@ body {
 
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out 0.3s both;
+}
+
+/* Floating orb accent animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.08); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.03); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out 1s infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 10s ease-in-out 2s infinite;
 }
 
 /* Custom scrollbar */

@@ -92,6 +92,13 @@ interface PredictedSpecialist {
 export default function HomePage({ loaderData }: Route.ComponentProps) {
   const { sessions } = loaderData;
   const submit = useSubmit();
+  const wizardRef = useRef<HTMLDivElement>(null);
+
+  const deliveredCount = sessions.filter((s) => s.phase === "delivered").length;
+
+  const scrollToWizard = useCallback(() => {
+    wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   // Step wizard state
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -269,28 +276,61 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   }, [step1Data, step2Specialists, submit]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8">
-      <div className="w-full max-w-2xl text-center space-y-8">
-        <div className="space-y-4">
+    <main className="min-h-screen flex flex-col">
+      {/* Hero Section */}
+      <section className="relative flex flex-col items-center justify-center min-h-[70vh] px-8 py-16 overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="hero-gradient absolute inset-0 -z-10" />
+
+        {/* Floating orb accents */}
+        <div className="absolute top-20 left-[15%] w-32 h-32 rounded-full bg-purple-500/10 blur-2xl animate-float" />
+        <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-blue-500/10 blur-2xl animate-float-delayed" />
+        <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-primary/10 blur-xl animate-float-slow" />
+
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-4">
             <img
               src="/logo.png"
               alt="Clowder"
-              className="w-14 h-14 drop-shadow-lg"
+              className="w-16 h-16 drop-shadow-lg"
             />
-            <h1 className="text-5xl font-bold tracking-tight">
+            <h1 className="text-6xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-purple-300 via-primary to-blue-400 bg-clip-text text-transparent">
                 Clowder
               </span>
             </h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Describe your app. Our AI expert committee builds it.
+
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground leading-tight max-w-xl mx-auto">
+            Describe your app.{" "}
+            <span className="text-primary">We'll build it.</span>
+          </h2>
+
+          <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed animate-fade-in-up">
+            A committee of AI experts designs, builds, and deploys your app — from idea to production in minutes.
           </p>
-          <p className="text-sm text-muted-foreground/60 animate-fade-in-up">
-            From idea to deployed product in minutes, not months.
-          </p>
+
+          <div className="flex flex-col items-center gap-4 pt-4">
+            <button
+              type="button"
+              onClick={scrollToWizard}
+              className="hero-cta px-8 py-4 rounded-2xl font-semibold text-lg text-white transition-all hover:scale-105"
+            >
+              Start Building →
+            </button>
+
+            {deliveredCount > 0 && (
+              <p className="text-sm text-muted-foreground animate-fade-in-up">
+                <span className="text-emerald-400 font-semibold">{deliveredCount}</span> apps built and deployed
+              </p>
+            )}
+          </div>
         </div>
+      </section>
+
+      {/* Wizard Section */}
+      <section ref={wizardRef} className="flex flex-col items-center px-8 py-12">
+        <div className="w-full max-w-2xl text-center space-y-8">
 
         <StepWizard
           step={currentStep}
@@ -402,7 +442,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           <br />
           <span className="text-muted-foreground/30">Powered by <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Kapable</a></span>
         </p>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
