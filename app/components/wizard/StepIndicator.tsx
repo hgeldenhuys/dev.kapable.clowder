@@ -7,7 +7,7 @@ const STEP_ICONS = ["✦", "⚡", "🚀"];
 
 export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-center gap-0 mb-10">
+    <div className="flex items-center justify-center gap-0 mb-5">
       {labels.map((label, i) => {
         const step = (i + 1) as 1 | 2 | 3;
         const isCompleted = step < currentStep;

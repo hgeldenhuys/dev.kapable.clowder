@@ -58,7 +58,7 @@ export function StepWizard({
         </div>
       </div>
       {step < 3 && (
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between mt-5">
           {step > 1 ? (
             <button
               type="button"

@@ -52,41 +52,31 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
   const isEmpty = !data.appName.trim() && !data.description.trim();
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent">
-          What are you building?
-        </h2>
-        <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
-          Give your app a name and describe what it does. The more detail, the
-          better your AI team can help.
-        </p>
-      </div>
-
-      {/* Starter templates — shown when fields are empty */}
+    <div className="space-y-5">
+      {/* Starter templates — compact horizontal scroll, shown when empty */}
       {isEmpty && (
-        <div className="space-y-4">
-          <p className="text-xs text-muted-foreground/50 text-center font-medium uppercase tracking-wider">or try a template</p>
-          <div className="grid grid-cols-2 gap-3 stagger-children">
+        <div className="space-y-2">
+          <p className="text-[11px] text-muted-foreground/40 text-center font-medium uppercase tracking-wider">or start from a template</p>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`text-left p-4 rounded-2xl border border-border/20 bg-gradient-to-br ${t.accent} ${t.borderAccent} hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group`}
+                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/20 bg-gradient-to-br ${t.accent} ${t.borderAccent} hover:shadow-md hover:shadow-primary/5 transition-all duration-200 group w-[160px]`}
               >
-                <div className="flex items-center gap-2.5 mb-2">
-                  <span className="text-xl group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
-                  <span className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
+                  <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">{t.name}</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground/50 leading-relaxed line-clamp-2">{t.description.slice(0, 90)}...</p>
+                <p className="text-[10px] text-muted-foreground/40 leading-snug line-clamp-2">{t.description.slice(0, 70)}...</p>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div>
           <label
             htmlFor="appName"
@@ -123,7 +113,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="w-full min-h-[180px] px-4 py-3 pb-8 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base leading-relaxed"
+              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${

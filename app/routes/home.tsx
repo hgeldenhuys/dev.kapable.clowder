@@ -293,7 +293,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Hero + Wizard — combined for zero-scroll-to-input */}
-      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-10 pb-8 overflow-hidden">
+      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-6 pb-6 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -302,39 +302,39 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-amber-500/6 blur-3xl animate-float-delayed" />
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-rose-500/6 blur-2xl animate-float-slow" />
 
-        {/* Branding */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto mb-6 animate-fade-in">
-          <div className="flex items-center justify-center gap-3">
+        {/* Branding — compact */}
+        <div className="text-center space-y-2.5 max-w-3xl mx-auto mb-4 animate-fade-in">
+          <div className="flex items-center justify-center gap-2.5">
             <img
               src="/logo.png"
               alt="Clowder"
-              className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg"
+              className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-lg"
             />
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-purple-300 via-primary to-amber-300 bg-clip-text text-transparent">
                 Clowder
               </span>
             </h1>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
             <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground/50 animate-fade-in-up">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+          <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground/45">
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
               No signup
             </span>
             <span className="opacity-20">·</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
               Free to use
             </span>
             <span className="opacity-20">·</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
               Deploys in minutes
             </span>
           </div>
