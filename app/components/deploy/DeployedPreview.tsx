@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface DeployedPreviewProps {
   appUrl: string;
@@ -14,6 +14,12 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
   const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  // Fallback: hide spinner after 4s even if onLoad doesn't fire (SSR hydration race)
+  useEffect(() => {
+    const timer = setTimeout(() => setLoaded(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCopy = useCallback(() => {
     onCopyUrl();
@@ -76,12 +82,12 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
       {/* iframe container */}
       <div className="flex-1 flex items-start justify-center overflow-hidden p-2">
         <div
-          className={`relative bg-white rounded-lg overflow-hidden shadow-2xl shadow-primary/5 transition-all duration-300 h-full ${
+          className={`relative rounded-lg overflow-hidden shadow-2xl shadow-primary/5 transition-all duration-300 h-full ${
             viewport === "mobile" ? "w-[375px]" : "w-full"
           }`}
         >
           {!loaded && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 gap-3">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 gap-3 z-10 pointer-events-none transition-opacity duration-500">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-muted-foreground">Loading {appName}...</p>
             </div>
@@ -89,7 +95,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
           <iframe
             src={appUrl}
             title={`${appName} — Live Preview`}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 bg-white"
             onLoad={() => setLoaded(true)}
           />
         </div>
