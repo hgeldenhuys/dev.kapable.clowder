@@ -383,7 +383,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Hero + Wizard — combined for zero-scroll-to-input */}
-      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-6 pb-6 overflow-hidden">
+      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-10 sm:pt-14 pb-8 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -393,7 +393,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-[#E8A838]/5 blur-2xl animate-float-slow" />
 
         {/* Branding — compact */}
-        <div className="text-center space-y-2.5 max-w-3xl mx-auto mb-4 animate-fade-in">
+        <div className="text-center space-y-3 max-w-3xl mx-auto mb-6 animate-fade-in">
           <div className="flex items-center justify-center gap-2.5">
             <img
               src="/logo.png"
@@ -516,7 +516,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Social proof metrics */}
         {sessions.length > 0 && (
-          <div className="space-y-3 mt-8 mb-8">
+          <div className="space-y-3 mt-10 mb-10">
             <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-card border border-border/40 shadow-[var(--shadow-md)]">
               <div className="text-center flex flex-col items-center gap-1">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -541,7 +541,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         )}
 
         {/* Recent Sessions */}
-        <div className="mt-8 text-left space-y-5">
+        <div className="mt-10 text-left space-y-5">
           {sessions.length > 0 ? (
             <>
               <div className="flex items-center gap-3">

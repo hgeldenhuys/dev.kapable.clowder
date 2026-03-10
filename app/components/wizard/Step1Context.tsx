@@ -85,10 +85,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div>
           <label
             htmlFor="appName"
-            className="flex items-center gap-1.5 text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-2"
+            className="text-xs font-medium text-muted-foreground/70 mb-1.5 block"
           >
-            <svg className="w-3.5 h-3.5 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-            App Name
+            App name
           </label>
           <input
             id="appName"
@@ -107,10 +106,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div>
           <label
             htmlFor="description"
-            className="flex items-center gap-1.5 text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-2"
+            className="text-xs font-medium text-muted-foreground/70 mb-1.5 block"
           >
-            <svg className="w-3.5 h-3.5 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" /></svg>
-            Description
+            What do you want to build?
           </label>
           <div className="relative">
             <textarea
