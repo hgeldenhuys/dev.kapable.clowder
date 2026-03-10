@@ -251,6 +251,16 @@ a, button, input, textarea, select {
   animation: float-slow 11s ease-in-out 3s infinite;
 }
 
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% auto;
+  animation: gradient-shift 4s ease-in-out infinite;
+}
+
 /* ─── Custom scrollbar — warm ─── */
 ::-webkit-scrollbar {
   width: 6px;

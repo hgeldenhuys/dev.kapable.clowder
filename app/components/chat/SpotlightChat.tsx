@@ -67,9 +67,10 @@ export function SpotlightChat({
               <span className="capitalize hidden sm:inline">{activeExpert.domain.replace(/_/g, " ")}</span>
               <span className="mx-1.5 opacity-40 hidden sm:inline">·</span>
               <span
-                className={activeExpert.confidence >= 0.8 ? "text-accent" : activeExpert.confidence >= 0.5 ? "text-[color:var(--warning)]" : "text-muted-foreground"}
+                className={`flex items-center gap-1 ${activeExpert.confidence >= 0.8 ? "text-accent" : activeExpert.confidence >= 0.5 ? "text-[color:var(--warning)]" : "text-muted-foreground"}`}
                 title={`Confidence: ${Math.round(activeExpert.confidence * 100)}% — increases as you discuss requirements`}
               >
+                <span className={`w-1.5 h-1.5 rounded-full ${activeExpert.confidence >= 0.8 ? "bg-accent" : activeExpert.confidence >= 0.5 ? "bg-[color:var(--warning)]" : "bg-muted-foreground/50"}`} />
                 {activeExpert.confidence >= 0.8 ? "Ready to build" : activeExpert.confidence >= 0.5 ? "Getting aligned" : "Learning"}
               </span>
             </p>
@@ -279,7 +280,7 @@ function ThinkingIndicator({
         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
       </div>
-      <span className="text-xs text-muted-foreground/80 transition-opacity duration-500">
+      <span key={displayMsg} className="text-xs text-muted-foreground/80 animate-fade-in">
         {displayMsg}
       </span>
     </div>
@@ -298,7 +299,7 @@ function PhaseChip({ phase }: { phase: string }) {
   const { label, color, bg } = phaseLabels[phase] ?? { label: phase, color: "text-muted-foreground", bg: "bg-zinc-400/10 border-zinc-400/20" };
 
   return (
-    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border transition-all duration-300 ${color} ${bg}`}>
+    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border transition-all duration-300 ${color} ${bg} ${phase === "delivered" ? "shadow-sm shadow-accent/20" : ""}`}>
       {label}
     </span>
   );

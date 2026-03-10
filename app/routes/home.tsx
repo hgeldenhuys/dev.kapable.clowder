@@ -383,14 +383,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               alt="Clowder"
               className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-lg"
             />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-[#E07A5F] via-[#D16B50] to-[#C25D43] bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-[#E07A5F] via-[#D16B50] to-[#C25D43] bg-clip-text text-transparent animate-gradient">
                 Clowder
               </span>
             </h1>
           </div>
 
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+          <h2 className="text-xl sm:text-2xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
@@ -416,6 +416,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Wizard — immediately below branding */}
         <div className="w-full max-w-2xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
+        <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-[var(--shadow-md)]">
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
@@ -494,6 +495,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             Kapable
           </a>
         </div>
+        </div>
 
         {/* Social proof metrics */}
         {sessions.length > 0 && (
@@ -555,6 +557,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     <p className="text-[11px] text-muted-foreground/40" suppressHydrationWarning>
                       {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
+                    {s.phase === "delivered" && (
+                      <span className="text-[10px] text-accent/50 font-medium">Built by AI</span>
+                    )}
                     {s.app_url && (
                       <a
                         href={s.app_url}

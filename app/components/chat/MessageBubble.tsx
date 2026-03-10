@@ -59,12 +59,23 @@ interface MessageBubbleProps {
 function useClientTime(isoString: string): string {
   const [time, setTime] = useState("");
   useEffect(() => {
-    setTime(
-      new Date(isoString).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
+    const date = new Date(isoString);
+    const now = Date.now();
+    const diffMs = now - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+
+    if (diffMin < 1) {
+      setTime("just now");
+    } else if (diffMin < 60) {
+      setTime(`${diffMin}m ago`);
+    } else {
+      setTime(
+        date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    }
   }, [isoString]);
   return time;
 }
