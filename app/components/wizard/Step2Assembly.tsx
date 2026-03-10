@@ -16,26 +16,26 @@ interface Step2Props {
 
 // Domain display config — colors for specialist chips
 const domainConfig: Record<string, { label: string; color: string }> = {
-  commerce: { label: "Commerce", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
-  compliance: { label: "Compliance", color: "bg-red-500/20 text-red-300 border-red-500/30" },
-  growth: { label: "Growth", color: "bg-green-500/20 text-green-300 border-green-500/30" },
-  analytics: { label: "Analytics", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" },
-  security: { label: "Security", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" },
-  iot: { label: "IoT", color: "bg-violet-500/20 text-violet-300 border-violet-500/30" },
-  content: { label: "Content", color: "bg-pink-500/20 text-pink-300 border-pink-500/30" },
-  ai_ml: { label: "AI/ML", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-  realtime: { label: "Realtime", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
-  mapping: { label: "Mapping", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
-  social: { label: "Social", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" },
-  scheduling: { label: "Scheduling", color: "bg-teal-500/20 text-teal-300 border-teal-500/30" },
-  logistics: { label: "Logistics", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
-  healthcare: { label: "Healthcare", color: "bg-rose-500/20 text-rose-300 border-rose-500/30" },
-  education: { label: "Education", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" },
-  finance: { label: "Finance", color: "bg-lime-500/20 text-lime-300 border-lime-500/30" },
-  media: { label: "Media", color: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30" },
+  commerce: { label: "Commerce", color: "bg-[#E8A838]/15 text-[#C08A2E] border-[#E8A838]/25" },
+  compliance: { label: "Compliance", color: "bg-[#D94F4F]/15 text-[#C04545] border-[#D94F4F]/25" },
+  growth: { label: "Growth", color: "bg-[#81B29A]/15 text-[#5E9A7E] border-[#81B29A]/25" },
+  analytics: { label: "Analytics", color: "bg-[#5B8FB9]/15 text-[#4A7A9E] border-[#5B8FB9]/25" },
+  security: { label: "Security", color: "bg-[#E07A5F]/15 text-[#C06A52] border-[#E07A5F]/25" },
+  iot: { label: "IoT", color: "bg-[#9B6B8E]/15 text-[#7E567A] border-[#9B6B8E]/25" },
+  content: { label: "Content", color: "bg-[#C75B8F]/15 text-[#A84D78] border-[#C75B8F]/25" },
+  ai_ml: { label: "AI/ML", color: "bg-[#9B6B8E]/15 text-[#7E567A] border-[#9B6B8E]/25" },
+  realtime: { label: "Realtime", color: "bg-[#5B8FB9]/15 text-[#4A7A9E] border-[#5B8FB9]/25" },
+  mapping: { label: "Mapping", color: "bg-[#81B29A]/15 text-[#5E9A7E] border-[#81B29A]/25" },
+  social: { label: "Social", color: "bg-[#6B7EB2]/15 text-[#566899] border-[#6B7EB2]/25" },
+  scheduling: { label: "Scheduling", color: "bg-[#5B9E9E]/15 text-[#4A8282] border-[#5B9E9E]/25" },
+  logistics: { label: "Logistics", color: "bg-[#E8A838]/15 text-[#C08A2E] border-[#E8A838]/25" },
+  healthcare: { label: "Healthcare", color: "bg-[#C75B8F]/15 text-[#A84D78] border-[#C75B8F]/25" },
+  education: { label: "Education", color: "bg-[#5B8FB9]/15 text-[#4A7A9E] border-[#5B8FB9]/25" },
+  finance: { label: "Finance", color: "bg-[#81B29A]/15 text-[#5E9A7E] border-[#81B29A]/25" },
+  media: { label: "Media", color: "bg-[#C75B8F]/15 text-[#A84D78] border-[#C75B8F]/25" },
 };
 
-const defaultChipColor = "bg-gray-500/20 text-gray-300 border-gray-500/30";
+const defaultChipColor = "bg-[#E8E5DF]/40 text-[#6A6763] border-[#E8E5DF]";
 
 const coreTeam = [
   { name: "Strategist", domain: "strategist", style: "bg-primary/20 text-primary border-primary/30" },
@@ -92,14 +92,14 @@ export function Step2Assembly({
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Specialists
           {loading && (
-            <span className="ml-2 text-indigo-400 animate-pulse">
+            <span className="ml-2 text-[#E07A5F] animate-pulse">
               analyzing...
             </span>
           )}
         </h3>
         <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
           {specialists.length === 0 && !loading && (
-            <span className="text-sm text-zinc-500">
+            <span className="text-sm text-[#6A6763]">
               No additional specialists suggested
             </span>
           )}
@@ -123,7 +123,7 @@ export function Step2Assembly({
                 <button
                   type="button"
                   onClick={() => onRemoveSpecialist(s.type)}
-                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-current hover:text-red-400"
+                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-current hover:text-[#D94F4F]"
                   title="Remove specialist"
                 >
                   ✕
@@ -133,7 +133,7 @@ export function Step2Assembly({
           })}
           {loading && (
             <span className="inline-flex items-center px-3 py-1.5 text-sm text-muted-foreground animate-pulse">
-              <span className="inline-block w-2 h-2 rounded-full bg-zinc-600 mr-2 animate-bounce" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[#E8E5DF] mr-2 animate-bounce" />
               discovering...
             </span>
           )}

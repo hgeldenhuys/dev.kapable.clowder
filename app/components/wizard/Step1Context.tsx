@@ -11,29 +11,29 @@ const STARTER_TEMPLATES = [
   {
     name: "Feedback Board",
     icon: "💬",
-    accent: "from-violet-500/10 to-blue-500/5",
-    borderAccent: "hover:border-violet-400/30",
+    accent: "from-[#E07A5F]/8 to-[#E07A5F]/3",
+    borderAccent: "hover:border-[#E07A5F]/30",
     description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
   },
   {
     name: "Team Task Board",
     icon: "✅",
-    accent: "from-emerald-500/10 to-teal-500/5",
-    borderAccent: "hover:border-emerald-400/30",
+    accent: "from-[#81B29A]/8 to-[#81B29A]/3",
+    borderAccent: "hover:border-[#81B29A]/30",
     description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
   },
   {
     name: "Event Planner",
     icon: "📅",
-    accent: "from-amber-500/10 to-orange-500/5",
-    borderAccent: "hover:border-amber-400/30",
+    accent: "from-[#E8A838]/8 to-[#E8A838]/3",
+    borderAccent: "hover:border-[#E8A838]/30",
     description: "A community event listing and RSVP platform. Organizers create events with date, time, location, and description. Attendees can browse upcoming events, RSVP, and see who else is going. Features: event categories, capacity limits, and a calendar view.",
   },
   {
     name: "Recipe Collection",
     icon: "🍳",
-    accent: "from-rose-500/10 to-pink-500/5",
-    borderAccent: "hover:border-rose-400/30",
+    accent: "from-[#C75B8F]/8 to-[#C75B8F]/3",
+    borderAccent: "hover:border-[#C75B8F]/30",
     description: "A personal recipe sharing app where users can add recipes with ingredients, steps, and photos. Features: search by ingredient, tag recipes by cuisine or dietary preference, save favorites, and share recipes with friends via a unique link.",
   },
 ];
@@ -118,10 +118,10 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
                 wordCount >= 200
-                  ? "text-emerald-400"
+                  ? "text-[#81B29A]"
                   : descriptionLength >= 20
                     ? "text-muted-foreground/50"
-                    : "text-amber-400/80"
+                    : "text-[#E8A838]/80"
               }`}
             >
               {wordCount} word{wordCount !== 1 ? "s" : ""}
@@ -139,7 +139,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
 
       {/* Validation hint */}
       {!isValid && (data.appName.trim() || data.description.trim()) && (
-        <p className="text-xs text-amber-400/70 text-center">
+        <p className="text-xs text-[#E8A838]/70 text-center">
           {!data.appName.trim()
             ? "Enter an app name to continue"
             : "Description needs at least 20 characters"}

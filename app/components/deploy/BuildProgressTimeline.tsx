@@ -160,7 +160,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
               {i < BUILD_STAGES.length - 1 && (
                 <div
                   className={`absolute left-[9px] top-5 w-px h-full ${
-                    isDone ? "bg-emerald-500/40" : isErrorStage ? "bg-red-500/40" : "bg-border/30"
+                    isDone ? "bg-[#81B29A]/40" : isErrorStage ? "bg-[#D94F4F]/40" : "bg-border/30"
                   }`}
                 />
               )}
@@ -168,14 +168,14 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
               {/* Status dot */}
               <div className="relative z-10 flex-none mt-0.5">
                 {isDone ? (
-                  <div className="w-[18px] h-[18px] rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="w-[18px] h-[18px] rounded-full bg-[#81B29A]/20 border border-[#81B29A]/50 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-[#81B29A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 ) : isErrorStage ? (
-                  <div className="w-[18px] h-[18px] rounded-full bg-red-500/20 border border-red-500/50 flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="w-[18px] h-[18px] rounded-full bg-[#D94F4F]/20 border border-[#D94F4F]/50 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-[#D94F4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
@@ -184,7 +184,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   </div>
                 ) : (
-                  <div className="w-[18px] h-[18px] rounded-full bg-zinc-800 border border-border/40" />
+                  <div className="w-[18px] h-[18px] rounded-full bg-[#F4F1EB] border border-[#E8E5DF]" />
                 )}
               </div>
 
@@ -193,9 +193,9 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                 <span
                   className={`text-xs leading-[18px] ${
                     isDone
-                      ? "text-emerald-400/80"
+                      ? "text-[#81B29A]/80"
                       : isErrorStage
-                        ? "text-red-400 font-medium"
+                        ? "text-[#D94F4F] font-medium"
                         : isActive
                           ? "text-foreground font-medium"
                           : "text-muted-foreground/40"
@@ -217,7 +217,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                       href={appUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:scale-[1.02]"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#81B29A] to-[#6FA389] hover:from-[#6FA389] hover:to-[#81B29A] text-white text-xs font-semibold transition-all shadow-lg shadow-[#81B29A]/20 hover:scale-[1.02]"
                     >
                       Open your app →
                     </a>
@@ -237,15 +237,15 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
 
       {/* T10: Error state with retry */}
       {buildError && (
-        <div className="mt-2 mx-1 p-3 rounded-lg bg-red-500/10 border border-red-500/20 space-y-2">
-          <p className="text-xs text-red-400/90 leading-relaxed">
+        <div className="mt-2 mx-1 p-3 rounded-lg bg-[#D94F4F]/10 border border-[#D94F4F]/20 space-y-2">
+          <p className="text-xs text-[#D94F4F]/90 leading-relaxed">
             {buildError.length > 200 ? buildError.slice(0, 200) + "…" : buildError}
           </p>
           {onRetry && (
             <button
               type="button"
               onClick={onRetry}
-              className="text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-md transition-colors"
+              className="text-xs font-medium text-[#D94F4F] hover:text-[#D94F4F]/80 bg-[#D94F4F]/10 hover:bg-[#D94F4F]/20 px-3 py-1.5 rounded-md transition-colors"
             >
               Retry build
             </button>
@@ -264,9 +264,9 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
 
       {/* T9: Collapsible build log */}
       {showLog && logEntries.length > 0 && (
-        <div className="mt-3 mx-1 rounded-lg bg-zinc-900/80 border border-border/30 overflow-hidden">
+        <div className="mt-3 mx-1 rounded-lg bg-[#F4F1EB] border border-border/30 overflow-hidden">
           <div className="px-3 py-1.5 border-b border-border/20 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Build Log</span>
           </div>
           <div className="max-h-40 overflow-y-auto p-2 space-y-1 font-mono">
@@ -277,9 +277,9 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                 </span>
                 <span className={
                   entry.content.toLowerCase().includes("error") || entry.content.toLowerCase().includes("failed")
-                    ? "text-red-400/80"
+                    ? "text-[#D94F4F]/80"
                     : entry.content.includes("created") || entry.content.includes("completed")
-                      ? "text-emerald-400/70"
+                      ? "text-[#81B29A]/70"
                       : "text-muted-foreground/70"
                 }>
                   {entry.content.length > 120 ? entry.content.slice(0, 120) + "…" : entry.content}

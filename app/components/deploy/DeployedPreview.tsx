@@ -28,12 +28,12 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
   }, [onCopyUrl]);
 
   return (
-    <div className="h-full flex flex-col bg-zinc-950">
+    <div className="h-full flex flex-col bg-[#FAF9F6]">
       {/* Preview toolbar */}
-      <div className="flex-none flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-gradient-to-r from-card/50 to-card/30">
+      <div className="flex-none flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-white">
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-medium text-emerald-400">Live</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#81B29A] animate-pulse" />
+          <span className="text-xs font-medium text-[#81B29A]">Live</span>
         </div>
         <span className="text-xs text-muted-foreground truncate flex-1 mx-2">
           {appUrl}
@@ -43,7 +43,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
         <button
           type="button"
           onClick={() => setViewport("desktop")}
-          className={`p-1.5 rounded text-xs transition-colors ${viewport === "desktop" ? "bg-zinc-700 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`p-1.5 rounded text-xs transition-colors ${viewport === "desktop" ? "bg-[#F4F1EB] text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           title="Desktop view"
         >
           ▢
@@ -51,7 +51,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
         <button
           type="button"
           onClick={() => setViewport("mobile")}
-          className={`p-1.5 rounded text-xs transition-colors ${viewport === "mobile" ? "bg-zinc-700 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`p-1.5 rounded text-xs transition-colors ${viewport === "mobile" ? "bg-[#F4F1EB] text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           title="Mobile view"
         >
           ▯
@@ -87,7 +87,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
           }`}
         >
           {!loaded && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 gap-3 z-10 pointer-events-none transition-opacity duration-500">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F4F1EB] gap-3 z-10 pointer-events-none transition-opacity duration-500">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-muted-foreground">Loading {appName}...</p>
             </div>

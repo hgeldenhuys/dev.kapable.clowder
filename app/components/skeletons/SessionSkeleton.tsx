@@ -6,11 +6,11 @@ export function SessionSkeleton() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Top bar skeleton */}
-      <div className="flex-none h-[60px] border-b border-border/30" style={{ background: "oklch(0.06 0.01 270)" }}>
+      <div className="flex-none h-[60px] border-b border-[#E8E5DF]" style={{ background: "#FAF9F6" }}>
         <div className="flex items-center gap-3 px-4 pt-3 pb-1">
-          <div className="w-6 h-6 rounded-full bg-zinc-800 animate-pulse" />
-          <div className="w-32 h-4 rounded bg-zinc-800 animate-pulse" />
-          <div className="w-16 h-3 rounded bg-zinc-800/60 animate-pulse" />
+          <div className="w-6 h-6 rounded-full bg-[#E8E5DF] animate-pulse" />
+          <div className="w-32 h-4 rounded bg-[#E8E5DF] animate-pulse" />
+          <div className="w-16 h-3 rounded bg-[#E8E5DF]/60 animate-pulse" />
         </div>
       </div>
 
@@ -20,10 +20,10 @@ export function SessionSkeleton() {
         <div className="flex-1 flex flex-col">
           {/* Expert header */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border/30">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 animate-pulse" />
+            <div className="w-10 h-10 rounded-full bg-[#E8E5DF] animate-pulse" />
             <div className="space-y-1.5">
-              <div className="w-24 h-3.5 rounded bg-zinc-800 animate-pulse" />
-              <div className="w-16 h-2.5 rounded bg-zinc-800/60 animate-pulse" />
+              <div className="w-24 h-3.5 rounded bg-[#E8E5DF] animate-pulse" />
+              <div className="w-16 h-2.5 rounded bg-[#E8E5DF]/60 animate-pulse" />
             </div>
           </div>
 
@@ -31,10 +31,10 @@ export function SessionSkeleton() {
           <div className="flex-1 px-4 py-4 space-y-4">
             {/* Expert message */}
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse flex-none" />
+              <div className="w-8 h-8 rounded-full bg-[#E8E5DF] animate-pulse flex-none" />
               <div className="space-y-2 max-w-[65%]">
-                <div className="w-20 h-3 rounded bg-zinc-800/60 animate-pulse" />
-                <div className="w-full h-16 rounded-2xl bg-zinc-800/40 animate-pulse" />
+                <div className="w-20 h-3 rounded bg-[#E8E5DF]/60 animate-pulse" />
+                <div className="w-full h-16 rounded-2xl bg-[#E8E5DF]/40 animate-pulse" />
               </div>
             </div>
 
@@ -45,17 +45,17 @@ export function SessionSkeleton() {
 
             {/* Expert message */}
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse flex-none" />
+              <div className="w-8 h-8 rounded-full bg-[#E8E5DF] animate-pulse flex-none" />
               <div className="space-y-2 max-w-[65%]">
-                <div className="w-24 h-3 rounded bg-zinc-800/60 animate-pulse" />
-                <div className="w-72 h-20 rounded-2xl bg-zinc-800/40 animate-pulse" />
+                <div className="w-24 h-3 rounded bg-[#E8E5DF]/60 animate-pulse" />
+                <div className="w-72 h-20 rounded-2xl bg-[#E8E5DF]/40 animate-pulse" />
               </div>
             </div>
           </div>
 
           {/* Input skeleton */}
           <div className="border-t border-border/30 p-4">
-            <div className="w-full h-14 rounded-xl bg-zinc-800/30 animate-pulse" />
+            <div className="w-full h-14 rounded-xl bg-[#E8E5DF]/30 animate-pulse" />
           </div>
         </div>
       </div>

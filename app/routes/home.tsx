@@ -77,19 +77,19 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 const phaseColors: Record<string, string> = {
-  assembling: "text-amber-400",
-  ideating: "text-blue-400",
-  planning: "text-purple-400",
-  building: "text-green-400",
-  delivered: "text-emerald-400",
+  assembling: "text-[#E8A838]",
+  ideating: "text-[#5B8FB9]",
+  planning: "text-[#9B6B8E]",
+  building: "text-[#81B29A]",
+  delivered: "text-[#81B29A]",
 };
 
 const phaseBorderColors: Record<string, string> = {
-  assembling: "oklch(0.78 0.16 75)",    // amber
-  ideating: "oklch(0.68 0.14 230)",     // blue
-  planning: "oklch(0.68 0.18 290)",     // purple
-  building: "oklch(0.72 0.17 155)",     // green
-  delivered: "oklch(0.72 0.17 165)",    // emerald
+  assembling: "#E8A838",
+  ideating: "#5B8FB9",
+  planning: "#9B6B8E",
+  building: "#81B29A",
+  delivered: "#81B29A",
 };
 
 const phaseLabels: Record<string, string> = {
@@ -298,9 +298,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="hero-gradient absolute inset-0 -z-10" />
 
         {/* Floating orb accents — warm palette */}
-        <div className="absolute top-20 left-[15%] w-32 h-32 rounded-full bg-primary/8 blur-3xl animate-float" />
-        <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-amber-500/6 blur-3xl animate-float-delayed" />
-        <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-rose-500/6 blur-2xl animate-float-slow" />
+        <div className="absolute top-20 left-[15%] w-32 h-32 rounded-full bg-[#E07A5F]/6 blur-3xl animate-float" />
+        <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-[#81B29A]/5 blur-3xl animate-float-delayed" />
+        <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-[#E8A838]/5 blur-2xl animate-float-slow" />
 
         {/* Branding — compact */}
         <div className="text-center space-y-2.5 max-w-3xl mx-auto mb-4 animate-fade-in">
@@ -311,7 +311,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-lg"
             />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-purple-300 via-primary to-amber-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#E07A5F] via-[#D16B50] to-[#C25D43] bg-clip-text text-transparent">
                 Clowder
               </span>
             </h1>
@@ -319,22 +319,22 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
           <h2 className="text-lg sm:text-xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
-            <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
+            <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
           <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground/45">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
               No signup
             </span>
             <span className="opacity-20">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
               Free to use
             </span>
             <span className="opacity-20">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
               Deploys in minutes
             </span>
           </div>
@@ -420,8 +420,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <Link
                   key={s.id}
                   to={`/session/${s.id}`}
-                  className="block p-4 rounded-2xl border border-border/20 bg-card/30 hover:bg-card/50 hover:border-border/40 transition-all duration-300 group border-l-2"
-                  style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "oklch(0.4 0.02 285)" }}
+                  className="block p-4 rounded-2xl border border-border/20 bg-white hover:bg-white hover:border-border/40 transition-all duration-300 group border-l-2"
+                  style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-1">
@@ -429,14 +429,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     </span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider flex-none px-2 py-0.5 rounded-full border ${
                       s.phase === "delivered"
-                        ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
+                        ? "bg-[#81B29A]/10 text-[#81B29A] border-[#81B29A]/20"
                         : s.phase === "building"
-                          ? "bg-green-400/10 text-green-400 border-green-400/20 animate-pulse"
+                          ? "bg-[#81B29A]/10 text-[#81B29A] border-[#81B29A]/20 animate-pulse"
                           : s.phase === "planning"
-                            ? "bg-purple-400/10 text-purple-400 border-purple-400/20"
+                            ? "bg-[#9B6B8E]/10 text-[#9B6B8E] border-[#9B6B8E]/20"
                             : s.phase === "ideating"
-                              ? "bg-blue-400/10 text-blue-400 border-blue-400/20"
-                              : "bg-amber-400/10 text-amber-400 border-amber-400/20"
+                              ? "bg-[#5B8FB9]/10 text-[#5B8FB9] border-[#5B8FB9]/20"
+                              : "bg-[#E8A838]/10 text-[#E8A838] border-[#E8A838]/20"
                     }`}>
                       {phaseLabels[s.phase] ?? s.phase}
                     </span>
@@ -447,7 +447,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     </p>
                     {s.app_url && (
                       <span
-                        className="text-[11px] text-emerald-400/60 hover:text-emerald-400 font-medium transition-colors"
+                        className="text-[11px] text-[#81B29A]/60 hover:text-[#81B29A] font-medium transition-colors"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(s.app_url, "_blank"); }}
                       >
                         Open app ↗

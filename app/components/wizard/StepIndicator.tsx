@@ -20,8 +20,8 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
                 <div
                   className={`h-full transition-all duration-500 ${
                     isCompleted
-                      ? "bg-gradient-to-r from-amber-400/60 to-primary/60"
-                      : "bg-zinc-700/40"
+                      ? "bg-gradient-to-r from-[#81B29A]/40 to-[#E07A5F]/40"
+                      : "bg-[#E8E5DF]"
                   }`}
                 />
               </div>
@@ -30,10 +30,10 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
               <div
                 className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                   isCompleted
-                    ? "bg-amber-400/15 text-amber-400 border border-amber-400/30 shadow-md shadow-amber-400/10"
+                    ? "bg-[#81B29A]/15 text-[#81B29A] border border-[#81B29A]/30"
                     : isActive
                       ? "bg-primary/15 text-primary border border-primary/40 shadow-lg shadow-primary/15 animate-pulse-glow"
-                      : "bg-zinc-800/60 text-zinc-500 border border-zinc-700/50"
+                      : "bg-[#F4F1EB] text-[#6A6763]/50 border border-[#E8E5DF]"
                 }`}
               >
                 {isCompleted ? (
@@ -47,10 +47,10 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
               <span
                 className={`text-[11px] font-semibold tracking-wide transition-colors duration-300 ${
                   isCompleted
-                    ? "text-amber-400/80"
+                    ? "text-[#81B29A]"
                     : isActive
                       ? "text-primary"
-                      : "text-zinc-500/60"
+                      : "text-[#6A6763]/40"
                 }`}
               >
                 {label}

@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import type { ClowderSession } from "~/lib/api.server";
 
 const phaseColors: Record<string, string> = {
-  assembling: "bg-yellow-400",
-  ideating: "bg-blue-400",
-  planning: "bg-purple-400",
-  building: "bg-green-400",
-  delivered: "bg-emerald-400",
+  assembling: "bg-[#E8A838]",
+  ideating: "bg-[#5B8FB9]",
+  planning: "bg-[#9B6B8E]",
+  building: "bg-[#81B29A]",
+  delivered: "bg-[#81B29A]",
 };
 
 interface SessionSidebarProps {
@@ -104,7 +104,7 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
   }
 
   return (
-    <div className="h-full flex flex-col bg-card/80 backdrop-blur-sm border-r border-border w-[85vw] max-w-[280px] md:w-64">
+    <div className="h-full flex flex-col bg-white/90 backdrop-blur-sm border-r border-border w-[85vw] max-w-[280px] md:w-64">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-border/50">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sessions</span>
@@ -172,7 +172,7 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
                   <div className="flex items-center gap-2 mt-0.5 pl-4">
                     <span className="text-[10px] text-muted-foreground/50 capitalize">{s.phase}</span>
                     {s.app_url && (
-                      <span className="text-[10px] text-emerald-400/60">live</span>
+                      <span className="text-[10px] text-[#81B29A]/60">live</span>
                     )}
                   </div>
                 </Link>

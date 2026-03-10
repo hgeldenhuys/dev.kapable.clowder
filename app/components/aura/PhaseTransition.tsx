@@ -10,32 +10,32 @@ import { useState, useEffect, useRef } from "react";
 const PHASE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
   assembling: {
     label: "Assembling your expert team",
-    color: "text-yellow-300",
-    bg: "from-yellow-500/20 via-transparent to-transparent",
+    color: "text-[#E8A838]",
+    bg: "from-[#E8A838]/15 via-transparent to-transparent",
     icon: "⚡",
   },
   ideating: {
     label: "Experts are discussing your idea",
-    color: "text-blue-300",
-    bg: "from-blue-500/20 via-transparent to-transparent",
+    color: "text-[#5B8FB9]",
+    bg: "from-[#5B8FB9]/15 via-transparent to-transparent",
     icon: "💭",
   },
   planning: {
     label: "Creating your app plan",
-    color: "text-purple-300",
-    bg: "from-purple-500/20 via-transparent to-transparent",
+    color: "text-[#9B6B8E]",
+    bg: "from-[#9B6B8E]/15 via-transparent to-transparent",
     icon: "📋",
   },
   building: {
     label: "Building your app",
-    color: "text-green-300",
-    bg: "from-green-500/20 via-transparent to-transparent",
+    color: "text-[#81B29A]",
+    bg: "from-[#81B29A]/15 via-transparent to-transparent",
     icon: "🔨",
   },
   delivered: {
     label: "Your app is live!",
-    color: "text-emerald-300",
-    bg: "from-emerald-500/30 via-emerald-500/10 to-transparent",
+    color: "text-[#81B29A]",
+    bg: "from-[#81B29A]/20 via-[#81B29A]/8 to-transparent",
     icon: "🎉",
   },
 };
@@ -86,7 +86,7 @@ export function PhaseTransition({ phase }: PhaseTransitionProps) {
         {/* Celebration glow burst for delivered */}
         {isDelivered && (
           <div className="absolute inset-0 animate-pulse-glow">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#81B29A]/8 to-transparent" />
           </div>
         )}
         <div className="flex items-center justify-center gap-2 relative z-10">

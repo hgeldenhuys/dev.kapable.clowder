@@ -4,57 +4,65 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Clowder Design System — "Warm Twilight"
+ * Clowder Design System — "Warm Paper"
  *
- * Philosophy: Premium dark theme with warmth. Think sunset,
- * not midnight. Purple primary with amber/gold accents.
- * Soft depth via colored shadows, not hard borders.
+ * Inspired by the Kapable marketing portal.
+ * Off-white background, terracotta + sage accents,
+ * warm charcoal text. Approachable and human.
  */
 
 :root {
-  /* Background: warm dark, hint of purple warmth */
-  --background: oklch(0.10 0.015 285);
-  --foreground: oklch(0.95 0.01 80);
+  /* Background: warm off-white paper */
+  --background: #FAF9F6;
+  --foreground: #33312E;
 
-  /* Cards: slightly warmer than bg, subtle distinction */
-  --card: oklch(0.14 0.018 285);
-  --card-foreground: oklch(0.93 0.01 80);
+  /* Cards: clean white on warm paper */
+  --card: #FFFFFF;
+  --card-foreground: #33312E;
 
   /* Popover: elevated card */
-  --popover: oklch(0.16 0.02 285);
-  --popover-foreground: oklch(0.93 0.01 80);
+  --popover: #FFFFFF;
+  --popover-foreground: #33312E;
 
-  /* Primary: warm violet — not cold blue-purple */
-  --primary: oklch(0.68 0.18 290);
-  --primary-foreground: oklch(0.98 0.005 80);
+  /* Primary: terracotta — warm coral-rust */
+  --primary: #E07A5F;
+  --primary-foreground: #FFFFFF;
 
-  /* Secondary: warm surface for subtle emphasis */
-  --secondary: oklch(0.19 0.02 285);
-  --secondary-foreground: oklch(0.88 0.01 80);
+  /* Secondary: sand — subtle warm surface */
+  --secondary: #F4F1EB;
+  --secondary-foreground: #33312E;
 
-  /* Muted: warm gray, readable but recessed */
-  --muted: oklch(0.20 0.015 285);
-  --muted-foreground: oklch(0.58 0.02 60);
+  /* Muted: warm gray */
+  --muted: #F0EDE7;
+  --muted-foreground: #6A6763;
 
-  /* Accent: warm gold-amber for highlights */
-  --accent: oklch(0.25 0.04 60);
-  --accent-foreground: oklch(0.93 0.01 80);
+  /* Accent: sage green */
+  --accent: #81B29A;
+  --accent-foreground: #FFFFFF;
 
-  /* Destructive: warm red, not cold */
-  --destructive: oklch(0.62 0.22 20);
-  --destructive-foreground: oklch(0.98 0.005 80);
+  /* Destructive */
+  --destructive: #D94F4F;
+  --destructive-foreground: #FFFFFF;
 
-  /* Border: subtle warm line */
-  --border: oklch(0.24 0.02 285);
-  --input: oklch(0.20 0.02 285);
-  --ring: oklch(0.68 0.18 290);
+  /* Border: soft warm gray */
+  --border: #E8E5DF;
+  --input: #E8E5DF;
+  --ring: #E07A5F;
 
   --radius: 0.75rem;
 
   /* Extended palette */
-  --success: oklch(0.72 0.17 155);
-  --warning: oklch(0.78 0.16 75);
-  --info: oklch(0.68 0.14 230);
+  --success: #81B29A;
+  --warning: #E8A838;
+  --info: #5B8FB9;
+
+  /* Brand tokens */
+  --brand-terracotta: #E07A5F;
+  --brand-sage: #81B29A;
+  --brand-sand: #F4F1EB;
+  --brand-paper: #FAF9F6;
+  --brand-ink: #33312E;
+  --brand-ink-light: #6A6763;
 }
 
 * {
@@ -83,28 +91,29 @@ a, button, input, textarea, select {
   transition: all 0.2s ease;
 }
 
-/* ─── Hero gradient — warm twilight radial ─── */
+/* ─── Hero gradient — warm paper with subtle color wash ─── */
 .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 50% 35%, oklch(0.18 0.08 290) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 70% 60%, oklch(0.14 0.06 60 / 0.3) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 30% 70%, oklch(0.12 0.04 330 / 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 50% 35%, #E07A5F12 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 70% 60%, #81B29A0A 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 30% 70%, #E8A83808 0%, transparent 70%),
     var(--background);
 }
 
-/* ─── Hero CTA — warm gradient with glow ─── */
+/* ─── Hero CTA — terracotta gradient ─── */
 .hero-cta {
-  background: linear-gradient(135deg, oklch(0.60 0.20 290), oklch(0.55 0.18 260));
+  background: linear-gradient(135deg, #E07A5F, #D16B50);
+  color: white;
   box-shadow:
-    0 0 24px oklch(0.60 0.20 290 / 0.35),
-    0 8px 24px oklch(0.0 0.0 0 / 0.25);
+    0 4px 16px #E07A5F30,
+    0 8px 24px rgba(0, 0, 0, 0.06);
   border-radius: 1rem;
 }
 .hero-cta:hover {
-  background: linear-gradient(135deg, oklch(0.65 0.20 290), oklch(0.60 0.18 260));
+  background: linear-gradient(135deg, #D16B50, #C25D43);
   box-shadow:
-    0 0 32px oklch(0.65 0.20 290 / 0.45),
-    0 8px 32px oklch(0.0 0.0 0 / 0.3);
+    0 6px 24px #E07A5F40,
+    0 8px 32px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 .hero-cta:active {
@@ -116,16 +125,16 @@ a, button, input, textarea, select {
   transition: all 0.3s ease;
 }
 .card-glow:hover {
-  border-color: oklch(0.68 0.18 290 / 0.3);
-  box-shadow: 0 4px 20px oklch(0.68 0.18 290 / 0.08);
+  border-color: #E07A5F40;
+  box-shadow: 0 4px 20px #E07A5F10;
 }
 
 /* ─── Glass card effect ─── */
 .glass-card {
-  background: oklch(0.14 0.018 285 / 0.8);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid oklch(0.30 0.02 285 / 0.5);
+  border: 1px solid #E8E5DF;
 }
 
 /* ─── Animations ─── */
@@ -157,8 +166,8 @@ a, button, input, textarea, select {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px oklch(0.68 0.18 290 / 0.2); }
-  50% { box-shadow: 0 0 20px oklch(0.68 0.18 290 / 0.4); }
+  0%, 100% { box-shadow: 0 0 8px #E07A5F20; }
+  50% { box-shadow: 0 0 20px #E07A5F40; }
 }
 
 @keyframes shimmer {
@@ -229,32 +238,32 @@ a, button, input, textarea, select {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.35 0.02 285);
+  background: #D5D0C8;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.42 0.03 290);
+  background: #B5B0A8;
 }
 
 /* ─── Focus ring ─── */
 *:focus-visible {
-  outline: 2px solid oklch(0.68 0.18 290 / 0.5);
+  outline: 2px solid #E07A5F60;
   outline-offset: 2px;
 }
 
 /* ─── Selection highlight ─── */
 ::selection {
-  background: oklch(0.68 0.18 290 / 0.3);
-  color: oklch(0.95 0.01 80);
+  background: #E07A5F30;
+  color: #33312E;
 }
 
 /* ─── Skeleton loading shimmer ─── */
 .skeleton {
   background: linear-gradient(
     90deg,
-    oklch(0.18 0.02 285) 0%,
-    oklch(0.24 0.02 285) 50%,
-    oklch(0.18 0.02 285) 100%
+    #F0EDE7 0%,
+    #E8E5DF 50%,
+    #F0EDE7 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;

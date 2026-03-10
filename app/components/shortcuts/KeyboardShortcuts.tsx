@@ -89,7 +89,7 @@ export function KeyboardShortcuts({ actions }: KeyboardShortcutsProps) {
               className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-primary/10 transition-colors text-left"
             >
               <span className="text-sm text-foreground">{action.label}</span>
-              <kbd className="text-[10px] text-muted-foreground bg-zinc-800 px-1.5 py-0.5 rounded border border-border/50 font-mono">
+              <kbd className="text-[10px] text-muted-foreground bg-[#F4F1EB] px-1.5 py-0.5 rounded border border-border/50 font-mono">
                 {action.shortcut}
               </kbd>
             </button>

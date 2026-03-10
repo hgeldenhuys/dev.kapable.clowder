@@ -163,10 +163,10 @@ export function FileDropZone({
         onClick={() => !disabled && inputRef.current?.click()}
         className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
           dragOver
-            ? "border-indigo-500 bg-indigo-500/10"
+            ? "border-[#E07A5F] bg-[#E07A5F]/10"
             : disabled
-              ? "border-zinc-800 bg-zinc-900/50 cursor-not-allowed"
-              : "border-zinc-700 hover:border-zinc-600"
+              ? "border-[#E8E5DF] bg-[#F4F1EB]/50 cursor-not-allowed"
+              : "border-[#E8E5DF] hover:border-[#6A6763]/40"
         }`}
       >
         <input
@@ -177,7 +177,7 @@ export function FileDropZone({
           onChange={handleFileInput}
           disabled={disabled}
         />
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-[#6A6763]">
           {disabled
             ? "Session ID needed to upload files — continue to step 2 first"
             : files.length >= MAX_FILES
@@ -195,14 +195,14 @@ export function FileDropZone({
               key={f.name}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                 f.status === "error"
-                  ? "bg-red-500/20 text-red-300 border-red-500/30"
+                  ? "bg-[#D94F4F]/15 text-[#D94F4F] border-[#D94F4F]/25"
                   : f.status === "uploading"
-                    ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/30 animate-pulse"
-                    : "bg-zinc-800 text-zinc-300 border-zinc-700"
+                    ? "bg-[#E8A838]/15 text-[#C08A2E] border-[#E8A838]/25 animate-pulse"
+                    : "bg-[#F4F1EB] text-[#33312E] border-[#E8E5DF]"
               }`}
             >
               {f.type === "text" ? "📄" : "📎"} {f.name}
-              <span className="text-zinc-500">({formatFileSize(f.size)})</span>
+              <span className="text-[#6A6763]">({formatFileSize(f.size)})</span>
               {f.status === "done" && (
                 <button
                   type="button"
@@ -210,16 +210,16 @@ export function FileDropZone({
                     e.stopPropagation();
                     onFileRemoved(f.name);
                   }}
-                  className="ml-0.5 hover:text-red-400 transition-colors"
+                  className="ml-0.5 hover:text-[#D94F4F] transition-colors"
                 >
                   ✕
                 </button>
               )}
               {f.status === "uploading" && (
-                <span className="text-yellow-400">uploading...</span>
+                <span className="text-[#E8A838]">uploading...</span>
               )}
               {f.status === "error" && (
-                <span className="text-red-400">failed</span>
+                <span className="text-[#D94F4F]">failed</span>
               )}
             </span>
           ))}

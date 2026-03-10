@@ -4,18 +4,18 @@ import { ExpertAvatar, getExpertIcon } from "./ExpertAvatar";
 
 /** Domain-specific border colors for expert messages (solid, not gradient) */
 const DOMAIN_BORDER_COLORS: Record<string, string> = {
-  strategist: "oklch(0.7 0.15 220)",   // cyan-blue
-  designer: "oklch(0.65 0.2 290)",      // violet
-  architect: "oklch(0.75 0.15 70)",     // amber
-  commerce: "oklch(0.7 0.15 160)",      // emerald
-  compliance: "oklch(0.65 0.15 20)",    // red
-  growth: "oklch(0.7 0.15 340)",        // pink
-  security: "oklch(0.55 0.05 260)",     // slate
-  data: "oklch(0.65 0.18 270)",         // indigo
-  analytics: "oklch(0.7 0.12 195)",     // teal
-  content: "oklch(0.7 0.15 350)",       // rose
-  ai_ml: "oklch(0.6 0.2 290)",          // purple
-  system: "oklch(0.5 0.05 260)",        // muted gray
+  strategist: "#5B8FB9",   // warm blue
+  designer: "#9B6B8E",     // warm plum
+  architect: "#E8A838",    // amber
+  commerce: "#81B29A",     // sage
+  compliance: "#D94F4F",   // warm red
+  growth: "#C75B8F",       // warm pink
+  security: "#7A7572",     // warm gray
+  data: "#6B6BA0",         // warm indigo
+  analytics: "#5B9B8F",    // warm teal
+  content: "#C75B8F",      // warm rose
+  ai_ml: "#8B6BA0",        // warm purple
+  system: "#9A9690",       // taupe
 };
 
 function getDomainBorderColor(domain: string): string {
@@ -23,7 +23,7 @@ function getDomainBorderColor(domain: string): string {
   for (const [key, color] of Object.entries(DOMAIN_BORDER_COLORS)) {
     if (d.includes(key)) return color;
   }
-  return "oklch(0.65 0.15 280)"; // fallback purple
+  return "#9B6B8E"; // fallback plum
 }
 
 /** Minimal markdown: **bold**, *italic*, `code`, ```code blocks```, and - bullet lists */
@@ -37,14 +37,14 @@ function renderSimpleMarkdown(text: string): string {
   // Code blocks (triple backtick)
   html = html.replace(
     /```(\w*)\n([\s\S]*?)```/g,
-    '<pre class="bg-zinc-900 border border-border rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>$2</code></pre>'
+    '<pre class="bg-[#F4F1EB] border border-[#E8E5DF] rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>$2</code></pre>'
   );
 
   // Inline formatting
   html = html
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, '<code class="bg-zinc-800 px-1.5 py-0.5 rounded text-xs text-emerald-400">$1</code>')
+    .replace(/`(.+?)`/g, '<code class="bg-[#F4F1EB] px-1.5 py-0.5 rounded text-xs text-[#E07A5F]">$1</code>')
     .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal">$2</li>');
 
@@ -93,7 +93,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
         className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
             ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-md shadow-lg shadow-primary/20"
-            : "bg-card/60 text-foreground rounded-tl-md shadow-sm backdrop-blur-sm border border-border/10 border-l-2"
+            : "bg-white text-foreground rounded-tl-md shadow-sm border border-[#E8E5DF] border-l-2"
         }`}
         style={
           !isUser
@@ -112,12 +112,12 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
               {expert?.name ?? (message.role === "system" ? "System" : "Clowder")}
             </span>
             {expert && (
-              <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-zinc-800/60 border border-zinc-700/50">
+              <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-[#F4F1EB] border border-[#E8E5DF]">
                 {expert.domain.replace(/_/g, " ")}
               </span>
             )}
             {expert && expert.confidence >= 0.8 && (
-              <span className="text-[10px] text-emerald-400/70 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/15">
+              <span className="text-[10px] text-[#81B29A] px-1.5 py-0.5 rounded-full bg-[#81B29A]/10 border border-[#81B29A]/20">
                 ready
               </span>
             )}
