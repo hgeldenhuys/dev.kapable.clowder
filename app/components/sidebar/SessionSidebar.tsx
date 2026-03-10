@@ -104,7 +104,7 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
   }
 
   return (
-    <div className="h-full flex flex-col bg-card/80 backdrop-blur-sm border-r border-border w-64">
+    <div className="h-full flex flex-col bg-card/80 backdrop-blur-sm border-r border-border w-[85vw] max-w-[280px] md:w-64">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-border/50">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sessions</span>

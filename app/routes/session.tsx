@@ -167,13 +167,23 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
 
       {/* Main content area */}
       <div className="flex-1 overflow-hidden relative flex flex-col md:flex-row" style={{ zIndex: 1, transform: "translateZ(0)" }}>
-        {/* Session sidebar */}
+        {/* Session sidebar — overlay on mobile, inline on md+ */}
         {showSidebar && (
-          <SessionSidebar
-            sessions={allSessions}
-            currentSessionId={session.id}
-            onClose={() => setShowSidebar(false)}
-          />
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              onClick={() => setShowSidebar(false)}
+              onKeyDown={() => {}}
+              role="presentation"
+            />
+            <div className="fixed inset-y-0 left-0 z-50 md:relative md:z-auto">
+              <SessionSidebar
+                sessions={allSessions}
+                currentSessionId={session.id}
+                onClose={() => setShowSidebar(false)}
+              />
+            </div>
+          </>
         )}
 
         {/* Chat panel */}

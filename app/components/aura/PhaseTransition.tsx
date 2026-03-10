@@ -35,7 +35,7 @@ const PHASE_CONFIG: Record<string, { label: string; color: string; bg: string; i
   delivered: {
     label: "Your app is live!",
     color: "text-emerald-300",
-    bg: "from-emerald-500/30 via-transparent to-transparent",
+    bg: "from-emerald-500/30 via-emerald-500/10 to-transparent",
     icon: "🎉",
   },
 };
@@ -65,12 +65,16 @@ export function PhaseTransition({ phase }: PhaseTransitionProps) {
     setDisplayPhase(phase);
     setVisible(true);
 
-    const timer = setTimeout(() => setVisible(false), 2500);
+    // Delivered gets a longer celebration moment
+    const duration = phase === "delivered" ? 5000 : 2500;
+    const timer = setTimeout(() => setVisible(false), duration);
     return () => clearTimeout(timer);
   }, [phase]);
 
   const config = PHASE_CONFIG[displayPhase];
   if (!config || !visible) return null;
+
+  const isDelivered = displayPhase === "delivered";
 
   return (
     <div
@@ -78,12 +82,19 @@ export function PhaseTransition({ phase }: PhaseTransitionProps) {
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
       }`}
     >
-      <div className={`bg-gradient-to-b ${config.bg} py-3 px-4 text-center`}>
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-lg">{config.icon}</span>
-          <span className={`text-sm font-medium ${config.color}`}>
+      <div className={`bg-gradient-to-b ${config.bg} py-3 px-4 text-center relative overflow-hidden`}>
+        {/* Celebration glow burst for delivered */}
+        {isDelivered && (
+          <div className="absolute inset-0 animate-pulse-glow">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/10 to-transparent" />
+          </div>
+        )}
+        <div className="flex items-center justify-center gap-2 relative z-10">
+          <span className={isDelivered ? "text-2xl animate-bounce" : "text-lg"}>{config.icon}</span>
+          <span className={`${isDelivered ? "text-base font-bold" : "text-sm font-medium"} ${config.color}`}>
             {config.label}
           </span>
+          {isDelivered && <span className="text-2xl animate-bounce" style={{ animationDelay: "200ms" }}>🚀</span>}
         </div>
       </div>
     </div>
