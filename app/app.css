@@ -262,19 +262,10 @@ a, button, input, textarea, select {
   animation: gradient-shift 4s ease-in-out infinite;
 }
 
-/* ─── Custom scrollbar — warm ─── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #D5D0C8;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #B5B0A8;
+/* ─── Scrollbar — clean native look ─── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D5D0C8 transparent;
 }
 
 /* ─── Focus ring ─── */
