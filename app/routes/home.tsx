@@ -515,32 +515,42 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
         </CardContent></Card>
 
-        {/* Social proof metrics — hidden until 50+ sessions */}
-        {sessions.length >= 50 && (
-          <div className="space-y-3 mt-10 mb-10">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 py-5 px-6 sm:px-8 rounded-2xl bg-card border border-border/40 shadow-[var(--shadow-md)]">
-              <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        {/* Social proof — always visible */}
+        {sessions.length > 0 && (
+          <div className="space-y-4 mt-8 mb-4">
+            {/* Stats row */}
+            <div className="flex items-center justify-center gap-6 sm:gap-8">
+              <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
                 <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Apps Built</p>
               </div>
-              <div className="hidden sm:block w-px h-12 bg-border/40" />
-              <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div className="w-px h-10 bg-border/40" />
+              <div className="text-center">
                 <p className="text-2xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
                 <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Deployed</p>
               </div>
-              <div className="hidden sm:block w-px h-12 bg-border/40" />
-              <div className="text-center flex flex-col items-center gap-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <p className="text-2xl font-bold text-primary">~5 min</p>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Avg Build</p>
-              </div>
             </div>
+            {/* Pulse showcase link */}
+            <a
+              href="https://pulse.kapable.run"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 hover:border-border/60 hover:shadow-[var(--shadow-sm)] transition-all group mx-auto max-w-sm"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <div className="text-left min-w-0">
+                <p className="text-xs font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                  See Pulse — built in 10 minutes
+                </p>
+                <p className="text-[10px] text-muted-foreground/60 leading-snug">
+                  A real-time feedback app, built and deployed by Clowder
+                </p>
+              </div>
+              <span className="text-muted-foreground/40 group-hover:text-primary/60 transition-colors ml-auto flex-none">&#8599;</span>
+            </a>
           </div>
-        )}
-        {sessions.length > 0 && (
-          <p className="text-xs text-muted-foreground/70 text-center font-medium mt-4">Join the builders creating apps with AI</p>
         )}
 
         {/* Recent Sessions */}
@@ -559,7 +569,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
+                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:-translate-y-1 cursor-pointer transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -597,7 +607,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                           href={s.app_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-accent/60 hover:text-accent font-medium transition-colors"
+                          className="text-[11px] text-accent/60 hover:text-accent hover:underline font-medium transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           Open app &#8599;
@@ -629,7 +639,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-60" />
-              <span className="text-[11px] text-muted-foreground/70">
+              <span className="text-[11px] text-foreground/50">
                 Clowder by{" "}
                 <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/70 transition-colors underline-offset-2 hover:underline">
                   Kapable
@@ -637,10 +647,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 · &copy; 2026
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-muted-foreground/70">
-              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">About Kapable</a>
-              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">Privacy</a>
-              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">Terms</a>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-foreground/50">
+              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">About Kapable</a>
+              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">Privacy</a>
+              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="py-3 sm:py-0 hover:text-foreground/70 transition-colors">Terms</a>
             </div>
             <a
               href="#"

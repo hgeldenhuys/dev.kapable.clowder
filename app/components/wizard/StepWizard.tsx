@@ -68,7 +68,7 @@ export function StepWizard({
             <div />
           )}
           {canProceed ? (
-            <div className="flex flex-col items-end gap-1.5 animate-in slide-in-from-bottom-2 duration-300">
+            <div className="flex flex-col items-end gap-1.5 animate-slide-in-cta">
               <Button
                 size="lg"
                 onClick={onNext}

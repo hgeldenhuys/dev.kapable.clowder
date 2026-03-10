@@ -332,14 +332,6 @@ a, button, input, textarea, select {
   border-radius: 0.5rem;
 }
 
-/* ─── Session card hover lift ─── */
-.session-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-.session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
 
 /* ─── Utility: line-clamp ─── */
 .line-clamp-2 {
@@ -395,4 +387,19 @@ a, button, input, textarea, select {
 
 .scroll-to-bottom-btn {
   animation: scroll-btn-fade-in 0.2s ease-out both;
+}
+
+/* ─── CTA slide-in animation ─── */
+@keyframes slide-in-cta {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-in-cta {
+  animation: slide-in-cta 400ms ease-out both;
 }
