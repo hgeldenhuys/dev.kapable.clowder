@@ -413,18 +413,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground/80">
-            <span className="flex items-center gap-1">
+          <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-muted-foreground/80">
+            <span className="flex items-center gap-1 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-accent" />
               No signup
             </span>
             <span className="opacity-60">·</span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-accent" />
               Free to use
             </span>
             <span className="opacity-60">·</span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-accent" />
               Deploys in minutes
             </span>
@@ -563,7 +563,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
-                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 truncate">
+                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-2">
                         {s.name}
                       </span>
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-none">
