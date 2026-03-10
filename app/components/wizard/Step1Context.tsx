@@ -12,28 +12,32 @@ export interface Step1Data {
 const STARTER_TEMPLATES = [
   {
     name: "Feedback Board",
-    icon: "💬",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+    thumbnailGradient: "from-primary/15 to-primary/5",
     accent: "from-primary/8 to-primary/3",
     borderAccent: "hover:border-primary/30",
     description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
   },
   {
     name: "Team Task Board",
-    icon: "✅",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+    thumbnailGradient: "from-accent/15 to-accent/5",
     accent: "from-accent/8 to-accent/3",
     borderAccent: "hover:border-accent/30",
     description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
   },
   {
     name: "Event Planner",
-    icon: "📅",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    thumbnailGradient: "from-[#E8A838]/15 to-[#E8A838]/5",
     accent: "from-[#E8A838]/8 to-[#E8A838]/3",
     borderAccent: "hover:border-[#E8A838]/30",
     description: "A community event listing and RSVP platform. Organizers create events with date, time, location, and description. Attendees can browse upcoming events, RSVP, and see who else is going. Features: event categories, capacity limits, and a calendar view.",
   },
   {
     name: "Recipe Collection",
-    icon: "🍳",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+    thumbnailGradient: "from-[#C75B8F]/15 to-[#C75B8F]/5",
     accent: "from-[#C75B8F]/8 to-[#C75B8F]/3",
     borderAccent: "hover:border-[#C75B8F]/30",
     description: "A personal recipe sharing app where users can add recipes with ingredients, steps, and photos. Features: search by ingredient, tag recipes by cuisine or dietary preference, save favorites, and share recipes with friends via a unique link.",
@@ -60,17 +64,19 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground/60 text-center font-medium">Or start with a template</p>
           <div className="relative">
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x scroll-smooth">
+          <div className="flex flex-col sm:flex-row gap-2 sm:overflow-x-auto pb-1 sm:-mx-2 sm:px-2 sm:snap-x sm:scroll-smooth">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-[160px] sm:w-[185px]`}
+                className={`sm:flex-none sm:snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-full sm:w-[185px]`}
                 aria-label={`Start with ${t.name} template`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${t.thumbnailGradient} flex items-center justify-center text-foreground/70 group-hover:scale-110 transition-transform duration-200`}>
+                    {t.icon}
+                  </div>
                   <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground/60 leading-snug line-clamp-2">{t.description.split('. ')[0]}.</p>
@@ -78,7 +84,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             ))}
           </div>
           {/* Right fade to indicate scrollable */}
-          <div className="absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-[#FAF9F6] to-transparent pointer-events-none rounded-r-xl" />
+          <div className="hidden sm:block absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-[#FAF9F6] to-transparent pointer-events-none rounded-r-xl" />
           </div>
         </div>
       )}

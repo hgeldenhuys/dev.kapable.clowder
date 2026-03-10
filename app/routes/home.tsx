@@ -413,19 +413,19 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground/80">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="w-2 h-2 rounded-full bg-accent" />
               No signup
             </span>
             <span className="opacity-60">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="w-2 h-2 rounded-full bg-accent" />
               Free to use
             </span>
             <span className="opacity-60">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="w-2 h-2 rounded-full bg-accent" />
               Deploys in minutes
             </span>
           </div>
@@ -434,7 +434,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Wizard — immediately below branding */}
         <div className="w-full max-w-2xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
-        <Card className="rounded-3xl border-border/40 shadow-[var(--shadow-md)] bg-white/92 backdrop-blur-xl"><CardContent className="p-6 sm:p-8">
+        <Card className="glass-card rounded-3xl border-border/50 shadow-[var(--shadow-lg)]"><CardContent className="p-6 sm:p-8">
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
@@ -515,8 +515,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
         </CardContent></Card>
 
-        {/* Social proof metrics */}
-        {sessions.length > 0 && (
+        {/* Social proof metrics — hidden until 50+ sessions */}
+        {sessions.length >= 50 && (
           <div className="space-y-3 mt-10 mb-10">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 py-5 px-6 sm:px-8 rounded-2xl bg-card border border-border/40 shadow-[var(--shadow-md)]">
               <div className="text-center flex flex-col items-center gap-1">
@@ -537,8 +537,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Avg Build</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground/70 text-center font-medium">Join the builders creating apps with AI</p>
           </div>
+        )}
+        {sessions.length > 0 && (
+          <p className="text-xs text-muted-foreground/70 text-center font-medium mt-4">Join the builders creating apps with AI</p>
         )}
 
         {/* Recent Sessions */}
@@ -635,10 +637,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 · &copy; 2026
               </span>
             </div>
-            <div className="flex items-center gap-6 text-[11px] text-muted-foreground/70">
-              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">About Kapable</a>
-              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">Privacy</a>
-              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/80 transition-colors">Terms</a>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-muted-foreground/70">
+              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">About Kapable</a>
+              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">Privacy</a>
+              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="py-2 sm:py-0 hover:text-muted-foreground/80 transition-colors">Terms</a>
             </div>
             <a
               href="#"

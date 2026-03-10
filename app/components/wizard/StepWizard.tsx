@@ -72,7 +72,7 @@ export function StepWizard({
               size="lg"
               disabled={!canProceed}
               onClick={onNext}
-              className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-95 disabled:grayscale hover:scale-[1.02] active:scale-[0.98]"
+              className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all disabled:opacity-100 disabled:pointer-events-auto hover:scale-[1.02] active:scale-[0.98]"
             >
               {nextLabel || defaultNextLabel}
             </Button>
