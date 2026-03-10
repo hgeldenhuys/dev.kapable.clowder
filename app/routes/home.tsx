@@ -13,6 +13,7 @@ import type { Step1Data } from "~/components/wizard/Step1Context";
 import { Step2Assembly } from "~/components/wizard/Step2Assembly";
 import type { Specialist } from "~/components/wizard/Step2Assembly";
 import { useTypeheadStream } from "~/hooks/useTypeheadStream";
+import { Card, CardContent } from "~/components/ui/card";
 // OnboardingTooltip removed — page is self-explanatory, tooltip was redundant
 
 export async function loader() {
@@ -433,7 +434,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Wizard — immediately below branding */}
         <div className="w-full max-w-2xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
-        <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-[var(--shadow-md)]">
+        <Card className="rounded-3xl border-border/40 shadow-[var(--shadow-md)] bg-white/92 backdrop-blur-xl"><CardContent className="p-6 sm:p-8">
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
@@ -512,7 +513,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             Kapable
           </a>
         </div>
-        </div>
+        </CardContent></Card>
 
         {/* Social proof metrics */}
         {sessions.length > 0 && (

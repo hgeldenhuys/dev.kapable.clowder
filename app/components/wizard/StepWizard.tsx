@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { StepIndicator } from "./StepIndicator";
+import { Button } from "~/components/ui/button";
 
 interface StepWizardProps {
   step: 1 | 2 | 3;
@@ -60,25 +61,21 @@ export function StepWizard({
       {step < 3 && (
         <div className="flex items-center justify-between mt-5">
           {step > 1 ? (
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-4 py-2.5 text-sm font-medium text-muted-foreground/60 hover:text-foreground transition-colors rounded-xl hover:bg-card/40"
-            >
+            <Button variant="ghost" onClick={onBack}>
               ← Back
-            </button>
+            </Button>
           ) : (
             <div />
           )}
           <div className="flex flex-col items-end gap-1.5">
-            <button
-              type="button"
-              onClick={onNext}
+            <Button
+              size="lg"
               disabled={!canProceed}
+              onClick={onNext}
               className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-95 disabled:grayscale hover:scale-[1.02] active:scale-[0.98]"
             >
               {nextLabel || defaultNextLabel}
-            </button>
+            </Button>
             <span className="text-[11px] text-muted-foreground/60 font-medium">
               {isMac ? "⌘" : "Ctrl"}+Enter
             </span>
