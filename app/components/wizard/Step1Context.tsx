@@ -75,7 +75,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:scale-[1.02] hover:-translate-y-1 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
+                className={`text-left rounded-xl border border-border/40 overflow-hidden bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:bg-primary/5 hover:border-primary/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-200 group w-full ${selectedTemplate === t.name ? 'ring-2 ring-primary border-primary/50' : ''}`}
                 aria-label={`Start with ${t.name} template`}
               >
                 {/* Gradient header — 60px colored band */}
