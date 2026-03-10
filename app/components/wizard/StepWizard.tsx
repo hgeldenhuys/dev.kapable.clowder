@@ -67,19 +67,24 @@ export function StepWizard({
           ) : (
             <div />
           )}
-          <div className="flex flex-col items-end gap-1.5">
-            <Button
-              size="lg"
-              disabled={!canProceed}
-              onClick={onNext}
-              className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all disabled:opacity-100 disabled:pointer-events-auto hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {nextLabel || defaultNextLabel}
-            </Button>
-            <span className="text-[11px] text-muted-foreground/60 font-medium">
-              {isMac ? "⌘" : "Ctrl"}+Enter
-            </span>
-          </div>
+          {canProceed ? (
+            <div className="flex flex-col items-end gap-1.5 animate-in slide-in-from-bottom-2 duration-300">
+              <Button
+                size="lg"
+                onClick={onNext}
+                className="hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {nextLabel || defaultNextLabel}
+              </Button>
+              <span className="text-[11px] text-muted-foreground/60 font-medium">
+                <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
+              </span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center">
+              Enter a name and 20+ word description to get started <span className="hidden sm:inline">{isMac ? "⌘" : "Ctrl"}+Enter</span>
+            </p>
+          )}
         </div>
       )}
     </div>

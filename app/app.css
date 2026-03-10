@@ -152,14 +152,6 @@ a, button, input, textarea, select {
 .hero-cta:active {
   transform: translateY(0);
 }
-.hero-cta:disabled {
-  background: #e7e5e4;
-  color: #a8a29e;
-  box-shadow: none;
-  transform: none;
-  border: 1px solid #d6d3d1;
-  cursor: not-allowed;
-}
 
 /* ─── Card hover glow ─── */
 .card-glow {
