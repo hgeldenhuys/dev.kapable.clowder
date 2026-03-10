@@ -72,7 +72,7 @@ export function StepWizard({
               disabled={!canProceed}
               className={canProceed
                 ? "hero-cta px-8 py-3.5 font-bold text-lg text-white transition-all hover:scale-[1.02] active:scale-[0.98] animate-slide-in-cta"
-                : "px-8 py-3.5 font-bold text-lg bg-stone-200 text-stone-400 border border-stone-300 cursor-not-allowed transition-all"
+                : "px-8 py-3.5 font-bold text-lg bg-stone-300 text-stone-600 border border-stone-400 cursor-not-allowed transition-all shadow-sm"
               }
               title={!canProceed ? "Enter a name and 20+ word description to continue" : undefined}
             >
