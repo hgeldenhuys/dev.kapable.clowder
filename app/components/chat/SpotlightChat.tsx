@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
+import { ExpertAvatar } from "./ExpertAvatar";
 
 interface SpotlightChatProps {
   messages: ClowderMessage[];
@@ -47,11 +48,12 @@ export function SpotlightChat({
       {/* Active expert header */}
       {activeExpert && (
         <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
-          <div
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-base font-bold shadow-lg ring-2 ring-primary/20"
-          >
-            {activeExpert.name[0]}
-          </div>
+          <ExpertAvatar
+            domain={activeExpert.domain}
+            name={activeExpert.name}
+            size="md"
+            className="ring-2 ring-primary/20"
+          />
           <div>
             <p className="text-sm font-semibold">{activeExpert.name}</p>
             <p className="text-xs text-muted-foreground">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
+import { ExpertAvatar } from "./ExpertAvatar";
 
 /** Minimal markdown: **bold**, *italic*, `code`, ```code blocks```, and - bullet lists */
 function renderSimpleMarkdown(text: string): string {
@@ -24,51 +25,6 @@ function renderSimpleMarkdown(text: string): string {
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal">$2</li>');
 
   return html;
-}
-
-/** Domain-specific gradient colors for expert avatars */
-const EXPERT_GRADIENTS: Record<string, string> = {
-  strategist: "from-cyan-500 to-blue-600",
-  designer: "from-violet-500 to-purple-600",
-  architect: "from-amber-500 to-orange-600",
-  commerce: "from-emerald-500 to-green-600",
-  compliance: "from-red-500 to-rose-600",
-  growth: "from-pink-500 to-fuchsia-600",
-  security: "from-slate-500 to-zinc-600",
-  data: "from-indigo-500 to-blue-600",
-  payments: "from-yellow-500 to-amber-600",
-};
-
-function getExpertGradient(expert: ClowderExpert | null): string {
-  if (!expert) return "from-zinc-500 to-zinc-600";
-  const domain = expert.domain.toLowerCase();
-  for (const [key, gradient] of Object.entries(EXPERT_GRADIENTS)) {
-    if (domain.includes(key)) return gradient;
-  }
-  // Fallback: hash the name to pick a consistent color
-  const hash = expert.name.charCodeAt(0) % 5;
-  const fallbacks = [
-    "from-cyan-500 to-blue-600",
-    "from-violet-500 to-purple-600",
-    "from-amber-500 to-orange-600",
-    "from-emerald-500 to-green-600",
-    "from-pink-500 to-fuchsia-600",
-  ];
-  return fallbacks[hash];
-}
-
-/** Domain-specific icons (Unicode symbols) */
-function getExpertIcon(expert: ClowderExpert | null): string {
-  if (!expert) return "◈";
-  const domain = expert.domain.toLowerCase();
-  if (domain.includes("strateg")) return "♟";
-  if (domain.includes("design")) return "◐";
-  if (domain.includes("architect")) return "△";
-  if (domain.includes("commerce") || domain.includes("payment")) return "◇";
-  if (domain.includes("security") || domain.includes("compliance")) return "◉";
-  if (domain.includes("growth")) return "↗";
-  if (domain.includes("data")) return "⬡";
-  return "◈";
 }
 
 interface MessageBubbleProps {
@@ -96,19 +52,17 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
     ? experts.find((e) => e.id === message.expert_id)
     : null;
   const html = useMemo(() => renderSimpleMarkdown(message.content), [message.content]);
-  const gradient = getExpertGradient(expert);
-  const icon = getExpertIcon(expert);
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
       {/* Expert avatar */}
       {!isUser && (
-        <div
-          className={`flex-none w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg mt-1`}
-          title={expert?.name ?? "System"}
-        >
-          {icon}
-        </div>
+        <ExpertAvatar
+          domain={expert?.domain ?? "system"}
+          name={expert?.name ?? "System"}
+          size="sm"
+          className="mt-1"
+        />
       )}
 
       <div

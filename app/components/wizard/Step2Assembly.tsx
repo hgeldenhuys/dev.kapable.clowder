@@ -1,3 +1,5 @@
+import { ExpertAvatar } from "~/components/chat/ExpertAvatar";
+
 export interface Specialist {
   type: string;
   name: string;
@@ -36,9 +38,9 @@ const domainConfig: Record<string, { label: string; color: string }> = {
 const defaultChipColor = "bg-gray-500/20 text-gray-300 border-gray-500/30";
 
 const coreTeam = [
-  { name: "Strategist", style: "bg-primary/20 text-primary border-primary/30" },
-  { name: "Designer", style: "bg-primary/20 text-primary border-primary/30" },
-  { name: "Architect", style: "bg-primary/20 text-primary border-primary/30" },
+  { name: "Strategist", domain: "strategist", style: "bg-primary/20 text-primary border-primary/30" },
+  { name: "Designer", domain: "designer", style: "bg-primary/20 text-primary border-primary/30" },
+  { name: "Architect", domain: "architect", style: "bg-primary/20 text-primary border-primary/30" },
 ];
 
 export function Step2Assembly({
@@ -76,9 +78,9 @@ export function Step2Assembly({
           {coreTeam.map((expert) => (
             <span
               key={expert.name}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${expert.style}`}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${expert.style}`}
             >
-              <span className="inline-block w-2 h-2 rounded-full bg-current" />
+              <ExpertAvatar domain={expert.domain} name={expert.name} size="sm" className="!w-6 !h-6 !text-xs" />
               {expert.name}
             </span>
           ))}
@@ -112,11 +114,11 @@ export function Step2Assembly({
             return (
               <span
                 key={s.type}
-                className={`group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-300 ${colorClass}`}
+                className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-300 ${colorClass}`}
                 style={{ opacity: Math.max(0.5, s.confidence) }}
                 title={s.reason || `Confidence: ${Math.round(s.confidence * 100)}%`}
               >
-                <span className="inline-block w-2 h-2 rounded-full bg-current" />
+                <ExpertAvatar domain={s.type} name={s.name} size="sm" className="!w-6 !h-6 !text-xs" showTooltip={false} />
                 {label}
                 <button
                   type="button"
