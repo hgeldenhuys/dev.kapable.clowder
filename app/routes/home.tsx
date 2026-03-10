@@ -138,6 +138,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   const [typeheadTimedOut, setTypeheadTimedOut] = useState(false);
   const typeheadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Auto-advance timer for Step 2
+  const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState<number | null>(null);
+  const autoAdvanceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const cancelAutoAdvance = useCallback(() => {
+    setAutoAdvanceCountdown(null);
+    if (autoAdvanceIntervalRef.current) {
+      clearInterval(autoAdvanceIntervalRef.current);
+      autoAdvanceIntervalRef.current = null;
+    }
+  }, []);
+
   // Typehead SSE stream
   useTypeheadStream({
     runId: typeheadRunId,
@@ -160,12 +172,43 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
     }, []),
   });
 
+  // Start auto-advance countdown when typehead loading finishes on Step 2
+  const handleConfirmTeamRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (currentStep === 2 && !typeheadLoading && autoAdvanceCountdown === null && !autoAdvanceIntervalRef.current) {
+      setAutoAdvanceCountdown(5);
+      autoAdvanceIntervalRef.current = setInterval(() => {
+        setAutoAdvanceCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            // Timer reached 0 — auto-advance
+            if (autoAdvanceIntervalRef.current) {
+              clearInterval(autoAdvanceIntervalRef.current);
+              autoAdvanceIntervalRef.current = null;
+            }
+            // Use a timeout to call handleConfirmTeam outside the setState
+            setTimeout(() => {
+              handleConfirmTeamRef.current?.();
+            }, 0);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    // Cancel auto-advance if user navigates away from step 2
+    if (currentStep !== 2) {
+      cancelAutoAdvance();
+    }
+  }, [currentStep, typeheadLoading, cancelAutoAdvance, autoAdvanceCountdown]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (abortRef.current) abortRef.current.abort();
       if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+      if (autoAdvanceIntervalRef.current) clearInterval(autoAdvanceIntervalRef.current);
     };
   }, []);
 
@@ -236,6 +279,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       reason: s.reason,
     }));
     setStep2Specialists(seeded);
+
+    // Auto-skip Step 2 if no specialists found and description is rich enough (>= 200 words)
+    const wordCount = step1Data.description.trim().split(/\s+/).filter(Boolean).length;
+    if (specialists.length === 0 && wordCount >= 200) {
+      // No specialists to review — skip straight to session creation
+      handleConfirmTeam();
+      return;
+    }
+
     setCurrentStep(2);
 
     // Trigger typehead flow for more accurate specialist prediction
@@ -266,15 +318,30 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         setTypeheadRunId(data.runId);
         setTypeheadFlowId(data.flowId);
       } else {
-        // Typehead not available — proceed with predict-experts results
+        // Typehead unavailable — auto-skip Step 2 and proceed directly to session creation.
+        // The seeded specialists from predict-experts are sufficient.
         setTypeheadLoading(false);
         if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+        const formData = new FormData();
+        formData.set("name", step1Data.appName);
+        formData.set("description", step1Data.description);
+        formData.set("specialists", JSON.stringify(seeded));
+        submit(formData, { method: "post", action: "?index" });
+        return;
       }
     } catch {
+      // Typehead fetch failed — auto-skip Step 2 and proceed directly to session creation.
+      // The seeded specialists from predict-experts are sufficient.
       setTypeheadLoading(false);
       if (typeheadTimeoutRef.current) clearTimeout(typeheadTimeoutRef.current);
+      const formData = new FormData();
+      formData.set("name", step1Data.appName);
+      formData.set("description", step1Data.description);
+      formData.set("specialists", JSON.stringify(seeded));
+      submit(formData, { method: "post", action: "?index" });
+      return;
     }
-  }, [specialists, step1Data]);
+  }, [specialists, step1Data, submit]);
 
   // Remove a specialist from Step 2
   const handleRemoveSpecialist = useCallback((type: string) => {
@@ -283,12 +350,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
   // Step 2 confirm → create session via form submit (includes specialist team)
   const handleConfirmTeam = useCallback(() => {
+    cancelAutoAdvance();
     const formData = new FormData();
     formData.set("name", step1Data.appName);
     formData.set("description", step1Data.description);
     formData.set("specialists", JSON.stringify(step2Specialists));
     submit(formData, { method: "post", action: "?index" });
-  }, [step1Data, step2Specialists, submit]);
+  }, [step1Data, step2Specialists, submit, cancelAutoAdvance]);
+
+  // Keep ref in sync for auto-advance timer callback
+  useEffect(() => {
+    handleConfirmTeamRef.current = handleConfirmTeam;
+  }, [handleConfirmTeam]);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -341,12 +414,12 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* Wizard — immediately below branding */}
-        <div className="w-full max-w-2xl text-center space-y-8 relative z-10">
+        <div className="w-full max-w-2xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
-          onBack={() => setCurrentStep(1)}
+          onBack={() => { cancelAutoAdvance(); setCurrentStep(1); }}
           canProceed={
             currentStep === 1
               ? isStep1Valid(step1Data)
@@ -401,6 +474,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   Team prediction timed out. Proceeding with current team.
                 </p>
               )}
+              {autoAdvanceCountdown !== null && (
+                <button
+                  type="button"
+                  onClick={cancelAutoAdvance}
+                  className="mt-3 px-4 py-1.5 rounded-full text-xs text-muted-foreground/60 hover:text-foreground bg-card/30 hover:bg-card/50 border border-border/20 hover:border-border/40 transition-all duration-200 mx-auto block cursor-pointer"
+                >
+                  Auto-starting in {autoAdvanceCountdown}s... (click to review team)
+                </button>
+              )}
             </>
           )}
         </StepWizard>
@@ -427,7 +509,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-1">
                       {s.name}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider flex-none px-2 py-0.5 rounded-full border ${
+                    <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-none px-2 py-0.5 rounded-full border ${
                       s.phase === "delivered"
                         ? "bg-[#81B29A]/10 text-[#81B29A] border-[#81B29A]/20"
                         : s.phase === "building"

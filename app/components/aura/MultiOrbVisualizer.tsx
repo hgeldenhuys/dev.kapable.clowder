@@ -199,16 +199,14 @@ function OrbCanvas({
       onClick={onClick}
       className="relative flex flex-col items-center gap-1 transition-all duration-500 ease-out cursor-pointer"
       style={{
-        transform: isActive ? "scale(1.0)" : "scale(0.65)",
+        transform: isActive ? "scale(1.0)" : "scale(0.7)",
         opacity: isActive ? 1 : 0.75,
         zIndex: isActive ? 10 : 1,
       }}
     >
       <div
-        className="rounded-full overflow-hidden"
+        className="rounded-full overflow-hidden w-[100px] h-[100px] sm:w-[140px] sm:h-[140px]"
         style={{
-          width: "140px",
-          height: "140px",
           boxShadow: isActive
             ? `0 0 30px rgba(${Math.round(params.color[0] * 255)}, ${Math.round(params.color[1] * 255)}, ${Math.round(params.color[2] * 255)}, 0.4)`
             : "none",

@@ -64,8 +64,8 @@ export function SpotlightChat({
           <div>
             <p className="text-sm font-semibold">{activeExpert.name}</p>
             <p className="text-xs text-muted-foreground">
-              <span className="capitalize">{activeExpert.domain.replace(/_/g, " ")}</span>
-              <span className="mx-1.5 opacity-40">·</span>
+              <span className="capitalize hidden sm:inline">{activeExpert.domain.replace(/_/g, " ")}</span>
+              <span className="mx-1.5 opacity-40 hidden sm:inline">·</span>
               <span
                 className={activeExpert.confidence >= 0.8 ? "text-[#81B29A]" : activeExpert.confidence >= 0.5 ? "text-[#E8A838]" : "text-[#6A6763]"}
                 title={`Confidence: ${Math.round(activeExpert.confidence * 100)}% — increases as you discuss requirements`}

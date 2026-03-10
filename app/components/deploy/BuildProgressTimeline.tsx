@@ -212,7 +212,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                 )}
                 {/* Celebration CTA for delivered apps */}
                 {isDelivered && stage.id === "done" && appUrl && (
-                  <div className="mt-3 flex items-center gap-3">
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
                     <a
                       href={appUrl}
                       target="_blank"
