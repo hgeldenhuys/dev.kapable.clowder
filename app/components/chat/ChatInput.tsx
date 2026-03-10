@@ -13,6 +13,7 @@ interface ChatInputProps {
   appUrl?: string;
   onSend?: (content: string) => void;
   onForceStart?: () => void;
+  onRetryBuild?: () => void;
   onFileDrop?: (file: File) => void;
 }
 
@@ -28,6 +29,7 @@ export function ChatInput({
   appUrl,
   onSend,
   onForceStart,
+  onRetryBuild,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -50,7 +52,7 @@ export function ChatInput({
   if (isBuilding) {
     return (
       <div className="py-3 px-2">
-        <BuildProgressTimeline messages={messages} phase={phase} appUrl={appUrl} />
+        <BuildProgressTimeline messages={messages} phase={phase} appUrl={appUrl} onRetry={onRetryBuild} />
       </div>
     );
   }

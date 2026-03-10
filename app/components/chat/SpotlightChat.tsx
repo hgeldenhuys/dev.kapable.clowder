@@ -16,6 +16,7 @@ interface SpotlightChatProps {
   isWaitingForExpert?: boolean;
   onSend: (content: string) => void;
   onForceStart?: () => void;
+  onRetryBuild?: () => void;
 }
 
 /**
@@ -34,6 +35,7 @@ export function SpotlightChat({
   isWaitingForExpert,
   onSend,
   onForceStart,
+  onRetryBuild,
 }: SpotlightChatProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const isBuilding = phase === "building" || phase === "delivered";
@@ -135,6 +137,7 @@ export function SpotlightChat({
           appUrl={appUrl}
           onSend={onSend}
           onForceStart={phase !== "building" && phase !== "delivered" ? onForceStart : undefined}
+          onRetryBuild={onRetryBuild}
         />
       </div>
     </div>

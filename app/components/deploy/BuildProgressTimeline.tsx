@@ -1,4 +1,5 @@
 import type { ClowderMessage } from "~/lib/api.server";
+import { useState } from "react";
 
 /**
  * Build stage definitions — matched against system message content/metadata.
@@ -16,18 +17,34 @@ const BUILD_STAGES = [
   { id: "done", label: "App is live!", match: (m: ClowderMessage) => m.content.includes("Your app is live") || m.metadata?.deployed === true },
 ] as const;
 
+/** Detect error messages from the builder */
+function detectBuildError(messages: ClowderMessage[]): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== "system") continue;
+    const c = m.content.toLowerCase();
+    if (c.includes("error") || c.includes("failed") || c.includes("encountered an error")) {
+      return m.content;
+    }
+  }
+  return null;
+}
+
 interface BuildProgressTimelineProps {
   messages: ClowderMessage[];
   phase: string;
   appUrl?: string;
+  onRetry?: () => void;
 }
 
 /**
  * Vertical timeline showing build progress.
  * Parses system messages from the builder to determine which stages are complete.
- * Replaces the static "Your experts are building your app..." message.
+ * Shows error state with retry button (T10) and collapsible build log (T9).
  */
-export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgressTimelineProps) {
+export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: BuildProgressTimelineProps) {
+  const [showLog, setShowLog] = useState(false);
+
   // Only show system messages (builder sends them)
   const systemMessages = messages.filter((m) => m.role === "system");
 
@@ -50,10 +67,11 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
     }
   }
 
-  // All stages up to and including the highest reached are "done"
-  // The next one is "active" (if building phase)
   const isBuilding = phase === "building";
   const isDelivered = phase === "delivered";
+
+  // T10: Detect build errors
+  const buildError = isBuilding ? detectBuildError(systemMessages) : null;
 
   // Get the most recent system message for context
   const lastSystemMsg = systemMessages[systemMessages.length - 1];
@@ -63,11 +81,8 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
   const buildStartMsg = systemMessages.find(
     (m) => m.metadata?.phase === "planning" || m.metadata?.phase === "building"
   );
-  // For delivered apps, use the last system message as end time (fallback for flow-based builds
-  // where there's no explicit "deployed" marker message)
   let buildEndMsg: ClowderMessage | null = null;
   if (isDelivered && systemMessages.length > 0) {
-    // Walk backwards to find a deploy/complete marker, or fall back to last system msg
     for (let i = systemMessages.length - 1; i >= 0; i--) {
       const m = systemMessages[i];
       if (m.metadata?.deployed === true || m.metadata?.phase === "delivered" || m.content.includes("Your app is live")) {
@@ -75,7 +90,6 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
         break;
       }
     }
-    // If no explicit marker, use the last system message
     if (!buildEndMsg) {
       buildEndMsg = systemMessages[systemMessages.length - 1];
     }
@@ -88,22 +102,38 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
     ? `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`
     : `${elapsedSec}s`;
 
+  // T9: Build log entries (system messages during build)
+  const logEntries = systemMessages.filter(
+    (m) => m.metadata?.phase === "building" || m.metadata?.phase === "planning" || m.metadata?.source === "flow"
+  );
+
   return (
     <div className="space-y-1 py-2">
       {/* Header */}
       <div className="flex items-center justify-between px-1 mb-3">
         <span className="text-xs font-medium text-foreground/80">Build Progress</span>
-        {elapsedMs > 0 && (
-          <span className="text-[10px] text-muted-foreground tabular-nums">{elapsedStr}</span>
-        )}
+        <div className="flex items-center gap-2">
+          {logEntries.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowLog((v) => !v)}
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showLog ? "Hide log" : "Show log"}
+            </button>
+          )}
+          {elapsedMs > 0 && (
+            <span className="text-[10px] text-muted-foreground tabular-nums">{elapsedStr}</span>
+          )}
+        </div>
       </div>
 
       {/* Timeline */}
       <div className="space-y-0">
         {BUILD_STAGES.map((stage, i) => {
           const isDone = i <= highestReachedIndex;
-          const isActive = !isDone && i === highestReachedIndex + 1 && isBuilding;
-          const isFuture = !isDone && !isActive;
+          const isActive = !isDone && i === highestReachedIndex + 1 && isBuilding && !buildError;
+          const isErrorStage = !isDone && i === highestReachedIndex + 1 && !!buildError;
 
           // Skip flow stage if not using flow-based build
           if (stage.id === "flow" && !reachedStages.has("flow")) {
@@ -120,7 +150,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
               {i < BUILD_STAGES.length - 1 && (
                 <div
                   className={`absolute left-[9px] top-5 w-px h-full ${
-                    isDone ? "bg-emerald-500/40" : "bg-border/30"
+                    isDone ? "bg-emerald-500/40" : isErrorStage ? "bg-red-500/40" : "bg-border/30"
                   }`}
                 />
               )}
@@ -131,6 +161,12 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
                   <div className="w-[18px] h-[18px] rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
                     <svg className="w-2.5 h-2.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                ) : isErrorStage ? (
+                  <div className="w-[18px] h-[18px] rounded-full bg-red-500/20 border border-red-500/50 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                 ) : isActive ? (
@@ -148,14 +184,18 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
                   className={`text-xs leading-[18px] ${
                     isDone
                       ? "text-emerald-400/80"
-                      : isActive
-                        ? "text-foreground font-medium"
-                        : "text-muted-foreground/40"
+                      : isErrorStage
+                        ? "text-red-400 font-medium"
+                        : isActive
+                          ? "text-foreground font-medium"
+                          : "text-muted-foreground/40"
                   }`}
                 >
                   {isDelivered && stage.id === "done" && appUrl
                     ? "App is live!"
-                    : stage.label}
+                    : isErrorStage
+                      ? `${stage.label} — failed`
+                      : stage.label}
                 </span>
                 {isActive && (
                   <span className="ml-1.5 text-[10px] text-muted-foreground animate-pulse">
@@ -168,12 +208,58 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
         })}
       </div>
 
-      {/* Latest status message */}
-      {lastContent && isBuilding && (
+      {/* T10: Error state with retry */}
+      {buildError && (
+        <div className="mt-2 mx-1 p-3 rounded-lg bg-red-500/10 border border-red-500/20 space-y-2">
+          <p className="text-xs text-red-400/90 leading-relaxed">
+            {buildError.length > 200 ? buildError.slice(0, 200) + "…" : buildError}
+          </p>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-md transition-colors"
+            >
+              Retry build
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Latest status message (when no error) */}
+      {lastContent && isBuilding && !buildError && (
         <div className="mt-2 px-1">
           <p className="text-[11px] text-muted-foreground/60 truncate" title={lastContent}>
             {lastContent.length > 80 ? lastContent.slice(0, 80) + "…" : lastContent}
           </p>
+        </div>
+      )}
+
+      {/* T9: Collapsible build log */}
+      {showLog && logEntries.length > 0 && (
+        <div className="mt-3 mx-1 rounded-lg bg-zinc-900/80 border border-border/30 overflow-hidden">
+          <div className="px-3 py-1.5 border-b border-border/20 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Build Log</span>
+          </div>
+          <div className="max-h-40 overflow-y-auto p-2 space-y-1 font-mono">
+            {logEntries.map((entry) => (
+              <div key={entry.id} className="flex gap-2 text-[10px] leading-relaxed">
+                <span className="text-muted-foreground/40 flex-none tabular-nums">
+                  {new Date(entry.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                </span>
+                <span className={
+                  entry.content.toLowerCase().includes("error") || entry.content.toLowerCase().includes("failed")
+                    ? "text-red-400/80"
+                    : entry.content.includes("created") || entry.content.includes("completed")
+                      ? "text-emerald-400/70"
+                      : "text-muted-foreground/70"
+                }>
+                  {entry.content.length > 120 ? entry.content.slice(0, 120) + "…" : entry.content}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
