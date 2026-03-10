@@ -70,7 +70,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-full`}
+                className={`text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:scale-[1.02] hover:-translate-y-1 transition-all duration-200 group w-full`}
                 aria-label={`Start with ${t.name} template`}
               >
                 <div className="flex items-center gap-2 mb-1">
