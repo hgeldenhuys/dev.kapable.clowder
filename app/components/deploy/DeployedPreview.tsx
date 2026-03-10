@@ -91,7 +91,6 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
             title={`${appName} — Live Preview`}
             className="w-full h-full border-0"
             onLoad={() => setLoaded(true)}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           />
         </div>
       </div>
