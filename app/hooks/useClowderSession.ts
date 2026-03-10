@@ -35,7 +35,11 @@ export function useClowderSession({
   const handleSSEEvent = useCallback((event: import("./useClowderSSE").ClowderSSEEvent) => {
     switch (event.type) {
       case "phase_changed":
-        setSession((s) => ({ ...s, phase: event.phase as ClowderSession["phase"] }));
+        setSession((s) => ({
+          ...s,
+          phase: event.phase as ClowderSession["phase"],
+          ...(event.app_url ? { app_url: event.app_url } : {}),
+        }));
         break;
 
       case "force_started":

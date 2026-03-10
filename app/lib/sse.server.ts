@@ -47,8 +47,8 @@ export function emitExpertUpdated(sessionId: string, expert: Record<string, unkn
   emit(sessionId, "expert_updated", { expert });
 }
 
-export function emitPhaseChanged(sessionId: string, phase: string) {
-  emit(sessionId, "phase_changed", { phase });
+export function emitPhaseChanged(sessionId: string, phase: string, extra?: Record<string, unknown>) {
+  emit(sessionId, "phase_changed", { phase, ...extra });
 }
 
 export function emitForceStarted(sessionId: string) {

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export type ClowderSSEEvent =
   | { type: "session_created"; session_id: string }
-  | { type: "phase_changed"; session_id: string; phase: string }
+  | { type: "phase_changed"; session_id: string; phase: string; app_url?: string }
   | { type: "force_started"; session_id: string }
   | { type: "message"; session_id: string; message: {
       id: string;

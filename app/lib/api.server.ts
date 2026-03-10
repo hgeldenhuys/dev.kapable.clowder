@@ -111,9 +111,9 @@ export async function listClowderSessions(): Promise<ClowderSession[]> {
   return rows.map(sessionToApi) as ClowderSession[];
 }
 
-export async function updateSessionPhase(sessionId: string, phase: ClowderSession["phase"]): Promise<void> {
+export async function updateSessionPhase(sessionId: string, phase: ClowderSession["phase"], extra?: Record<string, unknown>): Promise<void> {
   await dbUpdateSessionPhase(sessionId, phase);
-  emitPhaseChanged(sessionId, phase);
+  emitPhaseChanged(sessionId, phase, extra);
 }
 
 export async function getClowderSession(sessionId: string): Promise<{

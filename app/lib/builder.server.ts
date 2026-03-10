@@ -1012,7 +1012,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
   // Phase: "building" if flow is running, "delivered" if scaffold deployed, "planning" if nothing deployed
   const finalPhase = flowTriggered ? "building" : (provisionResult ? "delivered" : "planning");
-  await updateSessionPhase(sessionId, finalPhase);
+  const phaseExtra = deployResult?.appUrl ? { app_url: deployResult.appUrl } : undefined;
+  await updateSessionPhase(sessionId, finalPhase, phaseExtra);
 
   await sendClowderMessage(sessionId, {
     content: summaryLines.join("\n"),
