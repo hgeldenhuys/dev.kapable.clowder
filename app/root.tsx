@@ -62,7 +62,7 @@ function ClientOnlyToaster() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
-  return <Toaster position="top-right" richColors />;
+  return <Toaster position="bottom-center" richColors />;
 }
 
 export default function App() {
@@ -86,12 +86,20 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
+    <main className="min-h-screen flex items-center justify-center p-8 bg-[var(--background)]">
       <div className="text-center max-w-md">
-        <h1 className="text-4xl font-bold mb-4">{message}</h1>
-        <p className="text-muted-foreground mb-6">{details}</p>
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+          <svg className="w-8 h-8 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold mb-2 text-[var(--foreground)]">{message}</h1>
+        <p className="text-sm text-[var(--muted-foreground)] mb-6">{details}</p>
+        <a href="/" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+          ← Back to home
+        </a>
         {stack && (
-          <pre className="text-left text-sm bg-secondary p-4 rounded overflow-auto">
+          <pre className="text-left text-xs mt-6 bg-[var(--secondary)] text-[var(--foreground)] p-4 rounded-xl overflow-auto border border-[var(--border)]">
             <code>{stack}</code>
           </pre>
         )}
