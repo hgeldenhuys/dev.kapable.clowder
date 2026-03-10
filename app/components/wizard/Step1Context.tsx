@@ -87,8 +87,8 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 {/* Content below header */}
                 <div className="px-3.5 py-2.5">
                   <span className="text-xs font-bold text-stone-700 group-hover:text-primary transition-colors">{t.name}</span>
-                  <p className="text-[10px] text-stone-500 mt-0.5">{t.category}</p>
-                  <p className="text-[11px] text-stone-500 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
+                  <p className="text-xs text-stone-600 mt-0.5">{t.category}</p>
+                  <p className="text-xs text-stone-500 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
                 </div>
               </button>
             ))}

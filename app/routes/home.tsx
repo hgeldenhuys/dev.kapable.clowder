@@ -412,7 +412,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
-            <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
+            <span className="bg-gradient-to-r from-[#E07A5F] to-[#5B9A7F] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
           <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-stone-500">
@@ -510,7 +510,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Powered by badge */}
         <div className="flex items-center justify-center gap-2 mt-4 opacity-85 hover:opacity-100 transition-opacity">
-          <span className="text-[10px] text-stone-500">Powered by</span>
+          <span className="text-xs text-stone-500">Powered by</span>
           <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-stone-500 font-semibold hover:text-primary transition-colors">
             Kapable
           </a>
@@ -521,7 +521,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {sessions.length > 0 && (
           <div id="community" className="flex items-center gap-4 mt-10 mb-2 scroll-mt-16">
             <div className="flex-1 h-px bg-border/30" />
-            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">Community</span>
+            <span className="text-xs text-stone-500 uppercase tracking-widest font-medium">Community</span>
             <div className="flex-1 h-px bg-border/30" />
           </div>
         )}
