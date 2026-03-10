@@ -63,9 +63,23 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
   const buildStartMsg = systemMessages.find(
     (m) => m.metadata?.phase === "planning" || m.metadata?.phase === "building"
   );
-  const buildEndMsg = isDelivered
-    ? systemMessages.findLast((m) => m.metadata?.deployed === true || m.metadata?.phase === "delivered" || m.content.includes("Your app is live"))
-    : null;
+  // For delivered apps, use the last system message as end time (fallback for flow-based builds
+  // where there's no explicit "deployed" marker message)
+  let buildEndMsg: ClowderMessage | null = null;
+  if (isDelivered && systemMessages.length > 0) {
+    // Walk backwards to find a deploy/complete marker, or fall back to last system msg
+    for (let i = systemMessages.length - 1; i >= 0; i--) {
+      const m = systemMessages[i];
+      if (m.metadata?.deployed === true || m.metadata?.phase === "delivered" || m.content.includes("Your app is live")) {
+        buildEndMsg = m;
+        break;
+      }
+    }
+    // If no explicit marker, use the last system message
+    if (!buildEndMsg) {
+      buildEndMsg = systemMessages[systemMessages.length - 1];
+    }
+  }
   const startTime = buildStartMsg ? new Date(buildStartMsg.created_at).getTime() : 0;
   const endTime = buildEndMsg ? new Date(buildEndMsg.created_at).getTime() : Date.now();
   const elapsedMs = startTime ? endTime - startTime : 0;
