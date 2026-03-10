@@ -517,6 +517,48 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
         </CardContent></Card>
 
+        {/* How it works — 3-step explainer */}
+        <div id="how-it-works" className="mt-12 mb-4 scroll-mt-20 w-full">
+          <h3 className="text-sm font-semibold text-stone-600 text-center mb-8 uppercase tracking-wider">
+            How it works
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-stone-700">Describe your idea</p>
+              <p className="text-xs text-stone-500 leading-relaxed max-w-[200px]">
+                Tell us what you want to build in plain English. No technical knowledge needed.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-stone-700">AI experts refine it</p>
+              <p className="text-xs text-stone-500 leading-relaxed max-w-[200px]">
+                A team of specialist agents interviews you, asks smart questions, and shapes the spec.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-stone-700">App deploys live</p>
+              <p className="text-xs text-stone-500 leading-relaxed max-w-[200px]">
+                Your app is built, deployed, and accessible at its own URL — in minutes, not months.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Section divider — community area */}
         {sessions.length > 0 && (
           <div id="community" className="flex items-center gap-4 mt-10 mb-2 scroll-mt-16">

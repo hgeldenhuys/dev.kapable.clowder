@@ -11,7 +11,7 @@ export function NavBar() {
         {/* Navigation links */}
         <div className="flex items-center gap-6">
           <a
-            href="#community"
+            href="#how-it-works"
             className="hidden sm:inline text-sm text-stone-600 hover:text-stone-900 transition-colors"
           >
             How it works
