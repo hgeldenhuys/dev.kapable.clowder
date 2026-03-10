@@ -518,18 +518,20 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Social proof — always visible */}
         {sessions.length > 0 && (
           <div className="space-y-4 mt-8 mb-4">
-            {/* Stats row */}
-            <div className="flex items-center justify-center gap-6 sm:gap-8">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Apps Built</p>
+            {/* Stats row — only show when volume is impressive */}
+            {sessions.length >= 50 && (
+              <div className="flex items-center justify-center gap-6 sm:gap-8">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Apps Built</p>
+                </div>
+                <div className="w-px h-10 bg-border/40" />
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Deployed</p>
+                </div>
               </div>
-              <div className="w-px h-10 bg-border/40" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Deployed</p>
-              </div>
-            </div>
+            )}
             {/* Pulse showcase link */}
             <a
               href="https://pulse.kapable.run"
