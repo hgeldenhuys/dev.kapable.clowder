@@ -149,7 +149,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
 
       {/* Validation hint */}
       {!isValid && (data.appName.trim() || data.description.trim()) && (
-        <p className="text-xs text-yellow-500 text-center">
+        <p className="text-xs text-amber-400/70 text-center">
           {!data.appName.trim()
             ? "Enter an app name to continue"
             : "Description needs at least 20 characters"}

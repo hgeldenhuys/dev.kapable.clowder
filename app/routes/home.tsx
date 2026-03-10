@@ -293,7 +293,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center min-h-[50vh] px-6 sm:px-8 py-12 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center min-h-[45vh] px-6 sm:px-8 py-10 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -302,7 +302,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-amber-500/6 blur-3xl animate-float-delayed" />
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-rose-500/6 blur-2xl animate-float-slow" />
 
-        <div className="text-center space-y-8 max-w-3xl mx-auto">
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-4 animate-fade-in">
             <img
               src="/logo.png"
@@ -316,7 +316,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             </h1>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h2 className="text-2xl sm:text-4xl font-semibold text-foreground leading-tight max-w-xl mx-auto">
               Describe your app.{" "}
               <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
@@ -336,19 +336,19 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               Start Building →
             </button>
 
-            <div className="flex items-center gap-3 text-sm text-muted-foreground animate-fade-in-up">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground/60 animate-fade-in-up">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
                 No signup
               </span>
-              <span className="opacity-30">·</span>
+              <span className="opacity-20">·</span>
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
                 Free to use
               </span>
-              <span className="opacity-30">·</span>
+              <span className="opacity-20">·</span>
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400/80" />
                 Deploys in minutes
               </span>
             </div>
@@ -402,8 +402,30 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
+      {/* How it works — micro section */}
+      <section className="flex flex-col items-center px-6 sm:px-8 py-8">
+        <div className="flex items-center gap-6 sm:gap-10 text-center">
+          {[
+            { num: "1", label: "Describe", desc: "Tell us your idea" },
+            { num: "2", label: "Refine", desc: "AI experts ask questions" },
+            { num: "3", label: "Ship", desc: "Deployed in minutes" },
+          ].map((step, i) => (
+            <div key={step.num} className="flex items-center gap-6 sm:gap-10">
+              {i > 0 && <div className="w-8 sm:w-12 h-px bg-border/20" />}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary/70">
+                  {step.num}
+                </span>
+                <span className="text-xs font-semibold text-foreground/70">{step.label}</span>
+                <span className="text-[10px] text-muted-foreground/40">{step.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Wizard Section */}
-      <section ref={wizardRef} className="relative flex flex-col items-center px-8 py-16">
+      <section ref={wizardRef} className="relative flex flex-col items-center px-8 py-12">
         {/* Warm ambient glow behind wizard */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
         <div className="w-full max-w-2xl text-center space-y-8 relative z-10">
