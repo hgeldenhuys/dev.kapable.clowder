@@ -415,7 +415,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#5B9A7F] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
 
-          <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-stone-500">
+          <div className="flex items-center justify-center flex-wrap gap-3 gap-y-1 text-sm text-stone-600 font-medium">
             <span className="flex items-center gap-1 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-accent" />
               No signup
