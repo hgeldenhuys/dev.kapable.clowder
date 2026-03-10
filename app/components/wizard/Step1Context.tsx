@@ -56,7 +56,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
       {/* Starter templates — compact horizontal scroll, shown when empty */}
       {wordCount < 20 && (
         <div className="space-y-2">
-          <p className="text-[11px] text-muted-foreground/60 text-center font-medium uppercase tracking-wider">Quick start with a template</p>
+          <p className="text-xs text-muted-foreground/50 text-center font-medium">Or start with a template</p>
           <div className="relative">
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x">
             {STARTER_TEMPLATES.map((t) => (
