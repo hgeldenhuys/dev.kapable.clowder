@@ -1,81 +1,92 @@
-# Sprint 1 — Visual Foundation: Execution Summary
+# Sprint 3 Execution Summary
 
 **Date:** 2026-03-10
-**Session:** gentle-cat (Stockdog execution harness)
-**Sprint Goal:** Transform Clowder from "functional prototype" to "real product"
+**Session:** fair-owl (execution)
+**Sprint goal:** Break out of "mobile app on desktop" — widen layout, grid layouts, shadow hierarchy, entrance animations. Target: Layout 5.0->6.5, Interactions 4.5->5.5, Visual 5.5->6.0, Overall 5.8->6.2.
 
 ---
 
-## Results
+## Stories Completed: 4/4
 
-| Story | Title | Size | Status | Commits |
-|-------|-------|------|--------|---------|
-| 1 | Set up shadcn component foundation | XS | DONE | `54d0198` |
-| 2 | Typography + opacity overhaul | S | DONE | `a315f5f` |
-| 4 | Template cards visual upgrade | S | DONE | `16c0d9a` |
-| 3 | Rebuild wizard form with shadcn | M | DONE | `55f66ad` |
-| 5 | Mobile responsive foundations | S | DONE | `3677111` |
+### Story 1: Widen Desktop Layout + Session Cards Grid
+**Status:** DONE
+**Files changed:** `app/routes/home.tsx` (lines 435, 557)
+**Changes:**
+- Container width: `max-w-2xl` (672px) -> `max-w-4xl` (896px) — matches footer
+- Session cards: `space-y-2.5` vertical stack -> `grid grid-cols-1 md:grid-cols-2 gap-4` — 2-column on desktop, single column on mobile
+- `stagger-children` CSS class works with both flex and grid children (verified)
+**ACs verified:** 6/6 (build, width, grid, mobile, border accent, footer consistency)
 
-**5/5 stories completed. All builds pass. Deployed.**
+### Story 2: Template Cards 2-Column Grid
+**Status:** DONE
+**Files changed:** `app/components/wizard/Step1Context.tsx` (lines 67, 73, 86-87)
+**Changes:**
+- Template container: horizontal scroll strip -> `grid grid-cols-1 sm:grid-cols-2 gap-3`
+- Removed `sm:flex-none sm:snap-start` and `sm:w-[185px]` — cards fill grid cells via `w-full`
+- Deleted scroll fade overlay (comment + gradient div, 2 lines)
+- Preserved `</div>` closing tag (line 88) — JSX structure intact per grooming note
+**ACs verified:** 6/6 (build, 2x2 grid, mobile stack, no fade overlay, hover states, click populate)
 
-## What Was Done
+### Story 3: Shadow Depth Hierarchy
+**Status:** DONE
+**Files changed:** `app/app.css` (line 80), `app/routes/home.tsx` (lines 437, 455, 562)
+**Changes:**
+- New `--shadow-xl` token: `0 20px 60px rgba(51,49,46,0.14), 0 8px 20px rgba(51,49,46,0.10)`
+- Wizard card: `shadow-lg` -> `shadow-xl` (highest elevation)
+- Specialist preview: added `shadow-sm` (low elevation)
+- Session cards: `shadow-md` -> `shadow-sm` at rest, `hover:shadow-lg` unchanged
+- Social proof bar: `shadow-md` unchanged (medium-high)
+**ACs verified:** 5/5 (build, wizard depth, specialist shadow, session light shadow, no clipping)
 
-### Story 1 — shadcn Foundation
-- Created `components.json` for shadcn CLI config (Tailwind v4 compatible)
-- Created `app/lib/utils.ts` with `cn()` utility (clsx + tailwind-merge)
-- Created 5 shadcn UI components: Button, Card, Input, Textarea, Badge
-- Installed `@radix-ui/react-slot` dependency
+### Story 4: AI Team Preview Entrance Animation
+**Status:** DONE
+**Files changed:** `app/routes/home.tsx` (lines 455, 460, 463, 464)
+**Changes:**
+- Container: added `animate-in fade-in slide-in-from-bottom-2 duration-300`
+- Map callback: added `index` parameter for stagger delay
+- Chip: added `animate-in fade-in slide-in-from-bottom-1 fill-mode-backwards` class
+- Chip style: merged `animationDelay: \`${index * 80}ms\`` for cascading entrance
+- Used `fill-mode-backwards` (Tailwind class) NOT inline `animationFillMode` per grooming fix
+- "analyzing..." pulse indicator: NOT modified (independent `animate-pulse`)
+**ACs verified:** 5/5 (build, fade in, stagger cascade, pulse intact, no re-animation)
 
-### Story 2 — Typography + Opacity
-- Added CSS heading font rule: `h1-h4 { font-family: "Outfit", sans-serif }`
-- Raised "Powered by" badge opacity from 50% to 70%
-- Raised stats labels from `/70` to full muted-foreground
-- Raised footer text from `/60` to `/70`
-- Raised thinking indicator opacity from 0.6 to 0.7
-- Raised template label from `/50` to `/60`
-- Raised placeholder text from `/50` to `/60`
+---
 
-### Story 3 — Wizard Rebuild
-- Replaced raw `<input>` with shadcn `<Input>` (focus rings, consistent border)
-- Replaced raw `<textarea>` with shadcn `<Textarea>`
-- Replaced raw back `<button>` with `<Button variant="ghost">`
-- Replaced raw CTA `<button>` with `<Button size="lg">` (kept hero-cta class)
-- Replaced `glass-card` div with `<Card>` + `<CardContent>` wrapper
+## Build & Deploy
 
-### Story 4 — Template Cards
-- Widened cards from 140/160px to 160/185px
-- Removed `truncate` class — full template names visible
-- Changed description text from 10px to 11px
-- Fixed gradient fade from `from-white/90` to `from-[#FAF9F6]` (matches background)
-- Added `hover:-translate-y-0.5` for hover lift
-- Added `scroll-smooth` to scroll container
+| Step | Result |
+|------|--------|
+| `npx react-router build` | Exit 0 (all 4 stories) |
+| `git push origin main` | `ffba31f..0f52656 main -> main` |
+| Deploy API | `deployment_id: 8b95a57a`, `pipeline_run_id: 702f6aa9`, status: accepted |
 
-### Story 5 — Mobile Responsive
-- Added `overflow-x-hidden` to `<main>` to prevent horizontal scroll
-- Reduced h1 from `text-4xl` to `text-3xl` base
-- Reduced h2 from `text-2xl` to `text-xl` base with `md:text-3xl`
-- Added CSS media query for mobile heading sizes
-- Tightened session card padding (`p-3 sm:p-4`)
+## Commits
 
-## Deployment
-- Pipeline run: `80740b37-40a2-4640-9125-d3d3cffd0d69`
-- Domain: clowder.kapable.run
+| Commit | Message |
+|--------|---------|
+| `6c74168` | feat(clowder): sprint 3 — widen desktop layout + session cards grid |
+| `a0e045c` | feat(clowder): sprint 3 — template cards 2-column grid |
+| `8f093c4` | feat(clowder): sprint 3 — shadow depth hierarchy |
+| `0f52656` | feat(clowder): sprint 3 — AI team preview entrance animation |
 
-## Friction Log Summary
-- shadcn CLI incompatible with Tailwind v4 (no config file) — manual creation required
-- `@radix-ui/react-slot` missing from package.json — installed
-- Edit tool intermittently refused reads on app.css — used sed workaround
-- AC for `muted-foreground/50` was overly strict (caught placeholder opacity, which is intentionally lower)
+## Evidence
 
-## AC Verification Results
-- All `grep`-based ACs: PASS
-- All build ACs: PASS (exit code 0 on every story)
-- Screenshot ACs: Deferred to visual verification post-deploy (no Chrome MCP available in this session)
+| Story | Evidence |
+|-------|----------|
+| 1 | `evidence/sprint-3-task-1/verification.md` |
+| 2 | `evidence/sprint-3-task-2/verification.md` |
+| 3 | `evidence/sprint-3-task-3/verification.md` |
+| 4 | `evidence/sprint-3-task-4/verification.md` |
 
-## Estimated Impact (per sprint success metrics)
-| Dimension | Before | Target | Achieved |
-|-----------|--------|--------|----------|
-| Visual polish | 4/10 | 7/10 | 7/10 (shadcn depth, Card shadows) |
-| Typography | 5/10 | 8/10 | 8/10 (Outfit headings, readable text) |
-| Interactivity | 4/10 | 6/10 | 6/10 (hover lift, focus rings) |
-| Mobile | 1/10 | 6/10 | 5/10 (overflow fixed, headings responsive, needs viewport testing) |
+## Friction
+
+Zero friction. Well-groomed sprint with verified line numbers and exact code snippets made implementation mechanical. Grooming corrections (Story 2 line 88 warning, Story 4 fill-mode class) prevented two potential bugs.
+
+## Expected Score Impact
+
+| Dimension | Before | Target | Confidence |
+|-----------|--------|--------|------------|
+| Layout | 5.0 | 6.5 | High — `max-w-4xl` + 2-col grids fill desktop viewport |
+| Interactions | 4.5 | 5.5 | Medium — entrance animations add life, but hover is already covered |
+| Visual | 5.5 | 6.0 | Medium — shadow hierarchy creates depth, but single-dimension change |
+| **Overall** | **5.8** | **6.0-6.5** | **Conservative — depends on judge perception of grid + depth combo** |
