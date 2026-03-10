@@ -7,6 +7,29 @@ export interface Step1Data {
   files: UploadedFile[];
 }
 
+const STARTER_TEMPLATES = [
+  {
+    name: "Feedback Board",
+    icon: "💬",
+    description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
+  },
+  {
+    name: "Team Task Board",
+    icon: "✅",
+    description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
+  },
+  {
+    name: "Event Planner",
+    icon: "📅",
+    description: "A community event listing and RSVP platform. Organizers create events with date, time, location, and description. Attendees can browse upcoming events, RSVP, and see who else is going. Features: event categories, capacity limits, and a calendar view.",
+  },
+  {
+    name: "Recipe Collection",
+    icon: "🍳",
+    description: "A personal recipe sharing app where users can add recipes with ingredients, steps, and photos. Features: search by ingredient, tag recipes by cuisine or dietary preference, save favorites, and share recipes with friends via a unique link.",
+  },
+];
+
 interface Step1Props {
   data: Step1Data;
   onChange: (data: Step1Data) => void;
@@ -18,6 +41,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
   const descriptionLength = data.description.trim().length;
   const isValid = data.appName.trim().length >= 1 && descriptionLength >= 20;
   const wordCount = data.description.trim() ? data.description.trim().split(/\s+/).length : 0;
+  const isEmpty = !data.appName.trim() && !data.description.trim();
 
   return (
     <div className="space-y-6">
@@ -30,6 +54,29 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
           better your AI team can help.
         </p>
       </div>
+
+      {/* Starter templates — shown when fields are empty */}
+      {isEmpty && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground text-center">Try one of these to get started</p>
+          <div className="grid grid-cols-2 gap-2">
+            {STARTER_TEMPLATES.map((t) => (
+              <button
+                key={t.name}
+                type="button"
+                onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
+                className="text-left p-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/60 hover:border-primary/30 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base">{t.icon}</span>
+                  <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">{t.name}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground/60 leading-relaxed line-clamp-2">{t.description.slice(0, 80)}...</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         <div>

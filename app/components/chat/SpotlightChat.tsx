@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -122,22 +122,7 @@ export function SpotlightChat({
           <InterviewProgress messages={messages} />
         )}
         {isWaitingForExpert && (
-          <div className="flex items-center gap-3 px-3 py-3 mx-3 rounded-lg bg-card/30 border border-border/30">
-            <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
-            </div>
-            <span className="text-xs text-muted-foreground">
-              {phase === "interviewing"
-                ? "Preparing your next question…"
-                : activeExpert
-                  ? `${activeExpert.name} is formulating a response…`
-                  : experts.length > 0
-                    ? `${experts.map(e => e.name).join(", ")} are analyzing your requirements…`
-                    : "Assembling your expert team…"}
-            </span>
-          </div>
+          <ThinkingIndicator phase={phase} activeExpert={activeExpert} experts={experts} />
         )}
       </div>
 
@@ -224,6 +209,70 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
           Next: {currentStep.question}
         </p>
       )}
+    </div>
+  );
+}
+
+const THINKING_MESSAGES: Record<string, string[]> = {
+  interviewing: [
+    "Preparing your next question…",
+    "Reviewing your responses…",
+    "Refining the conversation…",
+  ],
+  ideating: [
+    "Analyzing your requirements…",
+    "Reviewing technical feasibility…",
+    "Evaluating design patterns…",
+    "Considering edge cases…",
+    "Mapping user workflows…",
+  ],
+  planning: [
+    "Drafting the build plan…",
+    "Selecting optimal architecture…",
+    "Planning database schema…",
+  ],
+};
+
+function ThinkingIndicator({
+  phase,
+  activeExpert,
+  experts,
+}: {
+  phase: string;
+  activeExpert?: ClowderExpert;
+  experts: ClowderExpert[];
+}) {
+  const [msgIndex, setMsgIndex] = useState(0);
+  const pool = THINKING_MESSAGES[phase] ?? THINKING_MESSAGES.ideating;
+
+  useEffect(() => {
+    setMsgIndex(0);
+    const interval = setInterval(() => {
+      setMsgIndex((i) => (i + 1) % pool.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [pool.length]);
+
+  const prefix = activeExpert
+    ? `${activeExpert.name}: `
+    : experts.length > 0
+      ? ""
+      : "";
+
+  const displayMsg = experts.length === 0
+    ? "Assembling your expert team…"
+    : `${prefix}${pool[msgIndex]}`;
+
+  return (
+    <div className="flex items-center gap-3 px-3 py-3 mx-3 rounded-lg bg-card/30 border border-border/30">
+      <div className="flex gap-1">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+      </div>
+      <span className="text-xs text-muted-foreground transition-opacity duration-300">
+        {displayMsg}
+      </span>
     </div>
   );
 }
