@@ -85,11 +85,11 @@ const phaseColors: Record<string, string> = {
 };
 
 const phaseBorderColors: Record<string, string> = {
-  assembling: "#E8A838",
-  ideating: "#5B8FB9",
-  planning: "#9B6B8E",
-  building: "#81B29A",
-  delivered: "#81B29A",
+  assembling: "var(--phase-assembling)",
+  ideating: "var(--phase-ideating)",
+  planning: "var(--phase-planning)",
+  building: "var(--phase-building)",
+  delivered: "var(--phase-delivered)",
 };
 
 const phaseLabels: Record<string, string> = {

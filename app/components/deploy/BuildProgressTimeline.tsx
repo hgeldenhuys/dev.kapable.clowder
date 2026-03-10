@@ -217,7 +217,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                       href={appUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-accent to-[#6FA389] hover:from-[#6FA389] hover:to-accent text-white text-xs font-semibold transition-all shadow-lg shadow-accent/20 hover:scale-[1.02]"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-white text-xs font-semibold transition-all shadow-lg shadow-accent/20 hover:scale-[1.02]"
                     >
                       Open your app →
                     </a>

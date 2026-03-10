@@ -28,14 +28,14 @@ const PHASE_CONFIG: Record<string, { label: string; color: string; bg: string; i
   },
   building: {
     label: "Building your app",
-    color: "text-[#81B29A]",
-    bg: "from-[#81B29A]/15 via-transparent to-transparent",
+    color: "text-accent",
+    bg: "from-accent/15 via-transparent to-transparent",
     icon: "🔨",
   },
   delivered: {
     label: "Your app is live!",
-    color: "text-[#81B29A]",
-    bg: "from-[#81B29A]/20 via-[#81B29A]/8 to-transparent",
+    color: "text-accent",
+    bg: "from-accent/20 via-accent/8 to-transparent",
     icon: "🎉",
   },
 };
@@ -86,7 +86,7 @@ export function PhaseTransition({ phase }: PhaseTransitionProps) {
         {/* Celebration glow burst for delivered */}
         {isDelivered && (
           <div className="absolute inset-0 animate-pulse-glow">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#81B29A]/8 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/8 to-transparent" />
           </div>
         )}
         <div className="flex items-center justify-center gap-2 relative z-10">

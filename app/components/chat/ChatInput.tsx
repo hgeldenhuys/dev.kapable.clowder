@@ -86,7 +86,7 @@ export function ChatInput({
           <button
             type="button"
             onClick={onForceStart}
-            className="flex items-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="flex items-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent text-white text-sm font-semibold transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <Play size={14} fill="currentColor" />
             <span className="sm:hidden">Start building</span>
