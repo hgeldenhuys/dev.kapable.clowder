@@ -109,7 +109,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
           <div className="relative">
             <textarea
               id="description"
-              placeholder="Describe your app idea in detail — who are the users, what do they do, what data is needed?"
+              placeholder="I want to build a tool where teams can track projects, assign tasks, and see progress in real-time..."
               value={data.description}
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
@@ -118,16 +118,18 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
-                wordCount >= 200
+                wordCount >= 20
                   ? "text-accent"
-                  : descriptionLength >= 20
+                  : wordCount >= 3
                     ? "text-muted-foreground/50"
-                    : "text-[color:var(--warning)] opacity-80"
+                    : "text-muted-foreground/40"
               }`}
             >
-              {wordCount} word{wordCount !== 1 ? "s" : ""}
-              {descriptionLength < 20 && " (min 20 chars)"}
-              {wordCount >= 200 && " ✨ instant build!"}
+              {wordCount < 3
+                ? "Describe your idea to get started"
+                : wordCount < 20
+                  ? `Keep going \u2014 ${wordCount} words (aim for 20+)`
+                  : `${wordCount} words`}
             </span>
           </div>
         </div>

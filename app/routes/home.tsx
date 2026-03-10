@@ -507,7 +507,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-1">
-                      {s.name}
+                      {s.name.length > 50 ? s.name.slice(0, 50) + "\u2026" : s.name}
                     </span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-none px-2 py-0.5 rounded-full border ${
                       s.phase === "delivered"
@@ -528,12 +528,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                       {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                     {s.app_url && (
-                      <span
+                      <a
+                        href={s.app_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-[11px] text-accent/60 hover:text-accent font-medium transition-colors"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(s.app_url, "_blank"); }}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         Open app ↗
-                      </span>
+                      </a>
                     )}
                   </div>
                 </Link>
@@ -557,6 +560,13 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               </a>
             </span>
           </div>
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="text-[11px] text-primary/40 hover:text-primary/60 transition-colors font-medium"
+          >
+            Build something →
+          </a>
           <div className="flex items-center gap-6 text-[11px] text-muted-foreground/40">
             <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Privacy</a>
             <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Terms</a>

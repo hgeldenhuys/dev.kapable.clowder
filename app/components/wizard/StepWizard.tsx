@@ -24,7 +24,7 @@ export function StepWizard({
     "Build",
   ];
 
-  const defaultNextLabel = step === 1 ? "Continue →" : step === 2 ? "Start Building →" : "";
+  const defaultNextLabel = step === 1 ? "Build my team \u2192" : step === 2 ? "Start Building \u2192" : "";
 
   // Detect Mac vs other platform (client-only to avoid hydration mismatch)
   const [isMac, setIsMac] = useState(false);
