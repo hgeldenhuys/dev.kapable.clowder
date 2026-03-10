@@ -124,7 +124,6 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 onChange({ ...data, description: e.target.value })
               }
               className="w-full min-h-[180px] px-4 py-3 pb-8 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base leading-relaxed"
-              autoFocus
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
