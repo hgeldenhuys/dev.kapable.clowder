@@ -434,7 +434,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         {/* Wizard — immediately below branding */}
         <div className="w-full max-w-4xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
 
-        <Card className="glass-card rounded-3xl border-border/50 shadow-[var(--shadow-lg)]"><CardContent className="p-6 sm:p-8">
+        <Card className="glass-card rounded-3xl border-border/50 shadow-[var(--shadow-xl)]"><CardContent className="p-6 sm:p-8">
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
@@ -452,7 +452,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             >
               {/* Specialist preview chips */}
               {specialists.length > 0 && (
-                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40">
+                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)]">
                   <p className="text-[11px] text-muted-foreground/70 text-center font-medium">
                     Your AI team is forming — confirmed in next step
                   </p>
@@ -559,7 +559,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
+                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
