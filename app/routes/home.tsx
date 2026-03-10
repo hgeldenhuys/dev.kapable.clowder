@@ -382,7 +382,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   }, [handleConfirmTeam]);
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Hero + Wizard — combined for zero-scroll-to-input */}
       <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-10 sm:pt-14 pb-8 overflow-hidden">
         {/* Animated gradient background */}
@@ -401,14 +401,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               alt="Clowder"
               className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-lg"
             />
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
               <span className="bg-gradient-to-r from-[#E07A5F] via-[#D16B50] to-[#C25D43] bg-clip-text text-transparent animate-gradient">
                 Clowder
               </span>
             </h1>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground leading-tight max-w-lg mx-auto">
             Describe your app.{" "}
             <span className="bg-gradient-to-r from-[#E07A5F] to-[#81B29A] bg-clip-text text-transparent">We'll build it.</span>
           </h2>
@@ -557,7 +557,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
+                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-card/95 hover:border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">

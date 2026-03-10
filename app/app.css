@@ -107,6 +107,12 @@ h1, h2, h3, h4 {
   font-family: "Outfit", sans-serif;
 }
 
+/* ─── Responsive heading sizes for mobile ─── */
+@media (max-width: 640px) {
+  h1 { font-size: 1.875rem; }
+  h2 { font-size: 1.25rem; }
+}
+
 /* ─── Page content fade-in ─── */
 main {
   animation: fade-in 0.3s ease-out;
