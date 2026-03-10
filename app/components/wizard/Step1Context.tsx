@@ -58,25 +58,25 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground/60 text-center font-medium">Or start with a template</p>
           <div className="relative">
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x scroll-smooth">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-200 group w-[140px] sm:w-[160px]`}
+                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 group w-[160px] sm:w-[185px]`}
                 aria-label={`Start with ${t.name} template`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-base group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
-                  <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">{t.name}</span>
+                  <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground/60 leading-snug line-clamp-2">{t.description.split('. ')[0]}.</p>
+                <p className="text-[11px] text-muted-foreground/60 leading-snug line-clamp-2">{t.description.split('. ')[0]}.</p>
               </button>
             ))}
           </div>
           {/* Right fade to indicate scrollable */}
-          <div className="absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-white/90 to-transparent pointer-events-none rounded-r-xl" />
+          <div className="absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-[#FAF9F6] to-transparent pointer-events-none rounded-r-xl" />
           </div>
         </div>
       )}
