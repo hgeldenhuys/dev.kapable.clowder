@@ -242,10 +242,13 @@ export function MultiOrbVisualizer({
 }: MultiOrbVisualizerProps) {
   if (orbs.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground text-xs">
-          Your experts will appear here
-        </p>
+      <div className="w-full h-full flex items-center justify-center animate-fade-in">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" />
+          <p className="text-muted-foreground text-xs">
+            Your AI experts will appear here as they join
+          </p>
+        </div>
       </div>
     );
   }

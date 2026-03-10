@@ -80,8 +80,8 @@ const phaseColors: Record<string, string> = {
   assembling: "text-[#E8A838]",
   ideating: "text-[#5B8FB9]",
   planning: "text-[#9B6B8E]",
-  building: "text-[#81B29A]",
-  delivered: "text-[#81B29A]",
+  building: "text-accent",
+  delivered: "text-accent",
 };
 
 const phaseBorderColors: Record<string, string> = {
@@ -371,8 +371,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="hero-gradient absolute inset-0 -z-10" />
 
         {/* Floating orb accents — warm palette */}
-        <div className="absolute top-20 left-[15%] w-32 h-32 rounded-full bg-[#E07A5F]/6 blur-3xl animate-float" />
-        <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-[#81B29A]/5 blur-3xl animate-float-delayed" />
+        <div className="absolute top-20 left-[15%] w-32 h-32 rounded-full bg-primary/5 blur-3xl animate-float" />
+        <div className="absolute bottom-24 right-[10%] w-40 h-40 rounded-full bg-accent/5 blur-3xl animate-float-delayed" />
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-[#E8A838]/5 blur-2xl animate-float-slow" />
 
         {/* Branding — compact */}
@@ -397,17 +397,17 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
           <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground/45">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               No signup
             </span>
             <span className="opacity-20">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               Free to use
             </span>
             <span className="opacity-20">·</span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               Deploys in minutes
             </span>
           </div>
@@ -470,7 +470,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 onRemoveSpecialist={handleRemoveSpecialist}
               />
               {typeheadTimedOut && (
-                <p className="text-xs text-yellow-500 text-center mt-2">
+                <p className="text-xs text-[color:var(--warning)] text-center mt-2">
                   Team prediction timed out. Proceeding with current team.
                 </p>
               )}
@@ -511,9 +511,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     </span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-none px-2 py-0.5 rounded-full border ${
                       s.phase === "delivered"
-                        ? "bg-[#81B29A]/10 text-[#81B29A] border-[#81B29A]/20"
+                        ? "bg-accent/10 text-accent border-accent/20"
                         : s.phase === "building"
-                          ? "bg-[#81B29A]/10 text-[#81B29A] border-[#81B29A]/20 animate-pulse"
+                          ? "bg-accent/10 text-accent border-accent/20 animate-pulse"
                           : s.phase === "planning"
                             ? "bg-[#9B6B8E]/10 text-[#9B6B8E] border-[#9B6B8E]/20"
                             : s.phase === "ideating"
@@ -529,7 +529,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     </p>
                     {s.app_url && (
                       <span
-                        className="text-[11px] text-[#81B29A]/60 hover:text-[#81B29A] font-medium transition-colors"
+                        className="text-[11px] text-accent/60 hover:text-accent font-medium transition-colors"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(s.app_url, "_blank"); }}
                       >
                         Open app ↗

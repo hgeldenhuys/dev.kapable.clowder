@@ -11,15 +11,15 @@ const STARTER_TEMPLATES = [
   {
     name: "Feedback Board",
     icon: "💬",
-    accent: "from-[#E07A5F]/8 to-[#E07A5F]/3",
-    borderAccent: "hover:border-[#E07A5F]/30",
+    accent: "from-primary/8 to-primary/3",
+    borderAccent: "hover:border-primary/30",
     description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
   },
   {
     name: "Team Task Board",
     icon: "✅",
-    accent: "from-[#81B29A]/8 to-[#81B29A]/3",
-    borderAccent: "hover:border-[#81B29A]/30",
+    accent: "from-accent/8 to-accent/3",
+    borderAccent: "hover:border-accent/30",
     description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
   },
   {
@@ -92,7 +92,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white transition-all text-base"
+            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white transition-all text-base"
           />
           <span className="text-[10px] text-muted-foreground/40 mt-1 block text-right">
             {data.appName.length}/60
@@ -114,15 +114,15 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white transition-all text-base leading-relaxed"
+              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
                 wordCount >= 200
-                  ? "text-[#81B29A]"
+                  ? "text-accent"
                   : descriptionLength >= 20
                     ? "text-muted-foreground/50"
-                    : "text-[#E8A838]/80"
+                    : "text-[color:var(--warning)] opacity-80"
               }`}
             >
               {wordCount} word{wordCount !== 1 ? "s" : ""}
@@ -140,7 +140,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
 
       {/* Validation hint */}
       {!isValid && (data.appName.trim() || data.description.trim()) && (
-        <p className="text-xs text-[#E8A838]/70 text-center">
+        <p className="text-xs text-[color:var(--warning)] opacity-70 text-center">
           {!data.appName.trim()
             ? "Enter an app name to continue"
             : "Description needs at least 20 characters"}

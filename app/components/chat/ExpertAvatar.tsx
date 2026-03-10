@@ -1,25 +1,25 @@
 /** Domain-specific gradient colors for expert avatars */
 const EXPERT_GRADIENTS: Record<string, string> = {
-  strategist: "from-cyan-500 to-blue-600",
-  designer: "from-violet-500 to-purple-600",
-  architect: "from-amber-500 to-orange-600",
-  commerce: "from-emerald-500 to-green-600",
-  compliance: "from-red-500 to-rose-600",
-  growth: "from-pink-500 to-fuchsia-600",
-  security: "from-slate-500 to-zinc-600",
-  data: "from-indigo-500 to-blue-600",
-  payments: "from-yellow-500 to-amber-600",
-  analytics: "from-cyan-400 to-teal-600",
-  content: "from-pink-400 to-rose-600",
-  ai_ml: "from-purple-400 to-indigo-600",
-  realtime: "from-blue-400 to-cyan-600",
-  social: "from-indigo-400 to-violet-600",
-  scheduling: "from-teal-400 to-emerald-600",
-  logistics: "from-yellow-400 to-orange-600",
-  healthcare: "from-rose-400 to-red-600",
-  education: "from-sky-400 to-blue-600",
-  finance: "from-lime-400 to-green-600",
-  media: "from-fuchsia-400 to-purple-600",
+  strategist: "from-sky-400 to-blue-500",
+  designer: "from-purple-400 to-violet-500",
+  architect: "from-amber-400 to-orange-500",
+  commerce: "from-emerald-400 to-green-500",
+  compliance: "from-rose-400 to-red-500",
+  growth: "from-pink-400 to-rose-500",
+  security: "from-stone-400 to-zinc-500",
+  data: "from-indigo-400 to-blue-500",
+  payments: "from-amber-400 to-yellow-500",
+  analytics: "from-teal-400 to-cyan-500",
+  content: "from-rose-400 to-pink-500",
+  ai_ml: "from-violet-400 to-purple-500",
+  realtime: "from-sky-400 to-cyan-500",
+  social: "from-violet-400 to-indigo-500",
+  scheduling: "from-emerald-400 to-teal-500",
+  logistics: "from-orange-400 to-amber-500",
+  healthcare: "from-rose-400 to-red-500",
+  education: "from-sky-400 to-blue-500",
+  finance: "from-emerald-400 to-green-500",
+  media: "from-fuchsia-400 to-purple-500",
 };
 
 /** Domain-specific icons (Unicode symbols) */
@@ -78,11 +78,11 @@ export function getExpertGradient(domain: string): string {
   // Fallback: hash the domain to pick a consistent color
   const hash = d.charCodeAt(0) % 5;
   const fallbacks = [
-    "from-cyan-500 to-blue-600",
-    "from-violet-500 to-purple-600",
-    "from-amber-500 to-orange-600",
-    "from-emerald-500 to-green-600",
-    "from-pink-500 to-fuchsia-600",
+    "from-sky-400 to-blue-500",
+    "from-violet-400 to-purple-500",
+    "from-amber-400 to-orange-500",
+    "from-emerald-400 to-green-500",
+    "from-pink-400 to-rose-500",
   ];
   return fallbacks[hash];
 }

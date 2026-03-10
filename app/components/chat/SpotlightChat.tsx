@@ -104,7 +104,7 @@ export function SpotlightChat({
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full animate-fade-in">
             <div className="text-center text-muted-foreground max-w-xs space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 animate-pulse-glow">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 animate-pulse-glow animate-float-slow">
                 <img src="/logo.png" alt="" className="w-8 h-8 opacity-60" />
               </div>
               <p className="text-sm font-semibold text-foreground/80">Your expert committee awaits</p>
@@ -114,9 +114,18 @@ export function SpotlightChat({
             </div>
           </div>
         )}
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} experts={experts} />
-        ))}
+        {messages.map((msg, idx) => {
+          const isRecent = idx >= messages.length - 3;
+          return (
+            <div
+              key={msg.id}
+              className={isRecent ? "animate-fade-in-up" : ""}
+              style={isRecent ? { animationDelay: `${(idx - (messages.length - 3)) * 0.05}s` } : undefined}
+            >
+              <MessageBubble message={msg} experts={experts} />
+            </div>
+          );
+        })}
         {/* Interview progress indicator */}
         {phase === "interviewing" && messages.length > 0 && (
           <InterviewProgress messages={messages} />
@@ -289,7 +298,7 @@ function PhaseChip({ phase }: { phase: string }) {
   const { label, color, bg } = phaseLabels[phase] ?? { label: phase, color: "text-muted-foreground", bg: "bg-zinc-400/10 border-zinc-400/20" };
 
   return (
-    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${color} ${bg}`}>
+    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border transition-all duration-300 ${color} ${bg}`}>
       {label}
     </span>
   );
