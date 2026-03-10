@@ -136,22 +136,23 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               }
               className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-stone-500 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:border-orange-400 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
             />
-            <span
-              className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
-                wordCount >= 20
-                  ? "text-accent"
-                  : wordCount >= 3
-                    ? "text-stone-500"
-                    : "text-stone-500"
-              }`}
-            >
-              {wordCount < 3
-                ? "Describe your idea to get started"
-                : wordCount < 20
+            {wordCount >= 3 && (
+              <span
+                className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
+                  wordCount >= 20 ? "text-accent" : "text-stone-500"
+                }`}
+              >
+                {wordCount < 20
                   ? `Keep going \u2014 ${wordCount} words (aim for 20+)`
                   : `${wordCount} words`}
-            </span>
+              </span>
+            )}
           </div>
+          {wordCount < 3 && (
+            <p className="text-[11px] text-stone-500 font-medium mt-1.5">
+              Describe your idea to get started
+            </p>
+          )}
         </div>
 
         {/* File upload removed — will be re-added when pre-session uploads are supported */}

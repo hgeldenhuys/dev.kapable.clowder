@@ -95,6 +95,28 @@ function relativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function formatSessionName(raw: string): string {
+  if (!raw) return "Untitled App";
+  // Strip "Build a/an " prefix
+  let name = raw.replace(/^Build an?\s+/i, "");
+  // Cut at clause boundary words
+  const clauseMatch = name.match(/^(.*?)\s+(?:that|where|which|who|and then|but|so)\s/i);
+  if (clauseMatch) name = clauseMatch[1];
+  // Cap at 45 chars on word boundary
+  if (name.length > 45) {
+    const trimmed = name.slice(0, 45);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    name = lastSpace > 10 ? trimmed.slice(0, lastSpace) : trimmed;
+  }
+  // Trim trailing whitespace and punctuation
+  name = name.replace(/[\s,;:\-]+$/, "");
+  // Capitalize first letter
+  if (name.length > 0) {
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+  }
+  return name;
+}
+
 const phaseColors: Record<string, string> = {
   assembling: "text-[#E8A838]",
   ideating: "text-[#5B8FB9]",
@@ -127,6 +149,7 @@ interface PredictedSpecialist {
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
   const { sessions } = loaderData;
+  const delivered = sessions.filter((s: { phase: string }) => s.phase === "delivered");
   const submit = useSubmit();
   const wizardRef = useRef<HTMLDivElement>(null);
 
@@ -396,7 +419,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         <div className="absolute top-1/2 right-[25%] w-24 h-24 rounded-full bg-[#E8A838]/5 blur-2xl animate-float-slow" />
 
         {/* Branding — compact */}
-        <div className="text-center space-y-3 max-w-3xl mx-auto mb-6 animate-fade-in">
+        <div className="text-center space-y-3 max-w-3xl mx-auto mb-6 animate-fade-in-up">
           <div className="flex items-center justify-center gap-2.5">
             <img
               src="/logo.png"
@@ -434,9 +457,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* Wizard — immediately below branding */}
-        <div className="w-full max-w-4xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10">
+        <div className="w-full max-w-4xl px-4 sm:px-0 text-center space-y-6 sm:space-y-8 relative z-10 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
 
-        <Card className="glass-card rounded-3xl border-border/50 shadow-xl"><CardContent className="p-6 sm:p-8">
+        <Card className="glass-card rounded-3xl border-border/50 shadow-xl animate-fade-in-up" style={{ animationDelay: '0.25s' }}><CardContent className="p-6 sm:p-8">
         <StepWizard
           step={currentStep}
           onNext={currentStep === 1 ? handleGoToStep2 : handleConfirmTeam}
@@ -518,7 +541,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </CardContent></Card>
 
         {/* How it works — 3-step explainer */}
-        <div id="how-it-works" className="mt-12 mb-4 scroll-mt-20 w-full">
+        <div id="how-it-works" className="mt-12 mb-4 scroll-mt-20 w-full animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
           <h3 className="text-sm font-semibold text-stone-600 text-center mb-8 uppercase tracking-wider">
             How it works
           </h3>
@@ -559,57 +582,45 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        {/* Section divider — community area */}
-        {sessions.length > 0 && (
-          <div id="community" className="flex items-center gap-4 mt-10 mb-2 scroll-mt-16">
-            <div className="flex-1 h-px bg-border/30" />
-            <span className="text-xs text-stone-500 uppercase tracking-widest font-medium">Community</span>
-            <div className="flex-1 h-px bg-border/30" />
-          </div>
-        )}
-
-        {/* Social proof — always visible */}
-        {sessions.length > 0 && (
-          <div className="space-y-4 mt-4 mb-4">
-            {/* Stats row — only show when volume is impressive */}
-            {sessions.length >= 50 && (
-              <div className="flex items-center justify-center gap-6 sm:gap-8">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{sessions.length}</p>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Apps Built</p>
-                </div>
-                <div className="w-px h-10 bg-border/40" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Deployed</p>
-                </div>
+        {/* Built with Clowder — social proof */}
+        {delivered.length > 0 && (
+          <div className="w-full animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+            <div className="flex items-center gap-4 mt-10 mb-2">
+              <div className="flex-1 h-px bg-border/30" />
+              <span className="text-xs text-stone-500 uppercase tracking-widest font-medium">Built with Clowder</span>
+              <div className="flex-1 h-px bg-border/30" />
+            </div>
+            <div className="space-y-4 mt-4 mb-4">
+              <p className="text-sm text-stone-600 font-medium text-center">
+                {delivered.length >= 3
+                  ? `${delivered.length} apps built and deployed`
+                  : "Apps built in minutes, not months"}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {delivered.slice(0, 3).map((app) => (
+                  <Link
+                    key={app.id}
+                    to={`/session/${app.id}`}
+                    className="rounded-2xl border border-border/40 bg-card shadow-lg hover:bg-orange-50 hover:border-orange-300 hover:shadow-xl hover:-translate-y-3 transition-all duration-300 p-4 group"
+                  >
+                    <p className="text-sm font-medium text-stone-600 group-hover:text-foreground transition-colors line-clamp-2">
+                      {formatSessionName(app.name)}
+                    </p>
+                    <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/20">
+                      Delivered
+                    </span>
+                    <p className="text-xs text-accent/60 hover:text-accent mt-2 font-medium transition-colors">
+                      View app &rarr;
+                    </p>
+                  </Link>
+                ))}
               </div>
-            )}
-            {/* Pulse showcase link */}
-            <a
-              href="https://pulse.kapable.run"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 shadow-lg hover:bg-orange-50 hover:border-orange-300 hover:shadow-xl transition-all group mx-auto max-w-sm"
-            >
-              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-none">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-xs font-semibold text-stone-600 group-hover:text-foreground transition-colors">
-                  See Pulse — built in 10 minutes
-                </p>
-                <p className="text-[10px] text-stone-500 leading-snug">
-                  A real-time feedback app, built and deployed by Clowder
-                </p>
-              </div>
-              <span className="text-stone-400 group-hover:text-primary/60 transition-colors ml-auto flex-none">&#8599;</span>
-            </a>
+            </div>
           </div>
         )}
 
         {/* Recent Sessions */}
-        <div className="mt-8 text-left space-y-5">
+        <div className="mt-8 text-left space-y-5 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
           {sessions.length > 0 ? (
             <>
               <div className="flex items-center gap-3">
@@ -629,7 +640,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">
                       <span className="text-sm font-medium text-stone-600 group-hover:text-foreground transition-colors min-w-0 line-clamp-2">
-                        {s.name}
+                        {formatSessionName(s.name)}
                       </span>
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-none">
                         {s.phase === "delivered" && (
