@@ -452,16 +452,16 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             >
               {/* Specialist preview chips */}
               {specialists.length > 0 && (
-                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)]">
+                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)] animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <p className="text-[11px] text-muted-foreground/70 text-center font-medium">
                     Your AI team is forming — confirmed in next step
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {specialists.map((s) => (
+                    {specialists.map((s, index) => (
                       <span
                         key={s.domain}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-primary/5 text-primary/80 border-primary/15"
-                        style={{ opacity: Math.max(0.5, s.confidence) }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-primary/5 text-primary/80 border-primary/15 animate-in fade-in slide-in-from-bottom-1 fill-mode-backwards"
+                        style={{ opacity: Math.max(0.5, s.confidence), animationDelay: `${index * 80}ms` }}
                         title={s.reason}
                       >
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
