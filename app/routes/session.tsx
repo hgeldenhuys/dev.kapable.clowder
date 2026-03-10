@@ -57,8 +57,9 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       >
         <div className="h-full flex flex-col">
           <div className="flex items-center gap-3 px-4 pt-3 pb-1">
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-              ← Back
+            <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
+              <img src="/logo.png" alt="Clowder" className="w-6 h-6" />
+              <span>← Back</span>
             </Link>
             <span className="text-xs text-muted-foreground">·</span>
             <h1 className="text-sm font-semibold text-foreground truncate">
