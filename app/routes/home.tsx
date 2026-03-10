@@ -432,7 +432,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               Recent Sessions
             </h2>
             <div className="space-y-2">
-              {sessions.map((s) => (
+              {sessions.slice(0, 5).map((s) => (
                 <div
                   key={s.id}
                   className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"

@@ -131,7 +131,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
       {/* Timeline */}
       <div className="space-y-0">
         {BUILD_STAGES.map((stage, i) => {
-          const isDone = i <= highestReachedIndex;
+          const isDone = i <= highestReachedIndex || (isDelivered && stage.id === "done");
           const isActive = !isDone && i === highestReachedIndex + 1 && isBuilding && !buildError;
           const isErrorStage = !isDone && i === highestReachedIndex + 1 && !!buildError;
 
@@ -191,9 +191,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                           : "text-muted-foreground/40"
                   }`}
                 >
-                  {isDelivered && stage.id === "done" && appUrl
-                    ? "App is live!"
-                    : isErrorStage
+                  {isErrorStage
                       ? `${stage.label} — failed`
                       : stage.label}
                 </span>
@@ -201,6 +199,19 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                   <span className="ml-1.5 text-[10px] text-muted-foreground animate-pulse">
                     in progress…
                   </span>
+                )}
+                {/* Celebration CTA for delivered apps */}
+                {isDelivered && stage.id === "done" && appUrl && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <a
+                      href={appUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors shadow-md shadow-emerald-900/30"
+                    >
+                      Open your app →
+                    </a>
+                  </div>
                 )}
               </div>
             </div>

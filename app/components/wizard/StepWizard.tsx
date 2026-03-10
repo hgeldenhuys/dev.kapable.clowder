@@ -69,7 +69,7 @@ export function StepWizard({
               type="button"
               onClick={onNext}
               disabled={!canProceed}
-              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-95 shadow-lg shadow-primary/20"
             >
               {nextLabel || defaultNextLabel}
             </button>
