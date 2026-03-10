@@ -546,7 +546,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               href="https://pulse.kapable.run"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)] hover:bg-primary/5 hover:border-primary/20 hover:shadow-[var(--shadow-md)] transition-all group mx-auto max-w-sm"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)] hover:bg-orange-50 hover:border-orange-300 hover:shadow-lg transition-all group mx-auto max-w-sm"
             >
               <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-none">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -580,7 +580,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <Link
                     key={s.id}
                     to={`/session/${s.id}`}
-                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-primary/5 hover:border-primary/25 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:-translate-y-1 cursor-pointer transition-all duration-300 group border-l-3"
+                    className="session-card block p-3 sm:p-4 rounded-2xl border border-border/40 bg-card hover:bg-orange-50 hover:border-orange-300 shadow-[var(--shadow-sm)] hover:shadow-lg hover:-translate-y-1.5 cursor-pointer transition-all duration-300 group border-l-3"
                     style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-3">

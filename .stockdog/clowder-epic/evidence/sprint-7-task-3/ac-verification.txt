@@ -1,0 +1,8 @@
+Story 3 — Replace invisible hover on SESSION CARDS + PULSE
+AC1: Build passes — VERIFIED (exit code 0)
+AC2: Session card hover:bg-orange-50 at home.tsx:583 — VERIFIED
+AC3: Pulse link hover:bg-orange-50 at home.tsx:549 — VERIFIED
+AC4: hover:border-orange-300 on both elements — VERIFIED
+AC5: Session card border-l-3 + borderLeftColor style preserved — VERIFIED (code inspection)
+AC6: Pulse arrow (↗) still in markup — VERIFIED (code inspection)
+AC7: Mobile 375px — REQUIRES BROWSER
