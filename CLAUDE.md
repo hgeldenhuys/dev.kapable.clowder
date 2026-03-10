@@ -67,7 +67,7 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 - **List pagination** — API defaults to 50 items. CLI handles this, but direct API calls need `?limit=N`.
 
 ## Known Blockers
-_(none — all resolved)_
+- **clowder.build flow doesn't deploy** (IMP-826) — Flow runs 7/7 planning nodes but doesn't create GitHub repo, register Connect App, or trigger pipeline deploy. Apps must be built manually after flow completes. `scaffoldAndDeploy` fallback is skipped when flow returns a runId.
 
 ## Resolved (Not Blockers)
 - **~~SQLite wiped on deploy~~** — Migrated to Kapable Data API (PostgreSQL). Sessions now persist across redeploys.
