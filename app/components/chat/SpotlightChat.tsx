@@ -42,9 +42,12 @@ export function SpotlightChat({
 
   // Auto-scroll to bottom when new messages arrive or typing indicator shows
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
+    // Use rAF to ensure DOM has updated before scrolling
+    requestAnimationFrame(() => {
+      if (listRef.current) {
+        listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+      }
+    });
   }, [messages.length, isWaitingForExpert]);
 
   return (

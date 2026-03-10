@@ -306,7 +306,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           </h2>
 
           <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed animate-fade-in-up">
-            A committee of AI experts designs, builds, and deploys your app — from idea to production in minutes.
+            A committee of AI experts designs, builds, and deploys a full-stack web app with database, API, and real-time features.
           </p>
 
           <div className="flex flex-col items-center gap-4 pt-4">
@@ -321,6 +321,41 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             <p className="text-sm text-muted-foreground animate-fade-in-up">
               No signup required · Free to use · Deploys in minutes
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Showcase Section */}
+      <section className="flex flex-col items-center px-8 py-12 border-t border-border/20">
+        <div className="max-w-4xl w-full space-y-6">
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-semibold text-foreground">Built with Clowder</h3>
+            <p className="text-sm text-muted-foreground">Real apps, described in plain English, deployed in minutes</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { name: "Pulse", desc: "Live feedback board with real-time voting", url: "https://pulse.kapable.run", phase: "delivered" },
+              { name: "Event Board", desc: "Community event listing with RSVP tracking", phase: "delivered" },
+              { name: "Tool Library", desc: "Neighborhood tool sharing and lending tracker", phase: "delivered" },
+            ].map((app) => (
+              <div key={app.name} className="rounded-xl border border-border/50 bg-card/30 p-4 space-y-2 hover:bg-card/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-foreground">{app.name}</h4>
+                  <span className="text-[10px] text-emerald-400 font-medium uppercase tracking-wide">Live</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{app.desc}</p>
+                {app.url && (
+                  <a
+                    href={app.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline inline-block mt-1"
+                  >
+                    Visit app →
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -434,13 +469,25 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground/40 mt-4">
-          A clowder is a group of cats — yours is a team of AI experts that builds together.
-          <br />
-          <span className="text-muted-foreground/30">Powered by <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Kapable</a></span>
-        </p>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border/20 py-8 px-8">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-60" />
+            <span className="text-xs text-muted-foreground/50">
+              Clowder by <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Kapable</a>
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">Privacy</a>
+            <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">Terms</a>
+            <span className="text-xs text-muted-foreground/30">Your apps are hosted on Kapable infrastructure</span>
+          </div>
+        </div>
+      </footer>
 
     </main>
   );
