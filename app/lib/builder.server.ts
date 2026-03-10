@@ -203,131 +203,11 @@ async function provisionTables(
 }
 
 // ---------------------------------------------------------------------------
-// Scaffold + Deploy — LEGACY FALLBACK (BL-CLW-002)
+// Scaffold + Deploy — Direct pipeline injection (no GitHub intermediary)
+//
+// Flow: LLM generates files → base64 encode → pass as SCAFFOLD_FILES_B64
+// env var → Connect App Pipeline extracts to /app via tar → install → build → deploy
 // ---------------------------------------------------------------------------
-
-/**
- * Get an ephemeral GitHub write token from the platform's Develop App.
- * Falls back to static GITHUB_TOKEN env var if the platform call fails.
- */
-async function getGitHubToken(): Promise<string> {
-  // Try platform's GitHub App first (ephemeral, 1-hour TTL)
-  try {
-    const res = await fetch(
-      `${getApiBaseUrl()}/v1/git/develop/token?installation_id=113953574`,
-      { headers: platformHeaders() },
-    );
-    if (res.ok) {
-      const data = await res.json() as { token: string };
-      if (data.token) return data.token;
-    }
-  } catch (e) {
-    console.warn("Platform GitHub token fetch failed, trying static fallback:", e);
-  }
-  // Static fallback
-  return process.env.GITHUB_TOKEN ?? "";
-}
-
-function githubHeadersFromToken(token: string): Record<string, string> {
-  return {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token}`,
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-}
-
-async function createGitHubRepo(repoName: string, token: string): Promise<boolean> {
-  const headers = githubHeadersFromToken(token);
-  // Installation tokens (ghs_*) must create repos under the org, not /user/repos
-  const org = "kapable-dev";
-  const res = await fetch(`https://api.github.com/orgs/${org}/repos`, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ name: repoName, auto_init: true, private: false }),
-  });
-  if (res.status === 422) return true; // Already exists
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    console.error(`GitHub repo create failed (${res.status}): ${body.slice(0, 200)}`);
-    return false;
-  }
-  return true;
-}
-
-async function pushFilesToGitHub(
-  owner: string,
-  repo: string,
-  files: Array<{ path: string; content: string }>,
-  token: string,
-): Promise<boolean> {
-  const headers = githubHeadersFromToken(token);
-  const refRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`, {
-    headers,
-  });
-  if (!refRes.ok) {
-    console.error(`GitHub get ref failed (${refRes.status})`);
-    return false;
-  }
-  const refData = await refRes.json() as any;
-  const latestCommitSha = refData.object.sha;
-
-  const treeItems: Array<{ path: string; mode: string; type: string; sha: string }> = [];
-  for (const file of files) {
-    const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ content: file.content, encoding: "utf-8" }),
-    });
-    if (!blobRes.ok) {
-      console.error(`GitHub blob create failed for ${file.path}: ${blobRes.status}`);
-      continue;
-    }
-    const blobData = await blobRes.json() as any;
-    treeItems.push({ path: file.path, mode: "100644", type: "blob", sha: blobData.sha });
-  }
-
-  if (treeItems.length === 0) return false;
-
-  const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ base_tree: latestCommitSha, tree: treeItems }),
-  });
-  if (!treeRes.ok) {
-    console.error(`GitHub tree create failed: ${treeRes.status}`);
-    return false;
-  }
-  const treeData = await treeRes.json() as any;
-
-  const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: "Initial scaffold from Clowder",
-      tree: treeData.sha,
-      parents: [latestCommitSha],
-    }),
-  });
-  if (!commitRes.ok) {
-    console.error(`GitHub commit create failed: ${commitRes.status}`);
-    return false;
-  }
-  const commitData = await commitRes.json() as any;
-
-  const updateRefRes = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/main`,
-    {
-      method: "PATCH",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ sha: commitData.sha }),
-    },
-  );
-  if (!updateRefRes.ok) {
-    console.error(`GitHub ref update failed: ${updateRefRes.status}`);
-    return false;
-  }
-  return true;
-}
 
 async function scaffoldAndDeploy(
   sessionId: string,
@@ -337,15 +217,9 @@ async function scaffoldAndDeploy(
   projectApiKey: string,
   projectId: string,
   sendProgress: (msg: string, meta?: Record<string, unknown>) => Promise<void>,
-): Promise<{ appId: string; appUrl: string; repoUrl: string } | null> {
+): Promise<{ appId: string; appUrl: string } | null> {
   const suffix = Math.random().toString(36).slice(2, 6);
   const slug = sessionName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 25) + "-" + suffix;
-
-  const githubToken = await getGitHubToken();
-  if (!githubToken) {
-    await sendProgress("GitHub token not available — skipping scaffold deploy. Install the Kapable Develop App on GitHub to enable this.");
-    return null;
-  }
 
   await sendProgress("Generating your app code...");
 
@@ -414,35 +288,18 @@ Plus route files for each table's CRUD pages.`;
       return null;
     }
 
-    await sendProgress(`Generated ${files.length} files. Pushing to GitHub...`);
+    await sendProgress(`Generated ${files.length} files. Setting up your app on Kapable...`);
 
-    const repoName = `clowder-${slug}`;
-    const owner = "kapable-dev";
-    const repoUrl = `https://github.com/${owner}/${repoName}`;
+    // Base64 encode scaffold files for pipeline injection (no GitHub needed)
+    const scaffoldB64 = Buffer.from(JSON.stringify(files)).toString("base64");
 
-    const repoCreated = await createGitHubRepo(repoName, githubToken);
-    if (!repoCreated) {
-      await sendProgress("Failed to create GitHub repo. The scaffold was generated but not saved.");
-      return null;
-    }
-
-    await new Promise((r) => setTimeout(r, 2000));
-
-    const pushed = await pushFilesToGitHub(owner, repoName, files, githubToken);
-    if (!pushed) {
-      await sendProgress(`Failed to push files to GitHub. Repo created at: ${repoUrl}`);
-      return null;
-    }
-
-    await sendProgress("Registering app on Kapable...");
-
+    // Register app on platform (no git_repo — files injected via pipeline scaffold stage)
     const registerRes = await fetch(`${getApiBaseUrl()}/v1/apps`, {
       method: "POST",
       headers: platformHeaders(),
       body: JSON.stringify({
         name: sessionName,
         slug,
-        git_repo: repoUrl,
         project_id: projectId,
         framework: "react-router",
         runtime: "bun",
@@ -451,7 +308,7 @@ Plus route files for each table's CRUD pages.`;
 
     if (!registerRes.ok) {
       const errBody = await registerRes.text().catch(() => "");
-      await sendProgress(`App registration failed (${registerRes.status}): ${errBody.slice(0, 100)}. Scaffold is on GitHub: ${repoUrl}`);
+      await sendProgress(`App registration failed (${registerRes.status}): ${errBody.slice(0, 100)}`);
       return null;
     }
 
@@ -460,21 +317,29 @@ Plus route files for each table's CRUD pages.`;
 
     await sendProgress("Deploying your app...");
 
+    // Trigger deploy with scaffold files as env var — the Connect App Pipeline
+    // reads SCAFFOLD_FILES_B64 from ENV_VARS_JSON and extracts to /app via tar
     const deployRes = await fetch(
       `${getApiBaseUrl()}/v1/apps/${appId}/environments/production/deploy`,
       {
         method: "POST",
         headers: platformHeaders(),
-        body: JSON.stringify({ branch: "main" }),
+        body: JSON.stringify({
+          env_vars: {
+            SCAFFOLD_FILES_B64: scaffoldB64,
+            KAPABLE_API_URL: "https://api.kapable.dev",
+            KAPABLE_API_KEY: projectApiKey,
+          },
+        }),
       }
     );
 
     if (!deployRes.ok) {
-      await sendProgress(`Deploy trigger failed (${deployRes.status}). You can deploy manually from: ${repoUrl}`);
+      await sendProgress(`Deploy trigger failed (${deployRes.status}).`);
     }
 
     const appUrl = `https://${slug}.kapable.run`;
-    return { appId, appUrl, repoUrl };
+    return { appId, appUrl };
   } catch (e) {
     console.error("Scaffold and deploy failed:", e);
     await sendProgress(`App scaffolding encountered an error: ${String(e).slice(0, 200)}`);
@@ -915,7 +780,7 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
   // Task 11: Trigger build flow (or fallback to scaffold)
   // ---------------------------------------------------------------------------
 
-  let deployResult: { appId: string; appUrl: string; repoUrl: string } | null = null;
+  let deployResult: { appId: string; appUrl: string } | null = null;
   let flowTriggered = false;
 
   if (provisionResult && provisionResult.tables.length > 0 && specPayload) {
@@ -1031,7 +896,6 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       ``,
       `**Your app is live!**`,
       `- URL: ${deployResult.appUrl}`,
-      `- GitHub: ${deployResult.repoUrl}`,
       ``,
       `Built with AI-assisted planning and deployed to the Kapable platform.`,
     );
@@ -1046,7 +910,6 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
       ``,
       `**Your app is live!**`,
       `- URL: ${deployResult.appUrl}`,
-      `- GitHub: ${deployResult.repoUrl}`,
     );
   }
 

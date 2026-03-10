@@ -70,10 +70,10 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 - (none currently)
 
 ## Resolved (Not Blockers)
-- **~~Build flow doesn't deploy~~** (IMP-826) — Fixed: `streamFlowEvents` was fire-and-forget, `scaffoldAndDeploy` only ran on flow failure. Now awaits flow completion then chains `scaffoldAndDeploy` for GitHub repo creation + Connect App deploy.
+- **~~Build flow doesn't deploy~~** (IMP-826) — Fixed: `streamFlowEvents` was fire-and-forget, `scaffoldAndDeploy` only ran on flow failure. Now awaits flow completion then chains `scaffoldAndDeploy`.
+- **~~GitHub integration removed~~** — Scaffold files are now injected directly into the Connect App Pipeline via `SCAFFOLD_FILES_B64` env var. No GitHub repo creation needed. The pipeline's new `scaffold` stage decodes base64 → tar → extracts to `/app` in the container.
 - **~~SQLite wiped on deploy~~** — Migrated to Kapable Data API (PostgreSQL). Sessions now persist across redeploys.
-- **~~GITHUB_TOKEN missing~~** — `builder.server.ts:213-229` already calls `GET /v1/git/develop/token?installation_id=113953574` for ephemeral GitHub App tokens. No static PAT needed. The real issue was `KAPABLE_API_URL=localhost` inside Incus containers (fixed by setting to `https://api.kapable.dev`).
-- **Hardcoded GitHub installation_id** — `113953574` is the Kapable GitHub App installation on `kapable-dev` org. This is intentional for now (`0a72eb1a`).
+- **~~GITHUB_TOKEN missing~~** — No longer relevant. GitHub removed from the scaffold flow entirely.
 
 ## Key Files
 | File | Purpose |
