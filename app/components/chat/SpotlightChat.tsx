@@ -141,42 +141,72 @@ export function SpotlightChat({
   );
 }
 
-const INTERVIEW_STEPS = ["Your idea", "Who uses it", "Core actions", "Success scenario", "Scope"];
+const INTERVIEW_STEPS = [
+  { label: "Idea", icon: "💡", question: "What's your app idea?" },
+  { label: "Users", icon: "👥", question: "Who are your users?" },
+  { label: "Actions", icon: "⚡", question: "What can users do?" },
+  { label: "Success", icon: "🎯", question: "What does success look like?" },
+  { label: "Scope", icon: "📐", question: "What's in/out of scope?" },
+];
 
 function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
   // Count user messages to determine progress
   const userMsgCount = messages.filter((m) => m.role === "user").length;
   const step = Math.min(userMsgCount, INTERVIEW_STEPS.length);
+  const currentStep = INTERVIEW_STEPS[step];
 
   return (
-    <div className="flex items-center gap-1.5 px-4 py-2">
-      {INTERVIEW_STEPS.map((label, i) => (
-        <div key={label} className="flex items-center gap-1.5">
-          <div
-            className={`w-2 h-2 rounded-full transition-colors ${
-              i < step
-                ? "bg-amber-400"
-                : i === step
-                  ? "bg-amber-400/50 animate-pulse"
-                  : "bg-muted-foreground/20"
-            }`}
-          />
-          <span
-            className={`text-[10px] ${
-              i < step
-                ? "text-amber-400"
-                : i === step
-                  ? "text-amber-400/70"
-                  : "text-muted-foreground/40"
-            }`}
-          >
-            {label}
-          </span>
-          {i < INTERVIEW_STEPS.length - 1 && (
-            <span className="text-muted-foreground/20 text-[10px]">›</span>
-          )}
-        </div>
-      ))}
+    <div className="mx-4 my-3 rounded-xl bg-card/50 border border-border/50 p-3 space-y-2.5">
+      {/* Progress bar */}
+      <div className="flex items-center gap-0">
+        {INTERVIEW_STEPS.map((s, i) => (
+          <div key={s.label} className="flex items-center flex-1 last:flex-none">
+            {/* Step circle */}
+            <div className="flex flex-col items-center gap-1 relative z-10">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
+                  i < step
+                    ? "bg-amber-400/20 border-2 border-amber-400 text-amber-400"
+                    : i === step
+                      ? "bg-amber-400/10 border-2 border-amber-400/60 text-amber-400/80 animate-pulse"
+                      : "bg-zinc-800/60 border border-border/40 text-muted-foreground/30"
+                }`}
+              >
+                {i < step ? (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <span className="text-[10px]">{i + 1}</span>
+                )}
+              </div>
+              <span
+                className={`text-[10px] font-medium whitespace-nowrap ${
+                  i < step
+                    ? "text-amber-400/80"
+                    : i === step
+                      ? "text-amber-400/60"
+                      : "text-muted-foreground/30"
+                }`}
+              >
+                {s.label}
+              </span>
+            </div>
+            {/* Connecting line */}
+            {i < INTERVIEW_STEPS.length - 1 && (
+              <div className={`flex-1 h-px mx-1 mt-[-14px] ${
+                i < step ? "bg-amber-400/40" : "bg-border/30"
+              }`} />
+            )}
+          </div>
+        ))}
+      </div>
+      {/* Current question hint */}
+      {currentStep && (
+        <p className="text-[11px] text-center text-muted-foreground/60">
+          Next: {currentStep.question}
+        </p>
+      )}
     </div>
   );
 }

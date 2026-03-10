@@ -59,13 +59,16 @@ export function BuildProgressTimeline({ messages, phase, appUrl }: BuildProgress
   const lastSystemMsg = systemMessages[systemMessages.length - 1];
   const lastContent = lastSystemMsg?.content ?? "";
 
-  // Calculate elapsed time from first system message with building phase
+  // Calculate elapsed time: use fixed duration for delivered, live timer for building
   const buildStartMsg = systemMessages.find(
     (m) => m.metadata?.phase === "planning" || m.metadata?.phase === "building"
   );
-  const elapsedMs = buildStartMsg
-    ? Date.now() - new Date(buildStartMsg.created_at).getTime()
-    : 0;
+  const buildEndMsg = isDelivered
+    ? systemMessages.findLast((m) => m.metadata?.deployed === true || m.metadata?.phase === "delivered" || m.content.includes("Your app is live"))
+    : null;
+  const startTime = buildStartMsg ? new Date(buildStartMsg.created_at).getTime() : 0;
+  const endTime = buildEndMsg ? new Date(buildEndMsg.created_at).getTime() : Date.now();
+  const elapsedMs = startTime ? endTime - startTime : 0;
   const elapsedSec = Math.round(elapsedMs / 1000);
   const elapsedStr = elapsedSec >= 60
     ? `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`
