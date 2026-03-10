@@ -242,13 +242,14 @@ ${tableDescriptions}
 - Auth: Include header "x-api-key: ${projectApiKey}" on all requests
 
 ## Requirements
-1. Use React Router v7 with file-based routing
-2. Use Bun as the runtime
-3. Use Tailwind CSS with dark mode
+1. Use React Router v7 with EXPLICIT route config in app/routes.ts (NOT file-based routing)
+2. Use Bun as the runtime (start script: "bun run --bun react-router-serve ./build/server/index.js")
+3. Use Tailwind CSS v4
 4. Create CRUD pages for each table (list view + detail/edit view)
 5. Include a homepage/dashboard that links to each table's list view
 6. Keep it minimal and functional — no over-engineering
 7. Use fetch() for all API calls with the x-api-key header
+8. EVERY route component MUST be registered in app/routes.ts — unregistered files = 404
 
 ## Output Format
 Output ONLY file contents in this exact format, one file per block:
@@ -257,17 +258,17 @@ Output ONLY file contents in this exact format, one file per block:
 --- END FILE ---
 
 Required files:
-- package.json (with dependencies: react, react-dom, react-router, @types/react, tailwindcss, etc.)
-- app/root.tsx
-- app/routes/_index.tsx (dashboard)
+- package.json (with dependencies: react, react-dom, react-router, @react-router/dev, @react-router/node, @react-router/serve, @types/react, tailwindcss, vite, etc.)
+- app/root.tsx (with Links, Meta, Outlet, Scripts, ScrollRestoration from react-router)
+- app/routes.ts (CRITICAL — React Router v7 uses EXPLICIT route config, NOT file-based routing. Example: import { type RouteConfig, route } from "@react-router/dev/routes"; export default [route("/", "routes/home.tsx"), route("/items", "routes/items.tsx")] satisfies RouteConfig;)
+- app/routes/home.tsx (dashboard page)
 - app/lib/api.ts (Kapable Data API client)
-- app/tailwind.css
-- tailwind.config.ts
+- app/app.css (Tailwind CSS with @tailwind directives)
 - tsconfig.json
-- vite.config.ts
-- react-router.config.ts
+- vite.config.ts (import { reactRouter } from "@react-router/dev/vite"; export default { plugins: [reactRouter()] })
+- react-router.config.ts (import type { Config } from "@react-router/dev/config"; export default { ssr: true } satisfies Config;)
 
-Plus route files for each table's CRUD pages.`;
+Plus route files for each table's CRUD pages. EVERY route file MUST be registered in app/routes.ts — files in routes/ are NOT auto-discovered.`;
 
   try {
     const output = await callLLM(scaffoldPrompt, { maxTokens: 16384, timeout: 180000, model: "anthropic/claude-sonnet-4" });
