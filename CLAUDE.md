@@ -67,9 +67,10 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 - **List pagination** — API defaults to 50 items. CLI handles this, but direct API calls need `?limit=N`.
 
 ## Known Blockers
-- **clowder.build flow doesn't deploy** (IMP-826) — Flow runs 7/7 planning nodes but doesn't create GitHub repo, register Connect App, or trigger pipeline deploy. Apps must be built manually after flow completes. `scaffoldAndDeploy` fallback is skipped when flow returns a runId.
+- (none currently)
 
 ## Resolved (Not Blockers)
+- **~~Build flow doesn't deploy~~** (IMP-826) — Fixed: `streamFlowEvents` was fire-and-forget, `scaffoldAndDeploy` only ran on flow failure. Now awaits flow completion then chains `scaffoldAndDeploy` for GitHub repo creation + Connect App deploy.
 - **~~SQLite wiped on deploy~~** — Migrated to Kapable Data API (PostgreSQL). Sessions now persist across redeploys.
 - **~~GITHUB_TOKEN missing~~** — `builder.server.ts:213-229` already calls `GET /v1/git/develop/token?installation_id=113953574` for ephemeral GitHub App tokens. No static PAT needed. The real issue was `KAPABLE_API_URL=localhost` inside Incus containers (fixed by setting to `https://api.kapable.dev`).
 - **Hardcoded GitHub installation_id** — `113953574` is the Kapable GitHub App installation on `kapable-dev` org. This is intentional for now (`0a72eb1a`).
@@ -83,6 +84,15 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 | `app/lib/api.server.ts` | Kapable platform API helpers |
 | `app/components/chat/` | Chat UI, message bubbles, input |
 | `app/components/aurora/` | Three.js orb visualizer |
+
+## Chrome MCP — CRITICAL
+- `chrome-devtools-mcp` spawns a **separate Chrome instance** with its own profile at `~/.cache/chrome-devtools-mcp/chrome-profile`
+- This automation Chrome is **NOT logged into** admin.kapable.dev, console.kapable.dev, or any authenticated service
+- **DO NOT use the automation Chrome for authenticated pages** — it will see login screens, not dashboards
+- The user's main Chrome (with all sessions/cookies) is the one you want for visual verification
+- If you see 2 Chrome icons on the dock, the automation one is the problem — the user may quit it
+- **For headless `claude -p --chrome`**: screenshots of public pages (clowder.kapable.run, lovable.dev) work fine since they don't require auth. But admin/console pages will NOT work.
+- If Chrome MCP can't connect (user quit the automation Chrome), fail gracefully — don't block the runner
 
 ## Development Rules
 - Bun over npm

@@ -939,10 +939,41 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
         },
       });
 
-      // Task 12: Stream flow events in the background (fire-and-forget)
-      streamFlowEvents(sessionId, buildFlowId, flowResult.runId).catch((e) =>
+      // Stream flow events and WAIT for completion (not fire-and-forget)
+      await streamFlowEvents(sessionId, buildFlowId, flowResult.runId).catch((e) =>
         console.error("Flow event stream error:", e)
       );
+
+      // Flow completed — now do the last mile: scaffold + deploy
+      // The flow produces planning artifacts; scaffoldAndDeploy creates the
+      // GitHub repo, pushes code, registers the Connect App, and deploys.
+      await sendClowderMessage(sessionId, {
+        content: `Build pipeline finished planning. Now creating your app and deploying...`,
+        role: "system",
+        metadata: { phase: "building" },
+      });
+
+      const sendProgress = async (msg: string, meta?: Record<string, unknown>) => {
+        await sendClowderMessage(sessionId, {
+          content: msg,
+          role: "system",
+          metadata: { phase: "building", ...meta },
+        });
+      };
+
+      deployResult = await scaffoldAndDeploy(
+        sessionId,
+        session.name,
+        JSON.stringify(specPayload),
+        tables,
+        provisionResult!.apiKey,
+        provisionResult!.projectId,
+        sendProgress,
+      );
+
+      if (deployResult) {
+        await updateSessionApp(sessionId, deployResult.appId, deployResult.appUrl);
+      }
     } else {
       // Fallback to legacy scaffold
       const sendProgress = async (msg: string, meta?: Record<string, unknown>) => {
@@ -993,11 +1024,20 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
     );
   }
 
-  if (flowTriggered) {
+  if (flowTriggered && deployResult) {
     summaryLines.push(
       ``,
-      `**Build pipeline running:**`,
-      `Your app is being built iteratively by AI agents. Progress updates will appear in chat.`,
+      `**Your app is live!**`,
+      `- URL: ${deployResult.appUrl}`,
+      `- GitHub: ${deployResult.repoUrl}`,
+      ``,
+      `Built with AI-assisted planning and deployed to the Kapable platform.`,
+    );
+  } else if (flowTriggered) {
+    summaryLines.push(
+      ``,
+      `**Build pipeline completed** but deployment could not be finalized.`,
+      `Your planning documents are saved — a developer can deploy manually.`,
     );
   } else if (deployResult) {
     summaryLines.push(
@@ -1010,8 +1050,8 @@ export async function runBuildPhase(sessionId: string): Promise<void> {
 
   summaryLines.push(``, `Your app plan has been saved to your Org Vault.`);
 
-  // Phase: "building" if flow is running, "delivered" if scaffold deployed, "planning" if nothing deployed
-  const finalPhase = flowTriggered ? "building" : (provisionResult ? "delivered" : "planning");
+  // Phase: "delivered" if we have a deploy result, "building" if flow ran but no deploy, "planning" if nothing
+  const finalPhase = deployResult ? "delivered" : (flowTriggered ? "building" : (provisionResult ? "delivered" : "planning"));
   const phaseExtra = deployResult?.appUrl ? { app_url: deployResult.appUrl } : undefined;
   await updateSessionPhase(sessionId, finalPhase, phaseExtra);
 
