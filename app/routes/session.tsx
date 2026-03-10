@@ -108,26 +108,26 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         }}
       >
         <div className="h-full flex flex-col">
-          <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 pt-3 pb-1 overflow-x-auto">
+          <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 pt-2.5 pb-1 overflow-x-auto">
             <Link to="/" className="flex-none" title="Home">
               <img src="/logo.png" alt="Clowder" className="w-5 h-5 md:w-6 md:h-6 hover:opacity-80 transition-opacity" />
             </Link>
             <button
               type="button"
               onClick={() => setShowSidebar((v) => !v)}
-              className="flex items-center text-muted-foreground hover:text-foreground transition-colors text-sm flex-none p-1"
+              className="flex items-center text-muted-foreground/50 hover:text-foreground transition-colors text-sm flex-none p-1 rounded-lg hover:bg-card/40"
               title="Toggle sessions (Cmd+B)"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-xs text-muted-foreground hidden sm:inline">·</span>
-            <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate min-w-0">
+            <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
+            <h1 className="text-xs sm:text-sm font-semibold text-foreground/80 truncate min-w-0">
               {session.name}
             </h1>
-            <span className="text-xs text-muted-foreground hidden sm:inline">·</span>
-            <span className="text-xs text-muted-foreground capitalize hidden sm:inline">{session.phase}</span>
+            <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
+            <span className="text-[10px] text-muted-foreground/50 capitalize hidden sm:inline font-medium">{session.phase}</span>
             {session.app_url && (
               <>
                 <span className="text-xs text-muted-foreground hidden md:inline">·</span>

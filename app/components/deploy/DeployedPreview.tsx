@@ -30,7 +30,7 @@ export function DeployedPreview({ appUrl, appName, onCopyUrl }: DeployedPreviewP
   return (
     <div className="h-full flex flex-col bg-zinc-950">
       {/* Preview toolbar */}
-      <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border bg-card/50">
+      <div className="flex-none flex items-center gap-2 px-4 py-2.5 border-b border-border/30 bg-gradient-to-r from-card/50 to-card/30">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs font-medium text-emerald-400">Live</span>

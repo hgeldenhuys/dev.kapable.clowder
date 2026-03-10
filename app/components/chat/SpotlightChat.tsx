@@ -54,7 +54,7 @@ export function SpotlightChat({
     <div className="flex flex-col h-full">
       {/* Active expert header */}
       {activeExpert && (
-        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border/50 bg-card/40 backdrop-blur-md">
+        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border/20 bg-gradient-to-r from-card/40 to-card/20 backdrop-blur-md">
           <ExpertAvatar
             domain={activeExpert.domain}
             name={activeExpert.name}
@@ -127,7 +127,7 @@ export function SpotlightChat({
       </div>
 
       {/* Input area */}
-      <div className="flex-none border-t border-border p-4">
+      <div className="flex-none border-t border-border/20 p-4 bg-card/10">
         <ChatInput
           sessionId={sessionId}
           isBuilding={isBuilding}
@@ -278,18 +278,18 @@ function ThinkingIndicator({
 }
 
 function PhaseChip({ phase }: { phase: string }) {
-  const phaseLabels: Record<string, { label: string; color: string }> = {
-    interviewing: { label: "Understanding", color: "text-amber-400" },
-    assembling: { label: "Assembling", color: "text-yellow-400" },
-    ideating: { label: "Ideating", color: "text-blue-400" },
-    planning: { label: "Planning", color: "text-purple-400" },
-    building: { label: "Building", color: "text-green-400" },
-    delivered: { label: "Delivered", color: "text-emerald-400" },
+  const phaseLabels: Record<string, { label: string; color: string; bg: string }> = {
+    interviewing: { label: "Understanding", color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20" },
+    assembling: { label: "Assembling", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/20" },
+    ideating: { label: "Ideating", color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20" },
+    planning: { label: "Planning", color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20" },
+    building: { label: "Building", color: "text-green-400", bg: "bg-green-400/10 border-green-400/20" },
+    delivered: { label: "Delivered", color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20" },
   };
-  const { label, color } = phaseLabels[phase] ?? { label: phase, color: "text-muted-foreground" };
+  const { label, color, bg } = phaseLabels[phase] ?? { label: phase, color: "text-muted-foreground", bg: "bg-zinc-400/10 border-zinc-400/20" };
 
   return (
-    <span className={`text-xs font-medium uppercase tracking-wide ${color}`}>
+    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${color} ${bg}`}>
       {label}
     </span>
   );

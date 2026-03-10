@@ -293,7 +293,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center min-h-[70vh] px-6 sm:px-8 py-16 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center min-h-[50vh] px-6 sm:px-8 py-12 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -319,10 +319,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           <div className="space-y-4">
             <h2 className="text-2xl sm:text-4xl font-semibold text-foreground leading-tight max-w-xl mx-auto">
               Describe your app.{" "}
-              <span className="text-primary">We'll build it.</span>
+              <span className="bg-gradient-to-r from-primary via-violet-300 to-amber-300 bg-clip-text text-transparent">We'll build it.</span>
             </h2>
 
-            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed animate-fade-in-up">
+            <p className="text-sm sm:text-base text-muted-foreground/70 max-w-md mx-auto leading-relaxed animate-fade-in-up">
               A committee of AI experts designs, builds, and deploys a full-stack web app with database, API, and real-time features.
             </p>
           </div>
@@ -357,7 +357,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       </section>
 
       {/* Showcase Section */}
-      <section className="flex flex-col items-center px-6 sm:px-8 py-16">
+      <section className="flex flex-col items-center px-6 sm:px-8 py-10">
         <div className="max-w-4xl w-full space-y-8">
           <div className="text-center space-y-2">
             <h3 className="text-lg font-bold text-foreground/80">Built with Clowder</h3>
@@ -365,11 +365,11 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
             {[
-              { name: "Pulse", desc: "Live feedback board with real-time voting and idea tracking", url: "https://pulse.kapable.run", icon: "💬", accent: "from-violet-500/8 to-blue-500/4" },
-              { name: "Event Board", desc: "Community event listing with RSVP tracking and capacity management", icon: "📅", accent: "from-amber-500/8 to-orange-500/4" },
-              { name: "Tool Library", desc: "Neighborhood tool sharing with lending history and availability", icon: "🔧", accent: "from-emerald-500/8 to-teal-500/4" },
+              { name: "Pulse", desc: "Live feedback board with real-time voting and idea tracking", url: "https://pulse.kapable.run", icon: "💬", accent: "from-violet-500/12 to-blue-500/5", border: "border-violet-500/15" },
+              { name: "Event Board", desc: "Community event listing with RSVP tracking and capacity management", icon: "📅", accent: "from-amber-500/12 to-orange-500/5", border: "border-amber-500/15" },
+              { name: "Tool Library", desc: "Neighborhood tool sharing with lending history and availability", icon: "🔧", accent: "from-emerald-500/12 to-teal-500/5", border: "border-emerald-500/15" },
             ].map((app) => (
-              <div key={app.name} className={`card-glow rounded-2xl border border-border/20 bg-gradient-to-br ${app.accent} p-5 space-y-3 group`}>
+              <div key={app.name} className={`card-glow rounded-2xl border ${app.border} bg-gradient-to-br ${app.accent} p-5 space-y-3 group`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="text-xl">{app.icon}</span>
