@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type { UploadedFile } from "~/lib/uploads.server";
-import { FileDropZone } from "./FileDropZone";
 
 export interface Step1Data {
   appName: string;
@@ -88,31 +87,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
           </div>
         </div>
 
-        {/* File upload */}
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
-            Reference Files <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <FileDropZone
-            sessionId={sessionId}
-            files={data.files}
-            onFileAdded={(file) => {
-              // Replace existing file with same name (update status), or add new
-              const existing = data.files.findIndex((f) => f.name === file.name);
-              const updated = [...data.files];
-              if (existing >= 0) {
-                updated[existing] = file;
-              } else {
-                updated.push(file);
-              }
-              onChange({ ...data, files: updated });
-            }}
-            onFileRemoved={(filename) => {
-              onChange({ ...data, files: data.files.filter((f) => f.name !== filename) });
-            }}
-            disabled={!sessionId}
-          />
-        </div>
+        {/* File upload removed — will be re-added when pre-session uploads are supported */}
       </div>
 
       {/* Specialist preview chips (from predict-experts) */}
