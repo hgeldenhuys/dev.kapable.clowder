@@ -507,9 +507,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </StepWizard>
 
         {/* Powered by badge */}
-        <div className="flex items-center justify-center gap-2 mt-4 opacity-70 hover:opacity-90 transition-opacity">
-          <span className="text-[10px] text-muted-foreground">Powered by</span>
-          <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground font-semibold hover:text-primary transition-colors">
+        <div className="flex items-center justify-center gap-2 mt-4 opacity-85 hover:opacity-100 transition-opacity">
+          <span className="text-[10px] text-muted-foreground/90">Powered by</span>
+          <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground/90 font-semibold hover:text-primary transition-colors">
             Kapable
           </a>
         </div>

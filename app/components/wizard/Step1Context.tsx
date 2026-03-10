@@ -67,7 +67,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
       {/* Starter templates — compact horizontal scroll, shown when empty or template selected */}
       {(wordCount < 20 || selectedTemplate !== null) && (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground/60 text-center font-medium">Or start with a template</p>
+          <p className="text-xs text-muted-foreground/80 text-center font-medium">Or start with a template</p>
           <div className="relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {STARTER_TEMPLATES.map((t) => (
@@ -87,8 +87,8 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 {/* Content below header */}
                 <div className="px-3.5 py-2.5">
                   <span className="text-xs font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5">{t.category}</p>
-                  <p className="text-[11px] text-muted-foreground/60 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
+                  <p className="text-[10px] text-foreground/60 mt-0.5">{t.category}</p>
+                  <p className="text-[11px] text-muted-foreground/75 leading-snug line-clamp-2 mt-1">{t.description.split('. ')[0]}.</p>
                 </div>
               </button>
             ))}
