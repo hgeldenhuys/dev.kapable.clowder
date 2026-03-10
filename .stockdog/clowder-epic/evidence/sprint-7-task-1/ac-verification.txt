@@ -1,0 +1,6 @@
+Story 1 — Force light color scheme
+AC1: Build passes — VERIFIED (exit code 0)
+AC2: color-scheme meta tag present at root.tsx:36 — VERIFIED
+     Content: 'light only'
+AC3: Screenshot dark mode test — REQUIRES BROWSER (production deploy)
+AC4: No visual regression — REQUIRES BROWSER

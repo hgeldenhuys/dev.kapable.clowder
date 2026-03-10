@@ -33,6 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light only" />
         <title>Clowder — AI App Builder by Kapable</title>
         <meta name="description" content="Describe your app idea. Our AI expert committee designs, builds, and deploys it — from concept to production in minutes." />
         <meta property="og:title" content="Clowder — AI App Builder" />
