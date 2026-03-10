@@ -12,6 +12,7 @@ interface SpotlightChatProps {
   sessionId: string;
   activeExpert?: ClowderExpert;
   phase: string;
+  appUrl?: string;
   isWaitingForExpert?: boolean;
   onSend: (content: string) => void;
   onForceStart?: () => void;
@@ -29,6 +30,7 @@ export function SpotlightChat({
   sessionId,
   activeExpert,
   phase,
+  appUrl,
   isWaitingForExpert,
   onSend,
   onForceStart,
@@ -128,6 +130,9 @@ export function SpotlightChat({
         <ChatInput
           sessionId={sessionId}
           isBuilding={isBuilding}
+          phase={phase}
+          messages={messages}
+          appUrl={appUrl}
           onSend={onSend}
           onForceStart={phase !== "building" && phase !== "delivered" ? onForceStart : undefined}
         />

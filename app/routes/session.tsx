@@ -140,6 +140,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
             sessionId={session.id}
             activeExpert={activeExpert}
             phase={session.phase}
+            appUrl={session.app_url}
             isWaitingForExpert={isWaitingForExpert}
             onSend={sendMessage}
             onForceStart={session.phase === "ideating" ? forceStart : undefined}

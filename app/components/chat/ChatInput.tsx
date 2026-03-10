@@ -2,10 +2,15 @@
 
 import { useRef, type FormEvent } from "react";
 import { Send, Play } from "lucide-react";
+import type { ClowderMessage } from "~/lib/api.server";
+import { BuildProgressTimeline } from "~/components/deploy/BuildProgressTimeline";
 
 interface ChatInputProps {
   sessionId: string;
   isBuilding?: boolean;
+  phase?: string;
+  messages?: ClowderMessage[];
+  appUrl?: string;
   onSend?: (content: string) => void;
   onForceStart?: () => void;
   onFileDrop?: (file: File) => void;
@@ -18,6 +23,9 @@ interface ChatInputProps {
 export function ChatInput({
   sessionId,
   isBuilding = false,
+  phase = "",
+  messages = [],
+  appUrl,
   onSend,
   onForceStart,
 }: ChatInputProps) {
@@ -41,8 +49,8 @@ export function ChatInput({
 
   if (isBuilding) {
     return (
-      <div className="flex items-center justify-center py-4 text-muted-foreground text-sm">
-        <div className="animate-pulse">Your experts are building your app…</div>
+      <div className="py-3 px-2">
+        <BuildProgressTimeline messages={messages} phase={phase} appUrl={appUrl} />
       </div>
     );
   }

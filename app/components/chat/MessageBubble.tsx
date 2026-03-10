@@ -1,6 +1,30 @@
 import { useState, useEffect, useMemo } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
-import { ExpertAvatar } from "./ExpertAvatar";
+import { ExpertAvatar, getExpertIcon } from "./ExpertAvatar";
+
+/** Domain-specific border colors for expert messages (solid, not gradient) */
+const DOMAIN_BORDER_COLORS: Record<string, string> = {
+  strategist: "oklch(0.7 0.15 220)",   // cyan-blue
+  designer: "oklch(0.65 0.2 290)",      // violet
+  architect: "oklch(0.75 0.15 70)",     // amber
+  commerce: "oklch(0.7 0.15 160)",      // emerald
+  compliance: "oklch(0.65 0.15 20)",    // red
+  growth: "oklch(0.7 0.15 340)",        // pink
+  security: "oklch(0.55 0.05 260)",     // slate
+  data: "oklch(0.65 0.18 270)",         // indigo
+  analytics: "oklch(0.7 0.12 195)",     // teal
+  content: "oklch(0.7 0.15 350)",       // rose
+  ai_ml: "oklch(0.6 0.2 290)",          // purple
+  system: "oklch(0.5 0.05 260)",        // muted gray
+};
+
+function getDomainBorderColor(domain: string): string {
+  const d = domain.toLowerCase();
+  for (const [key, color] of Object.entries(DOMAIN_BORDER_COLORS)) {
+    if (d.includes(key)) return color;
+  }
+  return "oklch(0.65 0.15 280)"; // fallback purple
+}
 
 /** Minimal markdown: **bold**, *italic*, `code`, ```code blocks```, and - bullet lists */
 function renderSimpleMarkdown(text: string): string {
@@ -73,18 +97,28 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
         }`}
         style={
           !isUser
-            ? { borderLeftColor: `var(--expert-color, oklch(0.65 0.2 280))` }
+            ? { borderLeftColor: getDomainBorderColor(expert?.domain ?? "system") }
             : undefined
         }
       >
         {!isUser && (
           <div className="flex items-center gap-2 mb-1">
+            {expert && (
+              <span className="text-xs opacity-60" title={expert.domain.replace(/_/g, " ")}>
+                {getExpertIcon(expert.domain)}
+              </span>
+            )}
             <span className="text-xs font-semibold text-primary">
               {expert?.name ?? (message.phase === "interviewing" ? "Product Owner" : "System")}
             </span>
             {expert && (
               <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-zinc-800/60 border border-zinc-700/50">
                 {expert.domain.replace(/_/g, " ")}
+              </span>
+            )}
+            {expert && expert.confidence >= 0.8 && (
+              <span className="text-[10px] text-emerald-400/70 px-1 py-0.5 rounded bg-emerald-500/10">
+                confident
               </span>
             )}
           </div>

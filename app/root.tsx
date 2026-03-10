@@ -39,9 +39,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta property="og:description" content="A committee of AI experts builds your app from a description. Powered by Kapable." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://clowder.kapable.run" />
+        <meta property="og:image" content="https://clowder.kapable.run/logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Clowder — AI App Builder" />
         <meta name="twitter:description" content="Describe your app. AI experts build it." />
+        <meta name="twitter:image" content="https://clowder.kapable.run/logo.png" />
+        <meta name="theme-color" content="#7c3aed" />
         <Meta />
         <Links />
       </head>
