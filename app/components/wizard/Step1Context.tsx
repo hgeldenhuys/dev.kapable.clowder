@@ -57,21 +57,21 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
 
       {/* Starter templates — shown when fields are empty */}
       {isEmpty && (
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground text-center">Try one of these to get started</p>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground/60 text-center font-medium">or try one of these</p>
+          <div className="grid grid-cols-2 gap-2.5 stagger-children">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className="text-left p-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/60 hover:border-primary/30 transition-all group"
+                className="card-glow text-left p-3.5 rounded-xl border border-border/30 bg-card/30 hover:bg-card/60 transition-all group"
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base">{t.icon}</span>
-                  <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">{t.name}</span>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base opacity-80 group-hover:opacity-100 transition-opacity">{t.icon}</span>
+                  <span className="text-xs font-bold text-foreground/80 group-hover:text-primary transition-colors">{t.name}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground/60 leading-relaxed line-clamp-2">{t.description.slice(0, 80)}...</p>
+                <p className="text-[10px] text-muted-foreground/50 leading-relaxed line-clamp-2">{t.description.slice(0, 80)}...</p>
               </button>
             ))}
           </div>

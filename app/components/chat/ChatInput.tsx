@@ -67,7 +67,7 @@ export function ChatInput({
             placeholder="Reply to your expert committee… (Enter to send, Shift+Enter for newline)"
             onKeyDown={handleKeyDown}
             rows={2}
-            className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            className="w-full px-4 py-3 pr-12 rounded-xl border border-border/40 bg-card/60 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 text-sm backdrop-blur-sm"
             autoFocus
           />
         </div>

@@ -3,27 +3,58 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Clowder Design System — "Warm Twilight"
+ *
+ * Philosophy: Premium dark theme with warmth. Think sunset,
+ * not midnight. Purple primary with amber/gold accents.
+ * Soft depth via colored shadows, not hard borders.
+ */
+
 :root {
-  --background: oklch(0.08 0.01 270);
-  --foreground: oklch(0.98 0.005 270);
-  --card: oklch(0.12 0.01 270);
-  --card-foreground: oklch(0.95 0.005 270);
-  --popover: oklch(0.12 0.01 270);
-  --popover-foreground: oklch(0.95 0.005 270);
-  --primary: oklch(0.65 0.2 280);
-  --primary-foreground: oklch(0.98 0.005 270);
-  --secondary: oklch(0.18 0.01 270);
-  --secondary-foreground: oklch(0.9 0.005 270);
-  --muted: oklch(0.18 0.01 270);
-  --muted-foreground: oklch(0.55 0.01 270);
-  --accent: oklch(0.22 0.02 280);
-  --accent-foreground: oklch(0.95 0.005 270);
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 270);
-  --border: oklch(0.22 0.01 270);
-  --input: oklch(0.22 0.01 270);
-  --ring: oklch(0.65 0.2 280);
-  --radius: 0.5rem;
+  /* Background: warm dark, hint of purple warmth */
+  --background: oklch(0.10 0.015 285);
+  --foreground: oklch(0.95 0.01 80);
+
+  /* Cards: slightly warmer than bg, subtle distinction */
+  --card: oklch(0.14 0.018 285);
+  --card-foreground: oklch(0.93 0.01 80);
+
+  /* Popover: elevated card */
+  --popover: oklch(0.16 0.02 285);
+  --popover-foreground: oklch(0.93 0.01 80);
+
+  /* Primary: warm violet — not cold blue-purple */
+  --primary: oklch(0.68 0.18 290);
+  --primary-foreground: oklch(0.98 0.005 80);
+
+  /* Secondary: warm surface for subtle emphasis */
+  --secondary: oklch(0.19 0.02 285);
+  --secondary-foreground: oklch(0.88 0.01 80);
+
+  /* Muted: warm gray, readable but recessed */
+  --muted: oklch(0.20 0.015 285);
+  --muted-foreground: oklch(0.58 0.02 60);
+
+  /* Accent: warm gold-amber for highlights */
+  --accent: oklch(0.25 0.04 60);
+  --accent-foreground: oklch(0.93 0.01 80);
+
+  /* Destructive: warm red, not cold */
+  --destructive: oklch(0.62 0.22 20);
+  --destructive-foreground: oklch(0.98 0.005 80);
+
+  /* Border: subtle warm line */
+  --border: oklch(0.24 0.02 285);
+  --input: oklch(0.20 0.02 285);
+  --ring: oklch(0.68 0.18 290);
+
+  --radius: 0.75rem;
+
+  /* Extended palette */
+  --success: oklch(0.72 0.17 155);
+  --warning: oklch(0.78 0.16 75);
+  --info: oklch(0.68 0.14 230);
 }
 
 * {
@@ -43,28 +74,65 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hero gradient background */
+/* ─── Smooth global transitions ─── */
+a, button, input, textarea, select {
+  transition: all 0.2s ease;
+}
+
+/* ─── Hero gradient — warm twilight radial ─── */
 .hero-gradient {
-  background: radial-gradient(ellipse 80% 60% at 50% 40%, oklch(0.15 0.06 280) 0%, oklch(0.08 0.01 270) 70%);
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 35%, oklch(0.18 0.08 290) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 70% 60%, oklch(0.14 0.06 60 / 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 30% 70%, oklch(0.12 0.04 330 / 0.2) 0%, transparent 70%),
+    var(--background);
 }
 
-/* Hero CTA button with gradient + glow */
+/* ─── Hero CTA — warm gradient with glow ─── */
 .hero-cta {
-  background: linear-gradient(135deg, oklch(0.55 0.22 280), oklch(0.50 0.18 250));
-  box-shadow: 0 0 20px oklch(0.55 0.22 280 / 0.4), 0 4px 12px oklch(0.0 0.0 0 / 0.3);
+  background: linear-gradient(135deg, oklch(0.60 0.20 290), oklch(0.55 0.18 260));
+  box-shadow:
+    0 0 24px oklch(0.60 0.20 290 / 0.35),
+    0 8px 24px oklch(0.0 0.0 0 / 0.25);
+  border-radius: 1rem;
 }
 .hero-cta:hover {
-  background: linear-gradient(135deg, oklch(0.60 0.22 280), oklch(0.55 0.18 250));
-  box-shadow: 0 0 30px oklch(0.55 0.22 280 / 0.5), 0 4px 16px oklch(0.0 0.0 0 / 0.3);
+  background: linear-gradient(135deg, oklch(0.65 0.20 290), oklch(0.60 0.18 260));
+  box-shadow:
+    0 0 32px oklch(0.65 0.20 290 / 0.45),
+    0 8px 32px oklch(0.0 0.0 0 / 0.3);
+  transform: translateY(-1px);
+}
+.hero-cta:active {
+  transform: translateY(0);
 }
 
-/* Tagline reveal animation */
+/* ─── Card hover glow ─── */
+.card-glow {
+  transition: all 0.3s ease;
+}
+.card-glow:hover {
+  border-color: oklch(0.68 0.18 290 / 0.3);
+  box-shadow: 0 4px 20px oklch(0.68 0.18 290 / 0.08);
+}
+
+/* ─── Glass card effect ─── */
+.glass-card {
+  background: oklch(0.14 0.018 285 / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(0.30 0.02 285 / 0.5);
+}
+
+/* ─── Animations ─── */
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -72,39 +140,88 @@ body {
   }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out 0.3s both;
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Floating orb accent animations */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px oklch(0.68 0.18 290 / 0.2); }
+  50% { box-shadow: 0 0 20px oklch(0.68 0.18 290 / 0.4); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out 0.2s both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s ease-out both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.30s; }
+
+/* ─── Floating orb accent animations ─── */
 @keyframes float {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
+  50% { transform: translateY(-18px) scale(1.04); }
 }
 
 @keyframes float-delayed {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-15px) scale(1.08); }
+  50% { transform: translateY(-12px) scale(1.06); }
 }
 
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-10px) scale(1.03); }
+  50% { transform: translateY(-8px) scale(1.02); }
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 7s ease-in-out infinite;
 }
 
 .animate-float-delayed {
-  animation: float-delayed 8s ease-in-out 1s infinite;
+  animation: float-delayed 9s ease-in-out 1.5s infinite;
 }
 
 .animate-float-slow {
-  animation: float-slow 10s ease-in-out 2s infinite;
+  animation: float-slow 11s ease-in-out 3s infinite;
 }
 
-/* Custom scrollbar */
+/* ─── Custom scrollbar — warm ─── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -112,6 +229,49 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.35 0.01 270);
+  background: oklch(0.35 0.02 285);
   border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.42 0.03 290);
+}
+
+/* ─── Focus ring ─── */
+*:focus-visible {
+  outline: 2px solid oklch(0.68 0.18 290 / 0.5);
+  outline-offset: 2px;
+}
+
+/* ─── Selection highlight ─── */
+::selection {
+  background: oklch(0.68 0.18 290 / 0.3);
+  color: oklch(0.95 0.01 80);
+}
+
+/* ─── Skeleton loading shimmer ─── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    oklch(0.18 0.02 285) 0%,
+    oklch(0.24 0.02 285) 50%,
+    oklch(0.18 0.02 285) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─── Utility: line-clamp ─── */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

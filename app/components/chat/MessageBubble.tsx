@@ -92,8 +92,8 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
-            ? "bg-primary text-primary-foreground rounded-tr-sm shadow-md shadow-primary/20"
-            : "bg-card text-foreground border-l-2 rounded-tl-sm shadow-sm"
+            ? "bg-primary text-primary-foreground rounded-tr-md shadow-lg shadow-primary/15"
+            : "bg-card/80 text-foreground border-l-2 rounded-tl-md shadow-sm backdrop-blur-sm"
         }`}
         style={
           !isUser

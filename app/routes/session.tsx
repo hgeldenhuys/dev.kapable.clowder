@@ -101,8 +101,8 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
         className="flex-none relative overflow-hidden"
         style={{
           height: isDelivered ? "60px" : experts.length === 0 ? "60px" : "220px",
-          background: "oklch(0.06 0.01 270)",
-          borderBottom: "1px solid oklch(0.22 0.01 270)",
+          background: "oklch(0.08 0.015 285)",
+          borderBottom: "1px solid oklch(0.24 0.02 285 / 0.6)",
           zIndex: 0,
           transition: "height 0.4s ease-in-out",
         }}

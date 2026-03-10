@@ -2,6 +2,7 @@
 
 import { Link, useNavigate } from "react-router";
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 import type { ClowderSession } from "~/lib/api.server";
 
 const phaseColors: Record<string, string> = {
@@ -21,8 +22,10 @@ interface SessionSidebarProps {
 /**
  * Collapsible sidebar listing all Clowder sessions.
  * Triple-dot menu on each session for rename and delete.
+ * Uses optimistic state updates — no page reloads.
  */
-export function SessionSidebar({ sessions, currentSessionId, onClose }: SessionSidebarProps) {
+export function SessionSidebar({ sessions: initialSessions, currentSessionId, onClose }: SessionSidebarProps) {
+  const [sessions, setSessions] = useState(initialSessions);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -30,6 +33,11 @@ export function SessionSidebar({ sessions, currentSessionId, onClose }: SessionS
   const renameInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Sync with prop changes (e.g. new session created via SSE)
+  useEffect(() => {
+    setSessions(initialSessions);
+  }, [initialSessions]);
 
   // Focus rename input when it appears
   useEffect(() => {
@@ -57,32 +65,41 @@ export function SessionSidebar({ sessions, currentSessionId, onClose }: SessionS
       setRenamingId(null);
       return;
     }
+    // Optimistic update
+    setSessions((prev) =>
+      prev.map((s) => (s.id === sessionId ? { ...s, name: trimmed } : s))
+    );
+    setRenamingId(null);
     try {
-      await fetch(`/api/clowder-session/${sessionId}`, {
+      const res = await fetch(`/api/clowder-session/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: trimmed }),
       });
-      // Reload to pick up the new name
-      window.location.reload();
+      if (!res.ok) throw new Error("Rename failed");
+      toast.success("Session renamed");
     } catch {
-      console.error("Failed to rename session");
+      // Revert optimistic update
+      setSessions(initialSessions);
+      toast.error("Failed to rename session");
     }
-    setRenamingId(null);
   }
 
   async function handleDelete(sessionId: string) {
+    // Optimistic removal
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    setConfirmDeleteId(null);
     try {
-      await fetch(`/api/clowder-session/${sessionId}`, { method: "DELETE" });
-      setConfirmDeleteId(null);
-      // If we deleted the current session, go home
+      const res = await fetch(`/api/clowder-session/${sessionId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      toast.success("Session deleted");
       if (sessionId === currentSessionId) {
         navigate("/");
-      } else {
-        window.location.reload();
       }
     } catch {
-      console.error("Failed to delete session");
+      // Revert optimistic update
+      setSessions(initialSessions);
+      toast.error("Failed to delete session");
     }
   }
 

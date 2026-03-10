@@ -54,7 +54,7 @@ export function SpotlightChat({
     <div className="flex flex-col h-full">
       {/* Active expert header */}
       {activeExpert && (
-        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
+        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border/50 bg-card/40 backdrop-blur-md">
           <ExpertAvatar
             domain={activeExpert.domain}
             name={activeExpert.name}
@@ -102,13 +102,13 @@ export function SpotlightChat({
         className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
       >
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center text-muted-foreground max-w-xs space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-blue-600/20 flex items-center justify-center border border-primary/10">
-                <span className="text-3xl opacity-60">◈</span>
+          <div className="flex items-center justify-center h-full animate-fade-in">
+            <div className="text-center text-muted-foreground max-w-xs space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 via-amber-500/8 to-rose-500/8 flex items-center justify-center border border-primary/10 animate-pulse-glow">
+                <img src="/logo.png" alt="" className="w-8 h-8 opacity-60" />
               </div>
-              <p className="text-sm font-medium text-foreground/80">Your expert committee awaits</p>
-              <p className="text-xs leading-relaxed">
+              <p className="text-sm font-semibold text-foreground/80">Your expert committee awaits</p>
+              <p className="text-xs leading-relaxed text-muted-foreground/60">
                 Describe your app idea and your team of AI experts will guide you from concept to deployed product.
               </p>
             </div>
@@ -264,13 +264,13 @@ function ThinkingIndicator({
     : `${prefix}${pool[msgIndex]}`;
 
   return (
-    <div className="flex items-center gap-3 px-3 py-3 mx-3 rounded-lg bg-card/30 border border-border/30">
-      <div className="flex gap-1">
-        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+    <div className="flex items-center gap-3 px-4 py-3 mx-3 rounded-xl glass-card animate-fade-in">
+      <div className="flex gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "150ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: "300ms" }} />
       </div>
-      <span className="text-xs text-muted-foreground transition-opacity duration-300">
+      <span className="text-xs text-muted-foreground/80 transition-opacity duration-500">
         {displayMsg}
       </span>
     </div>
