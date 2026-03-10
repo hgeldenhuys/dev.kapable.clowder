@@ -14,7 +14,7 @@ bun test                  # Run tests
 - **Frontend:** React Router v7 + Bun BFF
 - **Domain:** `clowder.kapable.run` (via kapable-proxy)
 - **App ID:** `77e56427-de58-4917-8d1d-4b918878b2e1`
-- **Data:** Local SQLite (bun:sqlite) — sessions, experts, messages
+- **Data:** Kapable Data API (PostgreSQL) — sessions, experts, messages (project: clowder-internal, e74b88ac)
 - **LLM:** OpenRouter (Gemini Flash) as PO agent, routes to experts
 - **Visuals:** Three.js floating orbs, aurora shaders, spotlight chat
 
@@ -67,9 +67,10 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 - **List pagination** — API defaults to 50 items. CLI handles this, but direct API calls need `?limit=N`.
 
 ## Known Blockers
-- **SQLite wiped on deploy** — Sessions lost. Needs migration to platform PostgreSQL (IMP-817 / `9123bfb9`).
+_(none — all resolved)_
 
 ## Resolved (Not Blockers)
+- **~~SQLite wiped on deploy~~** — Migrated to Kapable Data API (PostgreSQL). Sessions now persist across redeploys.
 - **~~GITHUB_TOKEN missing~~** — `builder.server.ts:213-229` already calls `GET /v1/git/develop/token?installation_id=113953574` for ephemeral GitHub App tokens. No static PAT needed. The real issue was `KAPABLE_API_URL=localhost` inside Incus containers (fixed by setting to `https://api.kapable.dev`).
 - **Hardcoded GitHub installation_id** — `113953574` is the Kapable GitHub App installation on `kapable-dev` org. This is intentional for now (`0a72eb1a`).
 
@@ -78,7 +79,7 @@ $AB board end --id $SID --summary "Built and deployed" --outcome completed
 |------|---------|
 | `app/lib/orchestrator.server.ts` | PO agent, expert routing, phase transitions |
 | `app/lib/builder.server.ts` | Spec generation, project provisioning, deploy |
-| `app/lib/db.server.ts` | SQLite schema, session/expert/message CRUD |
+| `app/lib/db.server.ts` | Data API client, session/expert/message CRUD |
 | `app/lib/api.server.ts` | Kapable platform API helpers |
 | `app/components/chat/` | Chat UI, message bubbles, input |
 | `app/components/aurora/` | Three.js orb visualizer |
