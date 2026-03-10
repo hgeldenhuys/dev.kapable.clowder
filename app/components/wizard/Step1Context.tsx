@@ -63,10 +63,10 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
   const selectedTemplate = STARTER_TEMPLATES.find(t => t.name === data.appName && t.description === data.description)?.name ?? null;
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       {/* Starter templates — compact horizontal scroll, shown when empty or template selected */}
       {(wordCount < 20 || selectedTemplate !== null) && (
-        <div className="space-y-2">
+        <div className="space-y-2 order-2 sm:order-1">
           <p className="text-xs text-stone-500 text-center font-medium">Or start with a template</p>
           <div className="relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -97,7 +97,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 order-1 sm:order-2">
         <div>
           <label
             htmlFor="appName"
