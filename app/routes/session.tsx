@@ -100,7 +100,7 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       <div
         className="flex-none relative overflow-hidden"
         style={{
-          height: isDelivered ? "60px" : "220px",
+          height: isDelivered ? "60px" : experts.length === 0 ? "60px" : "220px",
           background: "oklch(0.06 0.01 270)",
           borderBottom: "1px solid oklch(0.22 0.01 270)",
           zIndex: 0,
@@ -109,14 +109,16 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       >
         <div className="h-full flex flex-col">
           <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 pt-3 pb-1 overflow-x-auto">
+            <Link to="/" className="flex-none" title="Home">
+              <img src="/logo.png" alt="Clowder" className="w-5 h-5 md:w-6 md:h-6 hover:opacity-80 transition-opacity" />
+            </Link>
             <button
               type="button"
               onClick={() => setShowSidebar((v) => !v)}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm flex-none"
-              title="Toggle sessions"
+              className="flex items-center text-muted-foreground hover:text-foreground transition-colors text-sm flex-none p-1"
+              title="Toggle sessions (Cmd+B)"
             >
-              <img src="/logo.png" alt="Clowder" className="w-5 h-5 md:w-6 md:h-6" />
-              <svg className="w-3.5 h-3.5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>

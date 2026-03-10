@@ -13,7 +13,7 @@ import type { Step1Data } from "~/components/wizard/Step1Context";
 import { Step2Assembly } from "~/components/wizard/Step2Assembly";
 import type { Specialist } from "~/components/wizard/Step2Assembly";
 import { useTypeheadStream } from "~/hooks/useTypeheadStream";
-import { OnboardingTooltip } from "~/components/onboarding/OnboardingTooltip";
+// OnboardingTooltip removed — page is self-explanatory, tooltip was redundant
 
 export async function loader() {
   const sessions = await listClowderSessions();
@@ -94,8 +94,6 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   const { sessions } = loaderData;
   const submit = useSubmit();
   const wizardRef = useRef<HTMLDivElement>(null);
-
-  const deliveredCount = sessions.filter((s) => s.phase === "delivered").length;
 
   const scrollToWizard = useCallback(() => {
     wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -320,11 +318,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               Start Building →
             </button>
 
-            {deliveredCount > 0 && (
-              <p className="text-sm text-muted-foreground animate-fade-in-up">
-                <span className="text-emerald-400 font-semibold">{deliveredCount}</span> apps built and deployed
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground animate-fade-in-up">
+              No signup required · Free to use · Deploys in minutes
+            </p>
           </div>
         </div>
       </section>
@@ -446,8 +442,6 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      {/* First-time onboarding tooltip */}
-      <OnboardingTooltip />
     </main>
   );
 }

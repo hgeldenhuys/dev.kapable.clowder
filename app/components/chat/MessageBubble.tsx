@@ -92,8 +92,8 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
-            ? "bg-primary text-primary-foreground rounded-tr-sm"
-            : "bg-card text-foreground border-l-2 rounded-tl-sm"
+            ? "bg-primary text-primary-foreground rounded-tr-sm shadow-md shadow-primary/20"
+            : "bg-card text-foreground border-l-2 rounded-tl-sm shadow-sm"
         }`}
         style={
           !isUser
@@ -109,7 +109,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
               </span>
             )}
             <span className="text-xs font-semibold text-primary">
-              {expert?.name ?? (message.phase === "interviewing" ? "Product Owner" : "System")}
+              {expert?.name ?? (message.role === "system" ? "System" : "Clowder")}
             </span>
             {expert && (
               <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-zinc-800/60 border border-zinc-700/50">

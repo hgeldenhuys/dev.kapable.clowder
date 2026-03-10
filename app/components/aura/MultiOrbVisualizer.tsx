@@ -243,8 +243,8 @@ export function MultiOrbVisualizer({
   if (orbs.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground text-sm animate-pulse">
-          Assembling your expert committee...
+        <p className="text-muted-foreground text-xs">
+          Your experts will appear here
         </p>
       </div>
     );
