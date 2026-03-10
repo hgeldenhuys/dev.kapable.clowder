@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { ClowderMessage, ClowderExpert } from "~/lib/api.server";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -20,10 +20,52 @@ interface SpotlightChatProps {
 }
 
 /**
- * Spotlight chat panel — shows messages in a scrollable list.
+ * Compute grouping info for messages.
+ * Consecutive messages from the same expert are grouped:
+ * - isFirstInGroup: show avatar + name
+ * - isLastInGroup: full bottom margin
+ * - isMiddle: reduced gap, no avatar
+ */
+interface GroupInfo {
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
+}
+
+function computeGrouping(messages: ClowderMessage[]): GroupInfo[] {
+  const result: GroupInfo[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const prev = i > 0 ? messages[i - 1] : null;
+    const next = i < messages.length - 1 ? messages[i + 1] : null;
+
+    const sameAsPrev =
+      prev !== null &&
+      msg.role === prev.role &&
+      msg.role !== "user" &&
+      msg.expert_id === prev.expert_id &&
+      msg.expert_id != null;
+
+    const sameAsNext =
+      next !== null &&
+      msg.role === next.role &&
+      msg.role !== "user" &&
+      msg.expert_id === next.expert_id &&
+      msg.expert_id != null;
+
+    result.push({
+      isFirstInGroup: !sameAsPrev,
+      isLastInGroup: !sameAsNext,
+    });
+  }
+  return result;
+}
+
+/**
+ * Spotlight chat panel -- shows messages in a scrollable list.
  *
  * Displays who is "on stage" (the active expert) at the top.
  * Messages scroll to bottom automatically when new messages arrive.
+ * A floating "scroll to bottom" button appears when user scrolls up.
  */
 export function SpotlightChat({
   messages,
@@ -39,16 +81,44 @@ export function SpotlightChat({
 }: SpotlightChatProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const isBuilding = phase === "building" || phase === "delivered";
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const isNearBottomRef = useRef(true);
 
-  // Auto-scroll to bottom when new messages arrive or typing indicator shows
-  useEffect(() => {
-    // Use rAF to ensure DOM has updated before scrolling
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     requestAnimationFrame(() => {
       if (listRef.current) {
-        listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+        listRef.current.scrollTo({
+          top: listRef.current.scrollHeight,
+          behavior,
+        });
       }
     });
-  }, [messages.length, isWaitingForExpert]);
+  }, []);
+
+  // Track scroll position to show/hide scroll-to-bottom button
+  const handleScroll = useCallback(() => {
+    if (!listRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    const nearBottom = distanceFromBottom < 80;
+    isNearBottomRef.current = nearBottom;
+    setShowScrollBtn(!nearBottom);
+  }, []);
+
+  // Auto-scroll to bottom when new messages arrive (only if already near bottom)
+  useEffect(() => {
+    if (isNearBottomRef.current) {
+      scrollToBottom("smooth");
+    }
+  }, [messages.length, isWaitingForExpert, scrollToBottom]);
+
+  // On initial mount, scroll to bottom instantly
+  useEffect(() => {
+    scrollToBottom("instant");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const grouping = computeGrouping(messages);
 
   return (
     <div className="flex flex-col h-full">
@@ -100,8 +170,25 @@ export function SpotlightChat({
       {/* Message list */}
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+        className="flex-1 overflow-y-auto px-4 py-4"
+        onScroll={handleScroll}
+        style={{ scrollBehavior: "smooth" }}
       >
+        {/* Scroll-to-bottom floating button */}
+        {showScrollBtn && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom("smooth")}
+            className="scroll-to-bottom-btn fixed z-30 right-6 bottom-24 w-9 h-9 rounded-full bg-card border border-border shadow-[var(--shadow-md)] flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+            aria-label="Scroll to bottom"
+            title="Scroll to latest messages"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
+        )}
+
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full animate-fade-in">
             <div className="text-center text-muted-foreground max-w-xs space-y-4">
@@ -117,13 +204,22 @@ export function SpotlightChat({
         )}
         {messages.map((msg, idx) => {
           const isRecent = idx >= messages.length - 3;
+          const group = grouping[idx];
           return (
             <div
               key={msg.id}
               className={isRecent ? "animate-fade-in-up" : ""}
-              style={isRecent ? { animationDelay: `${(idx - (messages.length - 3)) * 0.05}s` } : undefined}
+              style={{
+                ...(isRecent ? { animationDelay: `${(idx - (messages.length - 3)) * 0.05}s` } : {}),
+                marginBottom: group.isLastInGroup ? "12px" : "3px",
+              }}
             >
-              <MessageBubble message={msg} experts={experts} />
+              <MessageBubble
+                message={msg}
+                experts={experts}
+                isFirstInGroup={group.isFirstInGroup}
+                isLastInGroup={group.isLastInGroup}
+              />
             </div>
           );
         })}
@@ -154,11 +250,11 @@ export function SpotlightChat({
 }
 
 const INTERVIEW_STEPS = [
-  { label: "Idea", icon: "💡", question: "What's your app idea?" },
-  { label: "Users", icon: "👥", question: "Who are your users?" },
-  { label: "Actions", icon: "⚡", question: "What can users do?" },
-  { label: "Success", icon: "🎯", question: "What does success look like?" },
-  { label: "Scope", icon: "📐", question: "What's in/out of scope?" },
+  { label: "Idea", icon: "idea", question: "What's your app idea?" },
+  { label: "Users", icon: "users", question: "Who are your users?" },
+  { label: "Actions", icon: "actions", question: "What can users do?" },
+  { label: "Success", icon: "success", question: "What does success look like?" },
+  { label: "Scope", icon: "scope", question: "What's in/out of scope?" },
 ];
 
 function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
@@ -223,26 +319,6 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
   );
 }
 
-const THINKING_MESSAGES: Record<string, string[]> = {
-  interviewing: [
-    "Preparing your next question…",
-    "Reviewing your responses…",
-    "Refining the conversation…",
-  ],
-  ideating: [
-    "Analyzing your requirements…",
-    "Reviewing technical feasibility…",
-    "Evaluating design patterns…",
-    "Considering edge cases…",
-    "Mapping user workflows…",
-  ],
-  planning: [
-    "Drafting the build plan…",
-    "Selecting optimal architecture…",
-    "Planning database schema…",
-  ],
-};
-
 function ThinkingIndicator({
   phase,
   activeExpert,
@@ -252,36 +328,21 @@ function ThinkingIndicator({
   activeExpert?: ClowderExpert;
   experts: ClowderExpert[];
 }) {
-  const [msgIndex, setMsgIndex] = useState(0);
-  const pool = THINKING_MESSAGES[phase] ?? THINKING_MESSAGES.ideating;
-
-  useEffect(() => {
-    setMsgIndex(0);
-    const interval = setInterval(() => {
-      setMsgIndex((i) => (i + 1) % pool.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [pool.length]);
-
-  const prefix = activeExpert
-    ? `${activeExpert.name}: `
+  const thinkingName = activeExpert
+    ? activeExpert.name
     : experts.length > 0
-      ? ""
-      : "";
-
-  const displayMsg = experts.length === 0
-    ? "Assembling your expert team…"
-    : `${prefix}${pool[msgIndex]}`;
+      ? "Experts"
+      : "Clowder";
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 mx-3 rounded-xl glass-card animate-fade-in">
       <div className="flex gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+        <span className="thinking-dot" />
+        <span className="thinking-dot" />
+        <span className="thinking-dot" />
       </div>
-      <span key={displayMsg} className="text-xs text-muted-foreground/80 animate-fade-in">
-        {displayMsg}
+      <span className="text-xs text-muted-foreground" style={{ opacity: 0.6 }}>
+        {thinkingName} is thinking...
       </span>
     </div>
   );

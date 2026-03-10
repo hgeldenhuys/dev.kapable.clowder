@@ -76,6 +76,23 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(`/session/${session.id}`);
 }
 
+function relativeTime(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay === 1) return "yesterday";
+  if (diffDay < 7) return `${diffDay}d ago`;
+  const diffWeek = Math.floor(diffDay / 7);
+  if (diffWeek < 5) return `${diffWeek}w ago`;
+  return new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 const phaseColors: Record<string, string> = {
   assembling: "text-[#E8A838]",
   ideating: "text-[#5B8FB9]",
@@ -499,111 +516,150 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Social proof metrics */}
         {sessions.length > 0 && (
-          <div className="flex items-center justify-center gap-6 py-4 px-6 rounded-2xl bg-card/30 border border-border/10 mb-8 mt-8">
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground">{sessions.length}</p>
-              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Apps Built</p>
+          <div className="space-y-3 mt-8 mb-8">
+            <div className="flex items-center justify-center gap-8 py-5 px-8 rounded-2xl bg-card/50 border border-border/15 shadow-[var(--shadow-sm)]">
+              <div className="text-center flex flex-col items-center gap-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <p className="text-xl font-bold text-foreground">{sessions.length}</p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Apps Built</p>
+              </div>
+              <div className="w-px h-12 bg-border/20" />
+              <div className="text-center flex flex-col items-center gap-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <p className="text-xl font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Deployed</p>
+              </div>
+              <div className="w-px h-12 bg-border/20" />
+              <div className="text-center flex flex-col items-center gap-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <p className="text-xl font-bold text-primary">~5 min</p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-medium">Avg Build</p>
+              </div>
             </div>
-            <div className="w-px h-8 bg-border/20" />
-            <div className="text-center">
-              <p className="text-lg font-bold text-accent">{sessions.filter(s => s.phase === 'delivered').length}</p>
-              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Deployed</p>
-            </div>
-            <div className="w-px h-8 bg-border/20" />
-            <div className="text-center">
-              <p className="text-lg font-bold text-primary">~5 min</p>
-              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Avg Build</p>
-            </div>
+            <p className="text-[11px] text-muted-foreground/35 text-center font-medium">Join the builders creating apps with AI</p>
           </div>
         )}
 
         {/* Recent Sessions */}
-        {sessions.length > 0 && (
-          <div className="mt-8 text-left space-y-5">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
-                Your Sessions
-              </h2>
-              <div className="flex-1 h-px bg-border/20" />
-              <span className="text-[10px] text-muted-foreground/30">{sessions.length} total</span>
+        <div className="mt-8 text-left space-y-5">
+          {sessions.length > 0 ? (
+            <>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                  Your Apps
+                </h2>
+                <div className="flex-1 h-px bg-border/20" />
+                <span className="text-[10px] text-muted-foreground/30">{sessions.length} total</span>
+              </div>
+              <div className="space-y-2.5 stagger-children">
+                {sessions.slice(0, 6).map((s) => (
+                  <Link
+                    key={s.id}
+                    to={`/session/${s.id}`}
+                    className="session-card block p-4 rounded-2xl border border-border/20 bg-white hover:bg-white hover:border-border/40 shadow-[var(--shadow-sm)] transition-all duration-300 group border-l-2"
+                    style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 truncate">
+                        {s.name}
+                      </span>
+                      <div className="flex items-center gap-2 flex-none">
+                        {s.phase === "delivered" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-primary/8 text-primary/70 border border-primary/15">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            AI Built
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap px-2.5 py-1 rounded-full border ${
+                          s.phase === "delivered"
+                            ? "bg-accent/10 text-accent border-accent/20"
+                            : s.phase === "building"
+                              ? "bg-accent/10 text-accent border-accent/20 animate-pulse"
+                              : s.phase === "planning"
+                                ? "bg-[#9B6B8E]/10 text-[#9B6B8E] border-[#9B6B8E]/20"
+                                : s.phase === "ideating"
+                                  ? "bg-[#5B8FB9]/10 text-[#5B8FB9] border-[#5B8FB9]/20"
+                                  : "bg-[#E8A838]/10 text-[#E8A838] border-[#E8A838]/20"
+                        }`}>
+                          {phaseLabels[s.phase] ?? s.phase}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-[11px] text-muted-foreground/40" suppressHydrationWarning>
+                        {relativeTime(s.created_at)}
+                      </p>
+                      {s.app_url && (
+                        <a
+                          href={s.app_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-accent/60 hover:text-accent font-medium transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Open app &#8599;
+                        </a>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 opacity-40">
+              {/* Cat silhouette SVG */}
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="mb-4">
+                <path d="M16 52c0-4 2-8 6-10 2-1 3-3 3-5V22c0-2 1-4 3-4l4-8 2 6h12l2-6 4 8c2 0 3 2 3 4v15c0 2 1 4 3 5 4 2 6 6 6 10" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="26" cy="28" r="2" fill="var(--muted-foreground)"/>
+                <circle cx="38" cy="28" r="2" fill="var(--muted-foreground)"/>
+                <path d="M30 33c1 1 3 1 4 0" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M20 30l-8-2M20 33l-8 1M44 30l8-2M44 33l8 1" stroke="var(--muted-foreground)" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+              </svg>
+              <p className="text-sm text-muted-foreground font-medium">No apps yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Describe your first idea above</p>
             </div>
-            <div className="space-y-2.5 stagger-children">
-              {sessions.slice(0, 6).map((s) => (
-                <Link
-                  key={s.id}
-                  to={`/session/${s.id}`}
-                  className="block p-4 rounded-2xl border border-border/20 bg-white hover:bg-white hover:border-border/40 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 group border-l-2"
-                  style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "#9B9B9B" }}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-1">
-                      {s.name.length > 50 ? s.name.slice(0, 50) + "\u2026" : s.name}
-                    </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-none px-2 py-0.5 rounded-full border ${
-                      s.phase === "delivered"
-                        ? "bg-accent/10 text-accent border-accent/20"
-                        : s.phase === "building"
-                          ? "bg-accent/10 text-accent border-accent/20 animate-pulse"
-                          : s.phase === "planning"
-                            ? "bg-[#9B6B8E]/10 text-[#9B6B8E] border-[#9B6B8E]/20"
-                            : s.phase === "ideating"
-                              ? "bg-[#5B8FB9]/10 text-[#5B8FB9] border-[#5B8FB9]/20"
-                              : "bg-[#E8A838]/10 text-[#E8A838] border-[#E8A838]/20"
-                    }`}>
-                      {phaseLabels[s.phase] ?? s.phase}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-[11px] text-muted-foreground/40" suppressHydrationWarning>
-                      {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                    {s.phase === "delivered" && (
-                      <span className="text-[10px] text-accent/50 font-medium">Built by AI</span>
-                    )}
-                    {s.app_url && (
-                      <a
-                        href={s.app_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-accent/60 hover:text-accent font-medium transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Open app ↗
-                      </a>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/5 py-12 px-6 sm:px-8 mt-8">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-30" />
-            <span className="text-[11px] text-muted-foreground/30">
-              Clowder by{" "}
-              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/60 transition-colors underline-offset-2 hover:underline">
-                Kapable
-              </a>{" "}
-              · &copy; 2026
-            </span>
+      <footer className="border-t border-border/10 py-10 px-6 sm:px-8 mt-auto bg-secondary/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-30" />
+              <span className="text-[11px] text-muted-foreground/40">
+                Clowder by{" "}
+                <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/60 transition-colors underline-offset-2 hover:underline">
+                  Kapable
+                </a>{" "}
+                · &copy; 2026
+              </span>
+            </div>
+            <div className="flex items-center gap-6 text-[11px] text-muted-foreground/40">
+              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">About Kapable</a>
+              <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Privacy</a>
+              <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Terms</a>
+            </div>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="text-[11px] text-primary/40 hover:text-primary/60 transition-colors font-medium"
+            >
+              Build something &#8594;
+            </a>
           </div>
-          <a
-            href="#"
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="text-[11px] text-primary/40 hover:text-primary/60 transition-colors font-medium"
-          >
-            Build something →
-          </a>
-          <div className="flex items-center gap-6 text-[11px] text-muted-foreground/40">
-            <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Privacy</a>
-            <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Terms</a>
+          {/* Paw print brand element */}
+          <div className="flex justify-center mt-6">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--muted-foreground)" className="opacity-10">
+              <ellipse cx="8" cy="7" rx="2.5" ry="3" />
+              <ellipse cx="16" cy="7" rx="2.5" ry="3" />
+              <ellipse cx="5" cy="14" rx="2" ry="2.5" />
+              <ellipse cx="19" cy="14" rx="2" ry="2.5" />
+              <path d="M12 20c-3 0-5.5-2.5-5.5-5 0-1.5 1-3 2.5-3.5 1-.4 2-.6 3-.6s2 .2 3 .6c1.5.5 2.5 2 2.5 3.5 0 2.5-2.5 5-5.5 5z" />
+            </svg>
           </div>
         </div>
       </footer>

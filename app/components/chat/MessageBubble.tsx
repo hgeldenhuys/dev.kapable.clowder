@@ -54,6 +54,10 @@ function renderSimpleMarkdown(text: string): string {
 interface MessageBubbleProps {
   message: ClowderMessage;
   experts: ClowderExpert[];
+  /** Whether this is the first message in a consecutive group from the same expert */
+  isFirstInGroup?: boolean;
+  /** Whether this is the last message in a consecutive group from the same expert */
+  isLastInGroup?: boolean;
 }
 
 function useClientTime(isoString: string): string {
@@ -80,18 +84,34 @@ function useClientTime(isoString: string): string {
   return time;
 }
 
-export function MessageBubble({ message, experts }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  experts,
+  isFirstInGroup = true,
+  isLastInGroup = true,
+}: MessageBubbleProps) {
   const isUser = message.role === "user";
   const timeStr = useClientTime(message.created_at);
   const expert = message.expert_id
     ? experts.find((e) => e.id === message.expert_id)
     : null;
   const html = useMemo(() => renderSimpleMarkdown(message.content), [message.content]);
+  const borderColor = getDomainBorderColor(expert?.domain ?? "system");
+
+  // For grouped non-user messages: only show avatar on first message
+  const showAvatar = !isUser && isFirstInGroup;
+  // For grouped non-user messages: only show header (name, domain) on first message
+  const showHeader = !isUser && isFirstInGroup;
+  // Only show timestamp on last message in group
+  const showTime = isLastInGroup;
+
+  // Avatar placeholder width for alignment when avatar is hidden
+  const avatarPlaceholder = !isUser && !isFirstInGroup;
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
-      {/* Expert avatar */}
-      {!isUser && (
+      {/* Expert avatar or spacer for alignment */}
+      {showAvatar && (
         <ExpertAvatar
           domain={expert?.domain ?? "system"}
           name={expert?.name ?? "System"}
@@ -99,20 +119,27 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
           className="mt-1"
         />
       )}
+      {avatarPlaceholder && (
+        <div className="w-8 flex-none" />
+      )}
 
       <div
-        className={`max-w-[90%] md:max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
+        className={`max-w-[90%] md:max-w-[75%] px-4 py-3 space-y-1 ${
           isUser
-            ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-md shadow-[var(--shadow-sm)]"
-            : "bg-card text-foreground rounded-tl-md shadow-[var(--shadow-sm)] border border-border border-l-2"
+            ? `bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[var(--shadow-sm)] ${
+                isFirstInGroup ? "rounded-2xl rounded-tr-md" : isLastInGroup ? "rounded-2xl rounded-br-md" : "rounded-xl"
+              }`
+            : `bg-card text-foreground shadow-[var(--shadow-sm)] border border-border border-l-2 ${
+                isFirstInGroup ? "rounded-2xl rounded-tl-md" : isLastInGroup ? "rounded-2xl rounded-bl-md" : "rounded-xl"
+              }`
         }`}
         style={
           !isUser
-            ? { borderLeftColor: getDomainBorderColor(expert?.domain ?? "system") }
+            ? { borderLeftColor: borderColor }
             : undefined
         }
       >
-        {!isUser && (
+        {showHeader && (
           <div className="flex items-center gap-2 mb-1">
             {expert && (
               <span className="text-xs opacity-60" title={expert.domain.replace(/_/g, " ")}>
@@ -138,7 +165,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
           className="text-sm leading-relaxed whitespace-pre-wrap"
           dangerouslySetInnerHTML={{ __html: html }}
         />
-        {timeStr && (
+        {showTime && timeStr && (
           <p className="text-[10px] opacity-40 text-right mt-1">
             {timeStr}
           </p>

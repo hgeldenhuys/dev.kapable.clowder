@@ -11,6 +11,15 @@ import { KeyboardShortcuts } from "~/components/shortcuts/KeyboardShortcuts";
 import { useClowderSession } from "~/hooks/useClowderSession";
 import type { OrbData } from "~/components/orbs/types";
 
+const PHASE_STYLES: Record<string, { label: string; color: string; bg: string }> = {
+  interviewing: { label: "Understanding", color: "#E8A838", bg: "rgba(232,168,56,0.1)" },
+  assembling: { label: "Assembling", color: "#E8A838", bg: "rgba(232,168,56,0.1)" },
+  ideating: { label: "Ideating", color: "#5B8FB9", bg: "rgba(91,143,185,0.1)" },
+  planning: { label: "Planning", color: "#9B6B8E", bg: "rgba(155,107,142,0.1)" },
+  building: { label: "Building", color: "#81B29A", bg: "rgba(129,178,154,0.1)" },
+  delivered: { label: "Delivered", color: "#81B29A", bg: "rgba(129,178,154,0.1)" },
+};
+
 export function meta({ data }: Route.MetaArgs) {
   const name = data?.session?.name ?? "Session";
   const phase = data?.session?.phase ?? "";
@@ -68,11 +77,19 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
   const [showSidebar, setShowSidebar] = useState(false);
   const isDelivered = session.phase === "delivered" && session.app_url;
 
+  const [shareCopied, setShareCopied] = useState(false);
+
   const handleCopyUrl = useCallback(() => {
     if (session.app_url) {
       navigator.clipboard.writeText(session.app_url);
     }
   }, [session.app_url]);
+
+  const handleShare = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
+  }, []);
 
   const shortcutActions = useMemo(() => {
     const actions = [
@@ -109,9 +126,6 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
       >
         <div className="h-full flex flex-col">
           <div className="flex flex-nowrap items-center gap-2 md:gap-3 px-3 md:px-4 pt-2.5 pb-1 overflow-x-auto">
-            <Link to="/" className="flex-none" title="Home">
-              <img src="/logo.png" alt="Clowder" className="w-5 h-5 md:w-6 md:h-6 hover:opacity-80 transition-opacity" />
-            </Link>
             <button
               type="button"
               onClick={() => setShowSidebar((v) => !v)}
@@ -123,34 +137,77 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
-            <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate min-w-0 max-w-[50vw]">
-              {session.name}
-            </h1>
-            <div className="w-px h-3.5 bg-border/20 hidden sm:block" />
-            <span className="text-[10px] text-muted-foreground capitalize hidden sm:inline font-medium">{session.phase}</span>
-            {session.app_url && (
-              <>
-                <span className="text-xs text-muted-foreground hidden md:inline">·</span>
+            {/* Breadcrumb: Clowder > Session Name */}
+            <nav className="flex items-center gap-1.5 min-w-0 flex-1" aria-label="Breadcrumb">
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 flex-none text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <img src="/logo.png" alt="" className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-xs font-medium hidden sm:inline">Clowder</span>
+              </Link>
+              <svg className="w-3 h-3 text-muted-foreground/40 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate min-w-0">
+                {session.name}
+              </h1>
+              {/* Phase pill */}
+              {(() => {
+                const ps = PHASE_STYLES[session.phase];
+                if (!ps) return null;
+                return (
+                  <span
+                    className="flex-none text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                    style={{
+                      color: ps.color,
+                      backgroundColor: ps.bg,
+                      borderColor: `${ps.color}33`,
+                    }}
+                  >
+                    {ps.label}
+                  </span>
+                );
+              })()}
+            </nav>
+            {/* Right side actions */}
+            <div className="flex items-center gap-2 flex-none ml-auto">
+              {/* Share button */}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary border border-transparent hover:border-border"
+                title="Copy session link"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  {shareCopied ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  )}
+                </svg>
+                <span className="hidden sm:inline">{shareCopied ? "Copied" : "Share"}</span>
+              </button>
+              {session.app_url && (
                 <a
                   href={session.app_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex-none"
+                  className="text-xs text-primary hover:underline flex-none hidden md:inline"
                 >
-                  Open app ↗
+                  Open app
                 </a>
-              </>
-            )}
-            {isDelivered && (
-              <button
-                type="button"
-                onClick={() => setShowPreview((p) => !p)}
-                className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPreview ? "Hide preview" : "Show preview"}
-              </button>
-            )}
+              )}
+              {isDelivered && (
+                <button
+                  type="button"
+                  onClick={() => setShowPreview((p) => !p)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPreview ? "Hide preview" : "Show preview"}
+                </button>
+              )}
+            </div>
           </div>
           {!isDelivered && (
             <div className="flex-1 min-h-0">
