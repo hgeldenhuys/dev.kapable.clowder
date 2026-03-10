@@ -46,16 +46,20 @@ export function SpotlightChat({
     <div className="flex flex-col h-full">
       {/* Active expert header */}
       {activeExpert && (
-        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border bg-card/50">
+        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-primary text-primary-foreground"
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-base font-bold shadow-lg ring-2 ring-primary/20"
           >
             {activeExpert.name[0]}
           </div>
           <div>
             <p className="text-sm font-semibold">{activeExpert.name}</p>
-            <p className="text-xs text-muted-foreground capitalize">
-              {activeExpert.domain} · {Math.round(activeExpert.confidence * 100)}% confident
+            <p className="text-xs text-muted-foreground">
+              <span className="capitalize">{activeExpert.domain.replace(/_/g, " ")}</span>
+              <span className="mx-1.5 opacity-40">·</span>
+              <span className={activeExpert.confidence >= 0.8 ? "text-emerald-400" : activeExpert.confidence >= 0.5 ? "text-amber-400" : "text-zinc-500"}>
+                {Math.round(activeExpert.confidence * 100)}% confident
+              </span>
             </p>
           </div>
           <div className="ml-auto">
@@ -83,11 +87,13 @@ export function SpotlightChat({
       >
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-muted-foreground max-w-xs">
-              <p className="text-4xl mb-3">🐱</p>
-              <p className="text-sm font-medium">Welcome to Clowder</p>
-              <p className="text-xs mt-1">
-                Tell us about your app idea. We'll ask a few questions to understand your vision, then assemble your expert team.
+            <div className="text-center text-muted-foreground max-w-xs space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-blue-600/20 flex items-center justify-center border border-primary/10">
+                <span className="text-3xl opacity-60">◈</span>
+              </div>
+              <p className="text-sm font-medium text-foreground/80">Your expert committee awaits</p>
+              <p className="text-xs leading-relaxed">
+                Describe your app idea and your team of AI experts will guide you from concept to deployed product.
               </p>
             </div>
           </div>

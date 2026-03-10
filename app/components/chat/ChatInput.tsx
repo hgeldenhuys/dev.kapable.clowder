@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, type FormEvent } from "react";
-import { Send, Paperclip, Play } from "lucide-react";
+import { Send, Play } from "lucide-react";
 
 interface ChatInputProps {
   sessionId: string;
@@ -70,11 +70,7 @@ export function ChatInput({
         </button>
       </form>
 
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Paperclip size={12} />
-          <span>File drop coming in v2</span>
-        </div>
+      <div className="flex items-center justify-end px-1">
         {onForceStart && (
           <button
             type="button"

@@ -271,12 +271,20 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="w-full max-w-2xl text-center space-y-8">
-        <div className="space-y-3">
-          <h1 className="text-5xl font-bold tracking-tight">
-            <span className="text-primary">Clowder</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            A committee of AI experts will guide you from concept to deployed product.
+        <div className="space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-primary/20">
+              <span className="text-2xl">🐱</span>
+            </div>
+            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-purple-200 to-primary bg-clip-text text-transparent">
+              Clowder
+            </h1>
+          </div>
+          <p className="text-xl text-muted-foreground max-w-md mx-auto leading-relaxed">
+            Describe your app. Our AI expert committee builds it.
+          </p>
+          <p className="text-sm text-muted-foreground/60">
+            From idea to deployed product in minutes, not months.
           </p>
         </div>
 
@@ -385,9 +393,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
           </div>
         )}
 
-        <p className="text-sm text-muted-foreground">
-          A clowder is a group of cats — and a team of expert AI agents that will
-          build your app together.
+        <p className="text-xs text-muted-foreground/40 mt-4">
+          A clowder is a group of cats — yours is a team of AI experts that builds together.
         </p>
       </div>
     </main>

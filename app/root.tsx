@@ -32,7 +32,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Clowder — AI App Builder</title>
+        <title>Clowder — AI App Builder by Kapable</title>
+        <meta name="description" content="Describe your app idea. Our AI expert committee designs, builds, and deploys it — from concept to production in minutes." />
+        <meta property="og:title" content="Clowder — AI App Builder" />
+        <meta property="og:description" content="A committee of AI experts builds your app from a description. Powered by Kapable." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://clowder.kapable.run" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Clowder — AI App Builder" />
+        <meta name="twitter:description" content="Describe your app. AI experts build it." />
         <Meta />
         <Links />
       </head>
