@@ -535,7 +535,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
               href="https://pulse.kapable.run"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 hover:border-border/60 hover:shadow-[var(--shadow-sm)] transition-all group mx-auto max-w-sm"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card/60 border border-border/40 shadow-[var(--shadow-sm)] hover:border-border/60 hover:shadow-[var(--shadow-md)] transition-all group mx-auto max-w-sm"
             >
               <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-none">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
