@@ -515,9 +515,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         </div>
         </CardContent></Card>
 
+        {/* Section divider — community area */}
+        {sessions.length > 0 && (
+          <div className="flex items-center gap-4 mt-10 mb-2">
+            <div className="flex-1 h-px bg-border/30" />
+            <span className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-medium">Community</span>
+            <div className="flex-1 h-px bg-border/30" />
+          </div>
+        )}
+
         {/* Social proof — always visible */}
         {sessions.length > 0 && (
-          <div className="space-y-4 mt-8 mb-4">
+          <div className="space-y-4 mt-4 mb-4">
             {/* Stats row — only show when volume is impressive */}
             {sessions.length >= 50 && (
               <div className="flex items-center justify-center gap-6 sm:gap-8">
@@ -556,7 +565,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
         )}
 
         {/* Recent Sessions */}
-        <div className="mt-10 text-left space-y-5">
+        <div className="mt-8 text-left space-y-5">
           {sessions.length > 0 ? (
             <>
               <div className="flex items-center gap-3">
