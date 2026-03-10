@@ -680,7 +680,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 <circle cx="12" cy="12" r="4"/>
               </svg>
               <p className="text-sm text-stone-500 font-medium">No apps yet</p>
-              <p className="text-xs text-stone-400 mt-1">Describe your first idea above to get started</p>
+              <p className="text-xs text-stone-500 mt-1">Describe your first idea above to get started</p>
             </div>
           )}
         </div>

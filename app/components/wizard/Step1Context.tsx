@@ -112,9 +112,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-stone-400 shadow-sm focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:border-orange-400 focus:bg-white focus:shadow-md transition-all text-base"
+            className="h-auto px-4 py-3 rounded-xl bg-white text-foreground placeholder:text-stone-500 shadow-sm focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:border-orange-400 focus:bg-white focus:shadow-md transition-all text-base"
           />
-          <span className="text-[10px] text-stone-400 mt-1 block text-right">
+          <span className="text-[11px] text-stone-500 mt-1 block text-right">
             {data.appName.length}/60
           </span>
         </div>
@@ -134,15 +134,15 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-stone-400 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:border-orange-400 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
+              className="min-h-[120px] px-4 py-3 pb-8 rounded-xl bg-white text-foreground placeholder:text-stone-500 shadow-sm resize-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:border-orange-400 focus:bg-white focus:shadow-md transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
                 wordCount >= 20
                   ? "text-accent"
                   : wordCount >= 3
-                    ? "text-stone-400"
-                    : "text-stone-400"
+                    ? "text-stone-500"
+                    : "text-stone-500"
               }`}
             >
               {wordCount < 3

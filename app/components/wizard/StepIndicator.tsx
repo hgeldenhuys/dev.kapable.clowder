@@ -65,7 +65,7 @@ export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
               >
                 {label}
               </span>
-              <span className="hidden sm:block text-[10px] text-stone-400 leading-tight">{STEP_SUBTITLES[i]}</span>
+              <span className="hidden sm:block text-[10px] text-stone-500 leading-tight">{STEP_SUBTITLES[i]}</span>
             </div>
           </div>
         );
