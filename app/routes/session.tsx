@@ -1,10 +1,27 @@
 import { Link } from "react-router";
+import { useState, useCallback } from "react";
 import type { Route } from "./+types/session";
 import { getClowderSession, listClowderMessages } from "~/lib/api.server";
 import { MultiOrbVisualizer } from "~/components/aura/MultiOrbVisualizer";
 import { SpotlightChat } from "~/components/chat/SpotlightChat";
+import { DeployedPreview } from "~/components/deploy/DeployedPreview";
 import { useClowderSession } from "~/hooks/useClowderSession";
 import type { OrbData } from "~/components/orbs/types";
+
+export function meta({ data }: Route.MetaArgs) {
+  const name = data?.session?.name ?? "Session";
+  const phase = data?.session?.phase ?? "";
+  const title = `${name} — Clowder`;
+  const description = phase === "delivered"
+    ? `${name} — built and deployed by Clowder AI experts`
+    : `${name} — being built by Clowder AI experts`;
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+  ];
+}
 
 export async function loader({ params }: Route.LoaderArgs) {
   const { sessionId } = params;
@@ -43,16 +60,26 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
     isActive: expert.id === activeExpertId,
   }));
 
+  const [showPreview, setShowPreview] = useState(true);
+  const isDelivered = session.phase === "delivered" && session.app_url;
+
+  const handleCopyUrl = useCallback(() => {
+    if (session.app_url) {
+      navigator.clipboard.writeText(session.app_url);
+    }
+  }, [session.app_url]);
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Top: Orb scene */}
       <div
         className="flex-none relative overflow-hidden"
         style={{
-          height: "220px",
+          height: isDelivered ? "60px" : "220px",
           background: "oklch(0.06 0.01 270)",
           borderBottom: "1px solid oklch(0.22 0.01 270)",
           zIndex: 0,
+          transition: "height 0.4s ease-in-out",
         }}
       >
         <div className="h-full flex flex-col">
@@ -76,34 +103,59 @@ export default function SessionPage({ loaderData }: Route.ComponentProps) {
                   rel="noopener noreferrer"
                   className="text-xs text-primary hover:underline"
                 >
-                  Visit your app →
+                  Open app ↗
                 </a>
               </>
             )}
+            {isDelivered && (
+              <button
+                type="button"
+                onClick={() => setShowPreview((p) => !p)}
+                className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPreview ? "Hide preview" : "Show preview"}
+              </button>
+            )}
           </div>
-          <div className="flex-1 min-h-0">
-            <MultiOrbVisualizer
-              orbs={orbs}
-              activeOrbId={activeExpertId}
-              onOrbClick={setActiveExpert}
-              isWaitingForExpert={isWaitingForExpert}
-            />
-          </div>
+          {!isDelivered && (
+            <div className="flex-1 min-h-0">
+              <MultiOrbVisualizer
+                orbs={orbs}
+                activeOrbId={activeExpertId}
+                onOrbClick={setActiveExpert}
+                isWaitingForExpert={isWaitingForExpert}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom: Chat — transform forces GPU layer so WebGL canvas doesn't bleed through */}
-      <div className="flex-1 overflow-hidden relative" style={{ zIndex: 1, transform: "translateZ(0)" }}>
-        <SpotlightChat
-          messages={messages}
-          experts={experts}
-          sessionId={session.id}
-          activeExpert={activeExpert}
-          phase={session.phase}
-          isWaitingForExpert={isWaitingForExpert}
-          onSend={sendMessage}
-          onForceStart={session.phase === "ideating" ? forceStart : undefined}
-        />
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden relative flex" style={{ zIndex: 1, transform: "translateZ(0)" }}>
+        {/* Chat panel */}
+        <div className={isDelivered && showPreview ? "w-[400px] flex-none border-r border-border" : "flex-1"}>
+          <SpotlightChat
+            messages={messages}
+            experts={experts}
+            sessionId={session.id}
+            activeExpert={activeExpert}
+            phase={session.phase}
+            isWaitingForExpert={isWaitingForExpert}
+            onSend={sendMessage}
+            onForceStart={session.phase === "ideating" ? forceStart : undefined}
+          />
+        </div>
+
+        {/* Deployed app preview */}
+        {isDelivered && showPreview && session.app_url && (
+          <div className="flex-1">
+            <DeployedPreview
+              appUrl={session.app_url}
+              appName={session.name}
+              onCopyUrl={handleCopyUrl}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
