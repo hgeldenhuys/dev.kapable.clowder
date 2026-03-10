@@ -1,5 +1,5 @@
 import type { ClowderMessage } from "~/lib/api.server";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 /**
  * Build stage definitions — matched against system message content/metadata.
@@ -94,9 +94,18 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
       buildEndMsg = systemMessages[systemMessages.length - 1];
     }
   }
+  // Use a client-only timer for live elapsed time (avoids hydration mismatch from Date.now())
+  const [now, setNow] = useState(() => 0);
+  useEffect(() => {
+    setNow(Date.now());
+    if (!isBuilding) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isBuilding]);
+
   const startTime = buildStartMsg ? new Date(buildStartMsg.created_at).getTime() : 0;
-  const endTime = buildEndMsg ? new Date(buildEndMsg.created_at).getTime() : Date.now();
-  const elapsedMs = startTime ? endTime - startTime : 0;
+  const endTime = buildEndMsg ? new Date(buildEndMsg.created_at).getTime() : now;
+  const elapsedMs = startTime && endTime ? endTime - startTime : 0;
   const elapsedSec = Math.round(elapsedMs / 1000);
   const elapsedStr = elapsedSec >= 60
     ? `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`
@@ -256,7 +265,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
           <div className="max-h-40 overflow-y-auto p-2 space-y-1 font-mono">
             {logEntries.map((entry) => (
               <div key={entry.id} className="flex gap-2 text-[10px] leading-relaxed">
-                <span className="text-muted-foreground/40 flex-none tabular-nums">
+                <span className="text-muted-foreground/40 flex-none tabular-nums" suppressHydrationWarning>
                   {new Date(entry.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
                 <span className={

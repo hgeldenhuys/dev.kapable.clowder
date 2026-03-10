@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StepIndicator } from "./StepIndicator";
 
 interface StepWizardProps {
@@ -25,6 +25,12 @@ export function StepWizard({
   ];
 
   const defaultNextLabel = step === 1 ? "Continue →" : step === 2 ? "Start Building →" : "";
+
+  // Detect Mac vs other platform (client-only to avoid hydration mismatch)
+  const [isMac, setIsMac] = useState(false);
+  useEffect(() => {
+    setIsMac(/Mac/.test(navigator.userAgent));
+  }, []);
 
   // Cmd/Ctrl+Enter keyboard shortcut to proceed
   useEffect(() => {
@@ -74,7 +80,7 @@ export function StepWizard({
               {nextLabel || defaultNextLabel}
             </button>
             <span className="text-xs text-muted-foreground">
-              {typeof navigator !== "undefined" && /Mac/.test(navigator.userAgent) ? "⌘" : "Ctrl"}+Enter
+              {isMac ? "⌘" : "Ctrl"}+Enter
             </span>
           </div>
         </div>

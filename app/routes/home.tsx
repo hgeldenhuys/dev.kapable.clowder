@@ -438,8 +438,8 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors"
                 >
                   <Link to={`/session/${s.id}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground truncate">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-foreground truncate min-w-0">
                         {s.name}
                       </span>
                       <span className={`text-xs font-medium uppercase tracking-wide ${phaseColors[s.phase] ?? "text-muted-foreground"}`}>
@@ -448,7 +448,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     </div>
                   </Link>
                   <div className="flex items-center justify-between mt-1">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                       {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                     {s.app_url && (
