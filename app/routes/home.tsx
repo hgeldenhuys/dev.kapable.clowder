@@ -14,6 +14,7 @@ import { Step2Assembly } from "~/components/wizard/Step2Assembly";
 import type { Specialist } from "~/components/wizard/Step2Assembly";
 import { useTypeheadStream } from "~/hooks/useTypeheadStream";
 import { Card, CardContent } from "~/components/ui/card";
+import { NavBar } from "~/components/nav/NavBar";
 // OnboardingTooltip removed — page is self-explanatory, tooltip was redundant
 
 export async function loader() {
@@ -383,8 +384,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
   return (
     <main className="min-h-screen flex flex-col overflow-x-hidden">
+      <NavBar />
       {/* Hero + Wizard — combined for zero-scroll-to-input */}
-      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-10 sm:pt-14 pb-8 overflow-hidden">
+      <section ref={wizardRef} className="relative flex flex-col items-center px-6 sm:px-8 pt-6 sm:pt-10 pb-8 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient absolute inset-0 -z-10" />
 
@@ -517,7 +519,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Section divider — community area */}
         {sessions.length > 0 && (
-          <div className="flex items-center gap-4 mt-10 mb-2">
+          <div id="community" className="flex items-center gap-4 mt-10 mb-2 scroll-mt-16">
             <div className="flex-1 h-px bg-border/30" />
             <span className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">Community</span>
             <div className="flex-1 h-px bg-border/30" />
