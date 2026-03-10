@@ -3,43 +3,54 @@ interface StepIndicatorProps {
   labels: [string, string, string];
 }
 
+const STEP_ICONS = ["✦", "⚡", "🚀"];
+
 export function StepIndicator({ currentStep, labels }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-center gap-2 mb-8">
+    <div className="flex items-center justify-center gap-0 mb-10">
       {labels.map((label, i) => {
         const step = (i + 1) as 1 | 2 | 3;
         const isCompleted = step < currentStep;
         const isActive = step === currentStep;
-        const isUpcoming = step > currentStep;
 
         return (
-          <div key={step} className="flex items-center gap-2">
+          <div key={step} className="flex items-center">
             {i > 0 && (
-              <div
-                className={`w-12 h-0.5 transition-colors duration-300 ${
-                  isCompleted ? "bg-green-500" : "bg-zinc-700"
-                }`}
-              />
+              <div className="w-16 h-px mx-1">
+                <div
+                  className={`h-full transition-all duration-500 ${
+                    isCompleted
+                      ? "bg-gradient-to-r from-amber-400/60 to-primary/60"
+                      : "bg-zinc-700/40"
+                  }`}
+                />
+              </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                   isCompleted
-                    ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                    ? "bg-amber-400/15 text-amber-400 border border-amber-400/30 shadow-md shadow-amber-400/10"
                     : isActive
-                      ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/40"
-                      : "bg-zinc-800 text-zinc-500 border border-zinc-700"
+                      ? "bg-primary/15 text-primary border border-primary/40 shadow-lg shadow-primary/15 animate-pulse-glow"
+                      : "bg-zinc-800/60 text-zinc-500 border border-zinc-700/50"
                 }`}
               >
-                {isCompleted ? "✓" : step}
+                {isCompleted ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <span className="text-xs">{STEP_ICONS[i]}</span>
+                )}
               </div>
               <span
-                className={`text-sm font-medium transition-colors duration-300 ${
+                className={`text-[11px] font-semibold tracking-wide transition-colors duration-300 ${
                   isCompleted
-                    ? "text-green-400"
+                    ? "text-amber-400/80"
                     : isActive
-                      ? "text-indigo-400"
-                      : "text-zinc-500"
+                      ? "text-primary"
+                      : "text-zinc-500/60"
                 }`}
               >
                 {label}

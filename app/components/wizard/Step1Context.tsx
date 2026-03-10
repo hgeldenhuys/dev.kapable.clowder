@@ -11,21 +11,29 @@ const STARTER_TEMPLATES = [
   {
     name: "Feedback Board",
     icon: "💬",
+    accent: "from-violet-500/10 to-blue-500/5",
+    borderAccent: "hover:border-violet-400/30",
     description: "A real-time feedback board where users can post ideas, vote on them, and track which ones get implemented. Features: user submissions with categories, upvote/downvote system, status tracking (new, planned, in progress, done), admin dashboard for managing submissions.",
   },
   {
     name: "Team Task Board",
     icon: "✅",
+    accent: "from-emerald-500/10 to-teal-500/5",
+    borderAccent: "hover:border-emerald-400/30",
     description: "A collaborative task management board for small teams. Users can create tasks with titles and descriptions, assign them to team members, drag between columns (To Do, In Progress, Done), and filter by assignee. Real-time updates so everyone sees changes instantly.",
   },
   {
     name: "Event Planner",
     icon: "📅",
+    accent: "from-amber-500/10 to-orange-500/5",
+    borderAccent: "hover:border-amber-400/30",
     description: "A community event listing and RSVP platform. Organizers create events with date, time, location, and description. Attendees can browse upcoming events, RSVP, and see who else is going. Features: event categories, capacity limits, and a calendar view.",
   },
   {
     name: "Recipe Collection",
     icon: "🍳",
+    accent: "from-rose-500/10 to-pink-500/5",
+    borderAccent: "hover:border-rose-400/30",
     description: "A personal recipe sharing app where users can add recipes with ingredients, steps, and photos. Features: search by ingredient, tag recipes by cuisine or dietary preference, save favorites, and share recipes with friends via a unique link.",
   },
 ];
@@ -44,12 +52,12 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
   const isEmpty = !data.appName.trim() && !data.description.trim();
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">
+    <div className="space-y-8">
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent">
           What are you building?
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
           Give your app a name and describe what it does. The more detail, the
           better your AI team can help.
         </p>
@@ -57,32 +65,32 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
 
       {/* Starter templates — shown when fields are empty */}
       {isEmpty && (
-        <div className="space-y-3">
-          <p className="text-xs text-muted-foreground/60 text-center font-medium">or try one of these</p>
-          <div className="grid grid-cols-2 gap-2.5 stagger-children">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground/50 text-center font-medium uppercase tracking-wider">or try a template</p>
+          <div className="grid grid-cols-2 gap-3 stagger-children">
             {STARTER_TEMPLATES.map((t) => (
               <button
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className="card-glow text-left p-3.5 rounded-xl border border-border/30 bg-card/30 hover:bg-card/60 transition-all group"
+                className={`text-left p-4 rounded-2xl border border-border/20 bg-gradient-to-br ${t.accent} ${t.borderAccent} hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-base opacity-80 group-hover:opacity-100 transition-opacity">{t.icon}</span>
-                  <span className="text-xs font-bold text-foreground/80 group-hover:text-primary transition-colors">{t.name}</span>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="text-xl group-hover:scale-110 transition-transform duration-200">{t.icon}</span>
+                  <span className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{t.name}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground/50 leading-relaxed line-clamp-2">{t.description.slice(0, 80)}...</p>
+                <p className="text-[11px] text-muted-foreground/50 leading-relaxed line-clamp-2">{t.description.slice(0, 90)}...</p>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div>
           <label
             htmlFor="appName"
-            className="block text-sm font-medium text-foreground mb-1.5"
+            className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2"
           >
             App Name
           </label>
@@ -93,9 +101,9 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-3 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base"
           />
-          <span className="text-xs text-muted-foreground mt-1 block text-right">
+          <span className="text-[10px] text-muted-foreground/40 mt-1 block text-right">
             {data.appName.length}/60
           </span>
         </div>
@@ -103,7 +111,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
         <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-foreground mb-1.5"
+            className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2"
           >
             Description
           </label>
@@ -115,21 +123,21 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="w-full min-h-[160px] px-4 py-3 pb-8 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary text-base"
+              className="w-full min-h-[180px] px-4 py-3 pb-8 rounded-xl border border-border/40 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/30 focus:bg-card/60 transition-all text-base leading-relaxed"
               autoFocus
             />
             <span
-              className={`absolute bottom-2 right-3 text-xs ${
+              className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${
                 wordCount >= 200
-                  ? "text-green-400"
+                  ? "text-emerald-400"
                   : descriptionLength >= 20
-                    ? "text-muted-foreground"
-                    : "text-yellow-500"
+                    ? "text-muted-foreground/50"
+                    : "text-amber-400/80"
               }`}
             >
               {wordCount} word{wordCount !== 1 ? "s" : ""}
               {descriptionLength < 20 && " (min 20 chars)"}
-              {wordCount >= 200 && " — instant build!"}
+              {wordCount >= 200 && " ✨ instant build!"}
             </span>
           </div>
         </div>

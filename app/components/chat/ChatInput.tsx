@@ -59,7 +59,7 @@ export function ChatInput({
 
   return (
     <div className="space-y-2">
-      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+      <form onSubmit={handleSubmit} className="flex gap-2.5 items-end">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -67,13 +67,13 @@ export function ChatInput({
             placeholder="Reply to your expert committee… (Enter to send, Shift+Enter for newline)"
             onKeyDown={handleKeyDown}
             rows={2}
-            className="w-full px-4 py-3 pr-12 rounded-xl border border-border/40 bg-card/60 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 text-sm backdrop-blur-sm"
+            className="w-full px-4 py-3 pr-12 rounded-2xl border border-border/30 bg-card/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/20 focus:bg-card/60 text-sm backdrop-blur-sm transition-all"
             autoFocus
           />
         </div>
         <button
           type="submit"
-          className="flex-none p-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity self-end"
+          className="flex-none p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all self-end"
           aria-label="Send message"
         >
           <Send size={18} />
@@ -85,7 +85,7 @@ export function ChatInput({
           <button
             type="button"
             onClick={onForceStart}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors shadow-md shadow-emerald-900/30"
+            className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Play size={14} fill="currentColor" />
             <span>I'm satisfied — start building</span>

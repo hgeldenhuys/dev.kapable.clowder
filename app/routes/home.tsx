@@ -77,11 +77,27 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 const phaseColors: Record<string, string> = {
-  assembling: "text-yellow-400",
+  assembling: "text-amber-400",
   ideating: "text-blue-400",
   planning: "text-purple-400",
   building: "text-green-400",
   delivered: "text-emerald-400",
+};
+
+const phaseBorderColors: Record<string, string> = {
+  assembling: "oklch(0.78 0.16 75)",    // amber
+  ideating: "oklch(0.68 0.14 230)",     // blue
+  planning: "oklch(0.68 0.18 290)",     // purple
+  building: "oklch(0.72 0.17 155)",     // green
+  delivered: "oklch(0.72 0.17 165)",    // emerald
+};
+
+const phaseLabels: Record<string, string> = {
+  assembling: "Assembling",
+  ideating: "Ideating",
+  planning: "Planning",
+  building: "Building",
+  delivered: "Delivered",
 };
 
 interface PredictedSpecialist {
@@ -344,33 +360,35 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       <section className="flex flex-col items-center px-6 sm:px-8 py-16">
         <div className="max-w-4xl w-full space-y-8">
           <div className="text-center space-y-2">
-            <h3 className="text-xl font-bold text-foreground">Built with Clowder</h3>
-            <p className="text-sm text-muted-foreground">Real apps, described in plain English, deployed in minutes</p>
+            <h3 className="text-lg font-bold text-foreground/80">Built with Clowder</h3>
+            <p className="text-xs text-muted-foreground/50">Real apps, described in plain English, deployed in minutes</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
             {[
-              { name: "Pulse", desc: "Live feedback board with real-time voting and idea tracking", url: "https://pulse.kapable.run", icon: "💬" },
-              { name: "Event Board", desc: "Community event listing with RSVP tracking and capacity management", icon: "📅" },
-              { name: "Tool Library", desc: "Neighborhood tool sharing with lending history and availability", icon: "🔧" },
+              { name: "Pulse", desc: "Live feedback board with real-time voting and idea tracking", url: "https://pulse.kapable.run", icon: "💬", accent: "from-violet-500/8 to-blue-500/4" },
+              { name: "Event Board", desc: "Community event listing with RSVP tracking and capacity management", icon: "📅", accent: "from-amber-500/8 to-orange-500/4" },
+              { name: "Tool Library", desc: "Neighborhood tool sharing with lending history and availability", icon: "🔧", accent: "from-emerald-500/8 to-teal-500/4" },
             ].map((app) => (
-              <div key={app.name} className="card-glow rounded-2xl border border-border/40 bg-card/50 p-5 space-y-3 group">
+              <div key={app.name} className={`card-glow rounded-2xl border border-border/20 bg-gradient-to-br ${app.accent} p-5 space-y-3 group`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-lg">{app.icon}</span>
-                    <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{app.name}</h4>
+                    <span className="text-xl">{app.icon}</span>
+                    <h4 className="text-sm font-bold text-foreground/90 group-hover:text-primary transition-colors">{app.name}</h4>
                   </div>
-                  <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium uppercase tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Live
-                  </span>
+                  {app.url && (
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-400/80 font-medium uppercase tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{app.desc}</p>
+                <p className="text-xs text-muted-foreground/60 leading-relaxed">{app.desc}</p>
                 {app.url && (
                   <a
                     href={app.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary/80 hover:text-primary font-medium transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary font-medium transition-colors"
                   >
                     Visit app
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -385,8 +403,10 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       </section>
 
       {/* Wizard Section */}
-      <section ref={wizardRef} className="flex flex-col items-center px-8 py-12">
-        <div className="w-full max-w-2xl text-center space-y-8">
+      <section ref={wizardRef} className="relative flex flex-col items-center px-8 py-16">
+        {/* Warm ambient glow behind wizard */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
+        <div className="w-full max-w-2xl text-center space-y-8 relative z-10">
 
         <StepWizard
           step={currentStep}
@@ -405,25 +425,26 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
             >
               {/* Specialist preview chips */}
               {specialists.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Suggested specialists — confirmed in next step
+                <div className="space-y-3 mt-6 p-4 rounded-2xl bg-card/20 border border-border/10">
+                  <p className="text-[11px] text-muted-foreground/50 text-center font-medium">
+                    Your AI team is forming — confirmed in next step
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {specialists.map((s) => (
                       <span
                         key={s.domain}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-zinc-800/50 text-zinc-400 border-zinc-700"
-                        style={{ opacity: Math.max(0.4, s.confidence) }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-primary/5 text-primary/80 border-primary/15"
+                        style={{ opacity: Math.max(0.5, s.confidence) }}
                         title={s.reason}
                       >
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
                         {s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
                     ))}
                     {predicting && (
-                      <span className="inline-flex items-center px-2 py-0.5 text-xs text-muted-foreground animate-pulse">
-                        ...
+                      <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-muted-foreground/40 animate-pulse">
+                        <span className="w-1 h-1 rounded-full bg-primary/30" />
+                        analyzing...
                       </span>
                     )}
                   </div>
@@ -451,41 +472,47 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 
         {/* Recent Sessions */}
         {sessions.length > 0 && (
-          <div className="mt-10 text-left space-y-4">
-            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              Your Sessions
-            </h2>
-            <div className="space-y-2 stagger-children">
-              {sessions.slice(0, 5).map((s) => (
+          <div className="mt-12 text-left space-y-5">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                Your Sessions
+              </h2>
+              <div className="flex-1 h-px bg-border/20" />
+              <span className="text-[10px] text-muted-foreground/30">{sessions.length} total</span>
+            </div>
+            <div className="space-y-2.5 stagger-children">
+              {sessions.slice(0, 6).map((s) => (
                 <Link
                   key={s.id}
                   to={`/session/${s.id}`}
-                  className="block p-4 rounded-xl border border-border/30 bg-card/30 hover:bg-card/60 hover:border-primary/20 transition-all group"
+                  className="block p-4 rounded-2xl border border-border/20 bg-card/30 hover:bg-card/50 hover:border-border/40 transition-all duration-300 group border-l-2"
+                  style={{ borderLeftColor: phaseBorderColors[s.phase] ?? "oklch(0.4 0.02 285)" }}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className={`w-2 h-2 rounded-full flex-none ${
-                        s.phase === "delivered" ? "bg-emerald-400" :
-                        s.phase === "building" ? "bg-green-400 animate-pulse" :
-                        s.phase === "planning" ? "bg-purple-400" :
-                        s.phase === "ideating" ? "bg-blue-400" :
-                        "bg-yellow-400"
-                      }`} />
-                      <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground truncate min-w-0">
-                        {s.name}
-                      </span>
-                    </div>
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider flex-none ${phaseColors[s.phase] ?? "text-muted-foreground"}`}>
-                      {s.phase}
+                    <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors min-w-0 line-clamp-1">
+                      {s.name}
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider flex-none px-2 py-0.5 rounded-full border ${
+                      s.phase === "delivered"
+                        ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
+                        : s.phase === "building"
+                          ? "bg-green-400/10 text-green-400 border-green-400/20 animate-pulse"
+                          : s.phase === "planning"
+                            ? "bg-purple-400/10 text-purple-400 border-purple-400/20"
+                            : s.phase === "ideating"
+                              ? "bg-blue-400/10 text-blue-400 border-blue-400/20"
+                              : "bg-amber-400/10 text-amber-400 border-amber-400/20"
+                    }`}>
+                      {phaseLabels[s.phase] ?? s.phase}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 pl-[18px]">
-                    <p className="text-[11px] text-muted-foreground/60" suppressHydrationWarning>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-[11px] text-muted-foreground/40" suppressHydrationWarning>
                       {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                     {s.app_url && (
                       <span
-                        className="text-[11px] text-emerald-400/70 font-medium"
+                        className="text-[11px] text-emerald-400/60 hover:text-emerald-400 font-medium transition-colors"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(s.app_url, "_blank"); }}
                       >
                         Open app ↗
@@ -502,21 +529,20 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/10 py-10 px-6 sm:px-8">
+      <footer className="border-t border-border/5 py-12 px-6 sm:px-8 mt-8">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-50" />
-            <span className="text-xs text-muted-foreground/40">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Clowder" className="w-5 h-5 opacity-30" />
+            <span className="text-[11px] text-muted-foreground/30">
               Clowder by{" "}
-              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/80 transition-colors underline-offset-2 hover:underline">
+              <a href="https://kapable.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary/60 transition-colors underline-offset-2 hover:underline">
                 Kapable
               </a>
             </span>
           </div>
-          <div className="flex items-center gap-5 text-xs text-muted-foreground/30">
-            <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Privacy</a>
-            <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/60 transition-colors">Terms</a>
-            <span className="hidden sm:inline">Hosted on Kapable infrastructure</span>
+          <div className="flex items-center gap-6 text-[11px] text-muted-foreground/20">
+            <a href="https://kapable.dev/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Privacy</a>
+            <a href="https://kapable.dev/terms" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Terms</a>
           </div>
         </div>
       </footer>

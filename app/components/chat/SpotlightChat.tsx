@@ -80,8 +80,8 @@ export function SpotlightChat({
         </div>
       )}
       {!activeExpert && (
-        <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-border">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-border/30 bg-card/20">
+          <p className="text-sm text-muted-foreground/70">
             {messages.length === 0
               ? "Describe your app to begin"
               : phase === "interviewing"
