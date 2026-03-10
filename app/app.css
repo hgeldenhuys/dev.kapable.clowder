@@ -102,6 +102,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ─── Heading font — Outfit for display, Inter for body ─── */
+h1, h2, h3, h4 {
+  font-family: "Outfit", sans-serif;
+}
+
 /* ─── Page content fade-in ─── */
 main {
   animation: fade-in 0.3s ease-out;

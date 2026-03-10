@@ -56,7 +56,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
       {/* Starter templates — compact horizontal scroll, shown when empty */}
       {wordCount < 20 && (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground/50 text-center font-medium">Or start with a template</p>
+          <p className="text-xs text-muted-foreground/60 text-center font-medium">Or start with a template</p>
           <div className="relative">
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 snap-x">
             {STARTER_TEMPLATES.map((t) => (
@@ -96,7 +96,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             placeholder="My Amazing App"
             value={data.appName}
             onChange={(e) => onChange({ ...data, appName: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/50 shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base"
+            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/60 shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base"
           />
           <span className="text-[10px] text-muted-foreground/60 mt-1 block text-right">
             {data.appName.length}/60
@@ -118,7 +118,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
               onChange={(e) =>
                 onChange({ ...data, description: e.target.value })
               }
-              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/50 shadow-[var(--shadow-sm)] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base leading-relaxed"
+              className="w-full min-h-[120px] px-4 py-3 pb-8 rounded-xl border border-border bg-white text-foreground placeholder:text-muted-foreground/60 shadow-[var(--shadow-sm)] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white focus:shadow-[var(--shadow-md)] transition-all text-base leading-relaxed"
             />
             <span
               className={`absolute bottom-2.5 right-3 text-[11px] font-medium ${

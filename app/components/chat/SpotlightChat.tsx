@@ -345,7 +345,7 @@ function ThinkingIndicator({
         <span className="thinking-dot" />
         <span className="thinking-dot" />
       </div>
-      <span className="text-xs text-muted-foreground" style={{ opacity: 0.6 }}>
+      <span className="text-xs text-muted-foreground" style={{ opacity: 0.7 }}>
         {thinkingName} is thinking...
       </span>
     </div>
