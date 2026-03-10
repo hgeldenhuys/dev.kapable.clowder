@@ -460,17 +460,17 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                     {specialists.map((s, index) => (
                       <span
                         key={s.domain}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-primary/5 text-primary/80 border-primary/15 animate-in fade-in slide-in-from-bottom-1 fill-mode-backwards"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-orange-50 text-orange-700 border-orange-200 animate-in fade-in slide-in-from-bottom-1 fill-mode-backwards"
                         style={{ opacity: Math.max(0.5, s.confidence), animationDelay: `${index * 80}ms` }}
                         title={s.reason}
                       >
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-400" />
                         {s.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
                     ))}
                     {predicting && (
                       <span className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-stone-400 animate-pulse">
-                        <span className="w-1 h-1 rounded-full bg-primary/60" />
+                        <span className="w-1 h-1 rounded-full bg-orange-400" />
                         analyzing...
                       </span>
                     )}
