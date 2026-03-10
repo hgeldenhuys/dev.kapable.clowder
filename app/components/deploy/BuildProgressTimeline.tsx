@@ -121,13 +121,13 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
     <div className="space-y-1 py-2">
       {/* Header */}
       <div className="flex items-center justify-between px-1 mb-3">
-        <span className="text-xs font-medium text-[#33312E]">Build Progress</span>
+        <span className="text-xs font-medium text-foreground">Build Progress</span>
         <div className="flex items-center gap-2">
           {logEntries.length > 0 && (
             <button
               type="button"
               onClick={() => setShowLog((v) => !v)}
-              className="text-[10px] text-[#6A6763] hover:text-[#33312E] transition-colors"
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
             >
               {showLog ? "Hide log" : "Show log"}
             </button>
@@ -160,7 +160,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
               {i < BUILD_STAGES.length - 1 && (
                 <div
                   className={`absolute left-[9px] top-5 w-px h-full ${
-                    isDone ? "bg-[#81B29A]/40" : isErrorStage ? "bg-[#D94F4F]/40" : "bg-border/30"
+                    isDone ? "bg-accent/40" : isErrorStage ? "bg-destructive/40" : "bg-border/30"
                   }`}
                 />
               )}
@@ -168,14 +168,14 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
               {/* Status dot */}
               <div className="relative z-10 flex-none mt-0.5">
                 {isDone ? (
-                  <div className="w-[18px] h-[18px] rounded-full bg-[#81B29A]/20 border border-[#81B29A]/50 flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-[#81B29A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="w-[18px] h-[18px] rounded-full bg-accent/20 border border-accent/50 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 ) : isErrorStage ? (
-                  <div className="w-[18px] h-[18px] rounded-full bg-[#D94F4F]/20 border border-[#D94F4F]/50 flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-[#D94F4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <div className="w-[18px] h-[18px] rounded-full bg-destructive/20 border border-destructive/50 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
@@ -184,7 +184,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   </div>
                 ) : (
-                  <div className="w-[18px] h-[18px] rounded-full bg-[#F4F1EB] border border-[#E8E5DF]" />
+                  <div className="w-[18px] h-[18px] rounded-full bg-secondary border border-border" />
                 )}
               </div>
 
@@ -193,9 +193,9 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                 <span
                   className={`text-xs leading-[18px] ${
                     isDone
-                      ? "text-[#81B29A]/80"
+                      ? "text-accent/80"
                       : isErrorStage
-                        ? "text-[#D94F4F] font-medium"
+                        ? "text-destructive font-medium"
                         : isActive
                           ? "text-foreground font-medium"
                           : "text-muted-foreground/40"
@@ -217,7 +217,7 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
                       href={appUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#81B29A] to-[#6FA389] hover:from-[#6FA389] hover:to-[#81B29A] text-white text-xs font-semibold transition-all shadow-lg shadow-[#81B29A]/20 hover:scale-[1.02]"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-accent to-[#6FA389] hover:from-[#6FA389] hover:to-accent text-white text-xs font-semibold transition-all shadow-lg shadow-accent/20 hover:scale-[1.02]"
                     >
                       Open your app →
                     </a>
@@ -237,15 +237,15 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
 
       {/* T10: Error state with retry */}
       {buildError && (
-        <div className="mt-2 mx-1 p-3 rounded-lg bg-[#D94F4F]/10 border border-[#D94F4F]/20 space-y-2">
-          <p className="text-xs text-[#D94F4F]/90 leading-relaxed">
+        <div className="mt-2 mx-1 p-3 rounded-lg bg-destructive/10 border border-destructive/20 space-y-2">
+          <p className="text-xs text-destructive/90 leading-relaxed">
             {buildError.length > 200 ? buildError.slice(0, 200) + "…" : buildError}
           </p>
           {onRetry && (
             <button
               type="button"
               onClick={onRetry}
-              className="text-xs font-medium text-[#D94F4F] hover:text-[#D94F4F]/80 bg-[#D94F4F]/10 hover:bg-[#D94F4F]/20 px-3 py-1.5 rounded-md transition-colors"
+              className="text-xs font-medium text-destructive hover:text-destructive/80 bg-destructive/10 hover:bg-destructive/20 px-3 py-1.5 rounded-md transition-colors"
             >
               Retry build
             </button>
@@ -264,23 +264,23 @@ export function BuildProgressTimeline({ messages, phase, appUrl, onRetry }: Buil
 
       {/* T9: Collapsible build log */}
       {showLog && logEntries.length > 0 && (
-        <div className="mt-3 mx-1 rounded-lg bg-[#F4F1EB] border border-[#E8E5DF] overflow-hidden">
+        <div className="mt-3 mx-1 rounded-lg bg-secondary border border-border overflow-hidden">
           <div className="px-3 py-1.5 border-b border-border/20 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#81B29A]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-accent" />
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Build Log</span>
           </div>
           <div className="max-h-40 overflow-y-auto p-2 space-y-1 font-mono">
             {logEntries.map((entry) => (
               <div key={entry.id} className="flex gap-2 text-[10px] leading-relaxed">
-                <span className="text-[#6A6763]/60 flex-none tabular-nums" suppressHydrationWarning>
+                <span className="text-muted-foreground/60 flex-none tabular-nums" suppressHydrationWarning>
                   {new Date(entry.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
                 <span className={
                   entry.content.toLowerCase().includes("error") || entry.content.toLowerCase().includes("failed")
-                    ? "text-[#D94F4F]"
+                    ? "text-destructive"
                     : entry.content.includes("created") || entry.content.includes("completed")
-                      ? "text-[#81B29A]"
-                      : "text-[#33312E]/80"
+                      ? "text-accent"
+                      : "text-foreground/80"
                 }>
                   {entry.content.length > 120 ? entry.content.slice(0, 120) + "…" : entry.content}
                 </span>

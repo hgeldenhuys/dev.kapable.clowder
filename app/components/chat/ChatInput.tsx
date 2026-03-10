@@ -67,7 +67,8 @@ export function ChatInput({
             placeholder="Reply to your expert committee… (Enter to send, Shift+Enter for newline)"
             onKeyDown={handleKeyDown}
             rows={2}
-            className="w-full px-4 py-3 pr-12 rounded-2xl border border-[#E8E5DF] bg-white text-foreground placeholder:text-[#6A6763]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[#E07A5F]/20 focus:border-[#E07A5F]/40 focus:bg-white text-sm backdrop-blur-sm transition-all"
+            className="w-full px-4 py-3 pr-12 rounded-2xl border border-border bg-card text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-card text-sm backdrop-blur-sm transition-all"
+            aria-label="Message input"
             autoFocus
           />
         </div>
@@ -85,7 +86,7 @@ export function ChatInput({
           <button
             type="button"
             onClick={onForceStart}
-            className="flex items-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center gap-2.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/25 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/30"
           >
             <Play size={14} fill="currentColor" />
             <span className="sm:hidden">Start building</span>

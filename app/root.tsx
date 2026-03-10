@@ -23,13 +23,13 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@400;500;600;700&display=swap",
   },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="twitter:title" content="Clowder — AI App Builder" />
         <meta name="twitter:description" content="Describe your app. AI experts build it." />
         <meta name="twitter:image" content="https://clowder.kapable.run/logo.png" />
-        <meta name="theme-color" content="#7c3aed" />
+        <meta name="theme-color" content="#FAF9F6" />
         <Meta />
         <Links />
       </head>

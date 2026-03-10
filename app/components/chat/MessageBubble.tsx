@@ -37,14 +37,14 @@ function renderSimpleMarkdown(text: string): string {
   // Code blocks (triple backtick)
   html = html.replace(
     /```(\w*)\n([\s\S]*?)```/g,
-    '<pre class="bg-[#F4F1EB] border border-[#E8E5DF] rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>$2</code></pre>'
+    '<pre class="bg-secondary border border-border rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>$2</code></pre>'
   );
 
   // Inline formatting
   html = html
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, '<code class="bg-[#F4F1EB] px-1.5 py-0.5 rounded text-xs text-[#E07A5F]">$1</code>')
+    .replace(/`(.+?)`/g, '<code class="bg-secondary px-1.5 py-0.5 rounded text-xs text-primary">$1</code>')
     .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal">$2</li>');
 
@@ -93,7 +93,7 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
         className={`max-w-[75%] rounded-2xl px-4 py-3 space-y-1 ${
           isUser
             ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-md shadow-[var(--shadow-sm)]"
-            : "bg-white text-foreground rounded-tl-md shadow-[var(--shadow-sm)] border border-[#E8E5DF] border-l-2"
+            : "bg-card text-foreground rounded-tl-md shadow-[var(--shadow-sm)] border border-border border-l-2"
         }`}
         style={
           !isUser
@@ -112,12 +112,12 @@ export function MessageBubble({ message, experts }: MessageBubbleProps) {
               {expert?.name ?? (message.role === "system" ? "System" : "Clowder")}
             </span>
             {expert && (
-              <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-[#F4F1EB] border border-[#E8E5DF]">
+              <span className="text-[10px] text-muted-foreground capitalize px-1.5 py-0.5 rounded-full bg-secondary border border-border">
                 {expert.domain.replace(/_/g, " ")}
               </span>
             )}
             {expert && expert.confidence >= 0.8 && (
-              <span className="text-[10px] text-[#81B29A] px-1.5 py-0.5 rounded-full bg-[#81B29A]/10 border border-[#81B29A]/20">
+              <span className="text-[10px] text-accent px-1.5 py-0.5 rounded-full bg-accent/10 border border-accent/20">
                 ready
               </span>
             )}

@@ -203,6 +203,8 @@ function OrbCanvas({
         opacity: isActive ? 1 : 0.75,
         zIndex: isActive ? 10 : 1,
       }}
+      aria-label={`${orb.name} — ${orb.status}${isActive ? " (selected)" : ""}`}
+      aria-pressed={isActive}
     >
       <div
         className="rounded-full overflow-hidden w-[100px] h-[100px] sm:w-[140px] sm:h-[140px]"

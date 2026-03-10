@@ -9,8 +9,8 @@ const phaseColors: Record<string, string> = {
   assembling: "bg-[#E8A838]",
   ideating: "bg-[#5B8FB9]",
   planning: "bg-[#9B6B8E]",
-  building: "bg-[#81B29A]",
-  delivered: "bg-[#81B29A]",
+  building: "bg-accent",
+  delivered: "bg-accent",
 };
 
 interface SessionSidebarProps {
@@ -172,7 +172,7 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
                   <div className="flex items-center gap-2 mt-0.5 pl-4">
                     <span className="text-[10px] text-muted-foreground/50 capitalize">{s.phase}</span>
                     {s.app_url && (
-                      <span className="text-[10px] text-[#81B29A]/60">live</span>
+                      <span className="text-[10px] text-accent/60">live</span>
                     )}
                   </div>
                 </Link>
@@ -187,7 +187,7 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
                     e.stopPropagation();
                     setMenuOpenId(menuOpenId === s.id ? null : s.id);
                   }}
-                  className="absolute right-2 top-2.5 p-1 rounded text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-background/50 transition-all"
+                  className="absolute right-2 top-2.5 p-1 rounded text-muted-foreground/40 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-foreground hover:bg-background/50 transition-all"
                   aria-label="Session options"
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -238,8 +238,8 @@ export function SessionSidebar({ sessions: initialSessions, currentSessionId, on
 
       {/* Delete confirmation dialog */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white border border-border rounded-xl shadow-2xl p-5 w-80 max-w-[90vw]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true">
+          <div className="bg-white border border-border rounded-xl shadow-2xl p-5 w-80 max-w-[90vw]" aria-label="Confirm deletion">
             <h3 className="text-sm font-semibold text-foreground mb-2">Delete session?</h3>
             <p className="text-xs text-muted-foreground mb-4">
               This will permanently delete the session, all expert data, and all messages. This cannot be undone.

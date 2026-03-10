@@ -54,7 +54,7 @@ export function SpotlightChat({
     <div className="flex flex-col h-full">
       {/* Active expert header */}
       {activeExpert && (
-        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-[#E8E5DF] bg-white shadow-[var(--shadow-sm)]">
+        <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-border bg-card shadow-[var(--shadow-sm)]">
           <ExpertAvatar
             domain={activeExpert.domain}
             name={activeExpert.name}
@@ -67,7 +67,7 @@ export function SpotlightChat({
               <span className="capitalize hidden sm:inline">{activeExpert.domain.replace(/_/g, " ")}</span>
               <span className="mx-1.5 opacity-40 hidden sm:inline">·</span>
               <span
-                className={activeExpert.confidence >= 0.8 ? "text-[#81B29A]" : activeExpert.confidence >= 0.5 ? "text-[#E8A838]" : "text-[#6A6763]"}
+                className={activeExpert.confidence >= 0.8 ? "text-accent" : activeExpert.confidence >= 0.5 ? "text-[color:var(--warning)]" : "text-muted-foreground"}
                 title={`Confidence: ${Math.round(activeExpert.confidence * 100)}% — increases as you discuss requirements`}
               >
                 {activeExpert.confidence >= 0.8 ? "Ready to build" : activeExpert.confidence >= 0.5 ? "Getting aligned" : "Learning"}
@@ -80,7 +80,7 @@ export function SpotlightChat({
         </div>
       )}
       {!activeExpert && (
-        <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-[#E8E5DF] bg-white/60">
+        <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-border bg-card/60">
           <p className="text-sm text-muted-foreground/70">
             {messages.length === 0
               ? "Describe your app to begin"
@@ -104,7 +104,7 @@ export function SpotlightChat({
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full animate-fade-in">
             <div className="text-center text-muted-foreground max-w-xs space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FDF0EC] flex items-center justify-center border border-[#E07A5F]/10 animate-pulse-glow">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 animate-pulse-glow">
                 <img src="/logo.png" alt="" className="w-8 h-8 opacity-60" />
               </div>
               <p className="text-sm font-semibold text-foreground/80">Your expert committee awaits</p>
@@ -127,7 +127,7 @@ export function SpotlightChat({
       </div>
 
       {/* Input area */}
-      <div className="flex-none border-t border-[#E8E5DF] p-4 bg-white/60">
+      <div className="flex-none border-t border-border p-4 bg-card/60">
         <ChatInput
           sessionId={sessionId}
           isBuilding={isBuilding}
@@ -168,10 +168,10 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
                   i < step
-                    ? "bg-[#E07A5F]/10 border-2 border-[#E07A5F] text-[#E07A5F]"
+                    ? "bg-primary/10 border-2 border-primary text-primary"
                     : i === step
-                      ? "bg-[#E07A5F]/5 border-2 border-[#E07A5F]/60 text-[#E07A5F]/80 animate-pulse"
-                      : "bg-[#F4F1EB] border border-[#E8E5DF] text-muted-foreground/30"
+                      ? "bg-primary/5 border-2 border-primary/60 text-primary/80 animate-pulse"
+                      : "bg-secondary border border-border text-muted-foreground/50"
                 }`}
               >
                 {i < step ? (
@@ -185,10 +185,10 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
               <span
                 className={`text-[10px] font-medium whitespace-nowrap ${
                   i < step
-                    ? "text-[#E07A5F]"
+                    ? "text-primary"
                     : i === step
-                      ? "text-[#E07A5F]/60"
-                      : "text-muted-foreground/30"
+                      ? "text-primary/60"
+                      : "text-muted-foreground/50"
                 }`}
               >
                 {s.label}
@@ -197,7 +197,7 @@ function InterviewProgress({ messages }: { messages: ClowderMessage[] }) {
             {/* Connecting line */}
             {i < INTERVIEW_STEPS.length - 1 && (
               <div className={`flex-1 h-px mx-1 mt-[-14px] ${
-                i < step ? "bg-[#E07A5F]/30" : "bg-[#E8E5DF]"
+                i < step ? "bg-primary/30" : "bg-border"
               }`} />
             )}
           </div>
@@ -266,9 +266,9 @@ function ThinkingIndicator({
   return (
     <div className="flex items-center gap-3 px-4 py-3 mx-3 rounded-xl glass-card animate-fade-in">
       <div className="flex gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#E07A5F] animate-bounce" style={{ animationDelay: "0ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-[#E07A5F] animate-bounce" style={{ animationDelay: "150ms" }} />
-        <span className="w-1.5 h-1.5 rounded-full bg-[#E07A5F] animate-bounce" style={{ animationDelay: "300ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
       </div>
       <span className="text-xs text-muted-foreground/80 transition-opacity duration-500">
         {displayMsg}
@@ -283,8 +283,8 @@ function PhaseChip({ phase }: { phase: string }) {
     assembling: { label: "Assembling", color: "text-[#E8A838]", bg: "bg-[#E8A838]/10 border-[#E8A838]/20" },
     ideating: { label: "Ideating", color: "text-[#5B8FB9]", bg: "bg-[#5B8FB9]/10 border-[#5B8FB9]/20" },
     planning: { label: "Planning", color: "text-[#9B6B8E]", bg: "bg-[#9B6B8E]/10 border-[#9B6B8E]/20" },
-    building: { label: "Building", color: "text-[#81B29A]", bg: "bg-[#81B29A]/10 border-[#81B29A]/20" },
-    delivered: { label: "Delivered", color: "text-[#81B29A]", bg: "bg-[#81B29A]/10 border-[#81B29A]/20" },
+    building: { label: "Building", color: "text-accent", bg: "bg-accent/10 border-accent/20" },
+    delivered: { label: "Delivered", color: "text-accent", bg: "bg-accent/10 border-accent/20" },
   };
   const { label, color, bg } = phaseLabels[phase] ?? { label: phase, color: "text-muted-foreground", bg: "bg-zinc-400/10 border-zinc-400/20" };
 
