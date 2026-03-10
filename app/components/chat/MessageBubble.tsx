@@ -162,7 +162,7 @@ export function MessageBubble({
           </div>
         )}
         <div
-          className="text-sm leading-relaxed whitespace-pre-wrap"
+          className="text-sm leading-relaxed whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: html }}
         />
         {showTime && timeStr && (

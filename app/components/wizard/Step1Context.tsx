@@ -64,7 +64,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
                 key={t.name}
                 type="button"
                 onClick={() => onChange({ ...data, appName: t.name, description: t.description })}
-                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-200 group w-[160px]`}
+                className={`flex-none snap-start text-left px-3.5 py-2.5 rounded-xl border border-border/40 bg-gradient-to-br ${t.accent} ${t.borderAccent} shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-200 group w-[140px] sm:w-[160px]`}
                 aria-label={`Start with ${t.name} template`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -76,7 +76,7 @@ export function Step1Context({ data, onChange, sessionId, children }: Step1Props
             ))}
           </div>
           {/* Right fade to indicate scrollable */}
-          <div className="absolute right-0 top-0 bottom-1 w-12 bg-gradient-to-l from-white/90 to-transparent pointer-events-none rounded-r-xl" />
+          <div className="absolute right-0 top-0 bottom-1 w-8 sm:w-12 bg-gradient-to-l from-white/90 to-transparent pointer-events-none rounded-r-xl" />
           </div>
         </div>
       )}

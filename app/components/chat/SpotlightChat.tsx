@@ -183,7 +183,7 @@ export function SpotlightChat({
           <button
             type="button"
             onClick={() => scrollToBottom("smooth")}
-            className="scroll-to-bottom-btn fixed z-30 right-6 bottom-24 w-9 h-9 rounded-full bg-card border border-border shadow-[var(--shadow-md)] flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+            className="scroll-to-bottom-btn fixed z-30 right-4 sm:right-6 bottom-20 sm:bottom-24 w-9 h-9 rounded-full bg-card border border-border shadow-[var(--shadow-md)] flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
             aria-label="Scroll to bottom"
             title="Scroll to latest messages"
           >
